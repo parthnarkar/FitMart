@@ -21,13 +21,33 @@ router.post('/', async (req, res) => {
     const populated = [];
     let total = 0;
     for (const it of orderItems) {
+
       const p = await Product.findOne({ productId: Number(it.productId) });
       if (!p) return res.status(400).json({ error: `Product ${it.productId} not found` });
+      // Oversell guard - skip check if stock is null (unlimited)
+      if (p.stock !== null) {
+        const available = p.stock - p.reserved;
+        if (available < it.quantity) {
+          return res.status(400).json({ 
+            error: `Insufficient stock for ${p.name}. Available: ${available}` 
+          });
+        }
+      }
       populated.push({ productId: p.productId, quantity: it.quantity, price: p.price });
       total += p.price * it.quantity;
     }
-
+    // After order is created, deduct stock and reserved for each item
     const order = await Order.create({ userId, items: populated, total });
+    for (const it of orderItems) {
+      const p = await Product.findOne({ productId: Number(it.productId) });
+      if (p && p.stock !== null) {
+        await Product.findOneAndUpdate(
+          { productId: p.productId },
+          { $inc: { stock: -it.quantity, reserved: -it.quantity } }
+        );
+      }
+    }
+
 
     // clear cart (do NOT release reserved - purchasing finalizes reservation)
     await Cart.findOneAndUpdate({ userId }, { items: [] });

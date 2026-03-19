@@ -58,5 +58,18 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+// GET /api/products/low-stock - get products with low stock
+const LOW_STOCK_THRESHOLD = 5;
+
+router.get('/low-stock', async (req, res) => {
+  try {
+    // only check products where stock is not null
+    const products = await Product.find({ stock: { $ne: null } });
+    const lowStock = products.filter(p => (p.stock - p.reserved) < LOW_STOCK_THRESHOLD);
+    res.json(lowStock);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 module.exports = router;

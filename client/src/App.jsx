@@ -7,6 +7,7 @@ import Checkout from "./pages/Checkout";
 import Payment from "./pages/PaymentPage";
 import ProductConfirmation from "./pages/ProductConfirmation";
 import NotFound from "./pages/NotFound";
+import AdminInventory from "./pages/AdminInventory";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/payment" element={<Payment />} />
         <Route path="/payment-confirmation" element={<ProductConfirmation />} />
+        <Route path="/admin/inventory" element={<AdminInventory />} />
 
         {/* ⚠️ Catchall MUST be LAST — it swallows every route below it */}
         <Route path="*" element={<NotFound/>} />
