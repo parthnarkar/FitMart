@@ -1,11 +1,8 @@
 // src/components/CartDrawer.jsx
-import { fmt } from "../utils/formatters"; // You might need to move the fmt function to a utils file
-import { useNavigate, Link } from "react-router-dom";
+import { fmt } from "../utils/formatters";
+import { Link } from "react-router-dom";
 
 function CartDrawer({ isOpen, onClose, cart, cartCount, cartTotal, updateQty, removeFromCart }) {
-
-  const navigate = useNavigate();
-
   return (
     <>
       {/* Overlay */}
@@ -16,35 +13,68 @@ function CartDrawer({ isOpen, onClose, cart, cartCount, cartTotal, updateQty, re
 
       {/* Drawer */}
       <aside className={`cart-slide fixed right-0 top-0 h-full w-full max-w-sm bg-white z-50 shadow-2xl flex flex-col ${isOpen ? "open" : ""}`}>
-        <div className="flex items-center justify-between px-6 py-5 border-b border-stone-100">
-          <h2 className="font-['DM_Serif_Display'] text-lg text-stone-900">
-            Cart {cartCount > 0 && <span className="text-stone-400 text-base">({cartCount})</span>}
-          </h2>
+
+        {/* ── Header ── */}
+        <div className="flex items-center justify-between px-7 py-6 border-b border-stone-200">
+          <div>
+            <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-0.5">
+              Your
+            </p>
+            <h2 className="font-['DM_Serif_Display'] text-2xl text-stone-900 leading-tight">
+              Cart{cartCount > 0 && <span className="text-stone-400"> — {cartCount}</span>}
+            </h2>
+          </div>
           <button
             onClick={onClose}
-            className="text-stone-400 hover:text-stone-700 transition-colors text-xl leading-none"
+            aria-label="Close cart"
+            className="text-stone-400 hover:text-stone-900 transition-colors text-2xl leading-none"
           >
             ×
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-6 py-4">
+        {/* ── Body ── */}
+        <div className="flex-1 overflow-y-auto px-7 py-4">
           {cart.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center text-stone-400 gap-3">
-              <span className="text-4xl">🛒</span>
-              <p className="text-sm">Your cart is empty.</p>
+
+            /* ── Empty State ── */
+            <div className="h-full flex flex-col items-center justify-center text-center gap-6">
+              <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d6d3d1" strokeWidth="1.5">
+                  <circle cx="12" cy="12" r="9"/>
+                  <line x1="5" y1="5" x2="19" y2="19"/>
+                </svg>
+              </div>
+              <div>
+                <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2">
+                  Nothing here yet
+                </p>
+                <p className="font-['DM_Serif_Display'] text-2xl text-stone-900 mb-2">
+                  Your cart is empty
+                </p>
+                <p className="text-sm text-stone-500 leading-relaxed">
+                  Add something from the store<br />and it'll appear here.
+                </p>
+              </div>
               <button
                 onClick={onClose}
-                className="text-xs text-stone-500 underline"
+                className="bg-stone-900 text-white text-sm px-8 py-3 rounded-full hover:bg-stone-700 transition-colors"
               >
-                Continue shopping
+                Continue Shopping
               </button>
             </div>
+
           ) : (
-            <div className="flex flex-col gap-4">
+
+            /* ── Cart Items ── */
+            <div className="flex flex-col">
               {cart.map((item) => (
-                <div key={item.id} className="flex gap-4 items-start py-4 border-b border-stone-100 last:border-0">
-                  <div className="w-14 h-14 bg-stone-100 rounded-xl flex items-center justify-center text-xl shrink-0 overflow-hidden">
+                <div
+                  key={item.id}
+                  className="flex gap-4 items-start py-5 border-b border-stone-200 last:border-0"
+                >
+                  {/* Product image */}
+                  <div className="w-16 h-16 bg-stone-100 rounded-2xl flex items-center justify-center shrink-0 overflow-hidden border border-stone-200">
                     {item.image ? (
                       <img
                         src={item.image}
@@ -52,36 +82,51 @@ function CartDrawer({ isOpen, onClose, cart, cartCount, cartTotal, updateQty, re
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           e.currentTarget.onerror = null;
-                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.style.display = "none";
                         }}
                       />
                     ) : (
-                      (item.category === "Nutrition" ? "🧴" : item.category === "Wearables" ? "⌚" : "🏋️")
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d6d3d1" strokeWidth="1.5">
+                        <circle cx="12" cy="12" r="9"/>
+                        <line x1="5" y1="5" x2="19" y2="19"/>
+                      </svg>
                     )}
                   </div>
+
+                  {/* Product info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-stone-400">{item.brand}</p>
-                    <p className="text-sm font-medium text-stone-900 leading-snug">{item.name}</p>
+                    {item.brand && (
+                      <p className="text-[10px] tracking-[0.15em] uppercase text-stone-400 mb-0.5">
+                        {item.brand}
+                      </p>
+                    )}
+                    <p className="font-['DM_Serif_Display'] text-base text-stone-900 leading-snug truncate">
+                      {item.name}
+                    </p>
                     <p className="text-sm text-stone-700 mt-1">{fmt(item.price)}</p>
                   </div>
-                  <div className="flex flex-col items-end gap-2">
+
+                  {/* Qty + Remove */}
+                  <div className="flex flex-col items-end gap-2 shrink-0">
                     <button
                       onClick={() => removeFromCart(item.id)}
-                      className="text-stone-300 hover:text-stone-500 text-xs transition-colors"
+                      className="text-xs text-stone-300 hover:text-stone-900 transition-colors"
                     >
                       Remove
                     </button>
-                    <div className="flex items-center gap-2 border border-stone-200 rounded-full px-2 py-0.5">
+                    <div className="flex items-center gap-2 border border-stone-200 rounded-full px-3 py-1">
                       <button
                         onClick={() => updateQty(item.id, -1)}
-                        className="text-stone-500 hover:text-stone-900 w-4 text-sm"
+                        className="text-stone-500 hover:text-stone-900 transition-colors text-sm w-4 text-center"
                       >
                         −
                       </button>
-                      <span className="text-xs text-stone-800 min-w-4 text-center">{item.qty}</span>
+                      <span className="text-xs text-stone-900 min-w-4 text-center">
+                        {item.qty}
+                      </span>
                       <button
                         onClick={() => updateQty(item.id, 1)}
-                        className="text-stone-500 hover:text-stone-900 w-4 text-sm"
+                        className="text-stone-500 hover:text-stone-900 transition-colors text-sm w-4 text-center"
                       >
                         +
                       </button>
@@ -93,19 +138,31 @@ function CartDrawer({ isOpen, onClose, cart, cartCount, cartTotal, updateQty, re
           )}
         </div>
 
+        {/* ── Footer ── */}
         {cart.length > 0 && (
-          <div className="border-t border-stone-100 px-6 py-5 space-y-3">
-            <div className="flex justify-between text-sm">
-              <span className="text-stone-500">Subtotal</span>
-              <span className="font-medium text-stone-900">{fmt(cartTotal)}</span>
+          <div className="border-t border-stone-200 px-7 py-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-xs tracking-[0.2em] uppercase text-stone-400">
+                Subtotal
+              </p>
+              <p className="font-['DM_Serif_Display'] text-2xl text-stone-900">
+                {fmt(cartTotal)}
+              </p>
             </div>
-            <p className="text-[10px] text-stone-400">Shipping calculated at checkout</p>
+            <p className="text-[10px] text-stone-400 -mt-2">
+              Taxes and shipping calculated at checkout
+            </p>
             <Link to="/checkout">
               <button className="w-full bg-stone-900 text-white text-sm py-3.5 rounded-full hover:bg-stone-700 transition-colors">
                 Checkout →
               </button>
             </Link>
-
+            <button
+              onClick={onClose}
+              className="w-full border border-stone-300 text-stone-700 text-sm py-3 rounded-full hover:bg-stone-100 transition-colors"
+            >
+              Continue Shopping
+            </button>
           </div>
         )}
       </aside>
