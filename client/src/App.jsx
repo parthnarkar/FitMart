@@ -6,7 +6,7 @@ import HomePage from "./pages/HomePage";
 import Checkout from "./pages/Checkout";
 import Payment from "./pages/PaymentPage";
 import ProductConfirmation from "./pages/ProductConfirmation";
-import NotFound from "./pages/Notfound";
+import NotFound from "./pages/NotFound";
 
 export default function App() {
   return (
