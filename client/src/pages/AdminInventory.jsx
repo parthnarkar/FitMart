@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 
 const LOW_STOCK_THRESHOLD = 5;
-const API_BASE = "http://localhost:5001/api";
+const API_BASE = "http://localhost:5000/api";
 
 export default function AdminInventory() {
   const [products, setProducts] = useState([]);
@@ -22,24 +22,25 @@ export default function AdminInventory() {
       });
   }, []);
   */
- useEffect(() => {
-  console.log("Fetching from:", `${API_BASE}/products`);
-  fetch(`${API_BASE}/products`)
-    .then(res => {
-      console.log("Response status:", res.status);
-      return res.json();
-    })
-    .then(data => {
-      console.log("Data received:", data);
-      setProducts(data);
-      setLoading(false);
-    })
-    .catch(err => {
-      console.error("Fetch error:", err);
-      setError("Failed to load inventory");
-      setLoading(false);
-    });
-}, []);
+
+  useEffect(() => {
+    console.log("Fetching from:", `${API_BASE}/products`);
+    fetch(`${API_BASE}/products`)
+      .then(res => {
+        console.log("Response status:", res.status);
+        return res.json();
+      })
+      .then(data => {
+        console.log("Data received:", data);
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Fetch error:", err);
+        setError("Failed to load inventory");
+        setLoading(false);
+      });
+  }, []);
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
