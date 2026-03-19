@@ -41,6 +41,8 @@ import { auth } from "../auth/firebase";
 import CartDrawer from "../components/CartDrawer";
 import { fmt } from "../utils/formatters";
 
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const CATEGORIES = [
   { name: "All", value: "all" },
   { name: "Equipment", value: "Equipment" },
@@ -179,7 +181,7 @@ export default function HomePage() {
   useEffect(() => {
     async function loadCartFromServer(u) {
       try {
-        const res = await fetch(`http://localhost:5000/api/cart/${u.uid}`);
+        const res = await fetch(`${API}/api/cart/${u.uid}`);
         if (!res.ok) return;
         const cartDoc = await res.json();
         const mapped = cartDoc.items.map(it => {
@@ -200,7 +202,7 @@ export default function HomePage() {
       setLoading(true);
       setBackendError(false);
       try {
-        const res = await fetch("http://localhost:5000/api/products");
+        const res = await fetch(`${API}/api/products`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         setProducts(data.map(p => ({ ...p, id: p.productId || p.id })));
@@ -223,7 +225,7 @@ export default function HomePage() {
     if (user) {
       (async () => {
         try {
-          const res = await fetch(`http://localhost:5000/api/cart/${user.uid}/add`, {
+          const res = await fetch(`${API}/api/cart/${user.uid}/add`, {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ productId: product.productId || product.id, quantity: 1 }),
           });
@@ -252,7 +254,7 @@ export default function HomePage() {
       (async () => {
         try {
           const existing = cart.find(i => i.id === id);
-          const res = await fetch(`http://localhost:5000/api/cart/${user.uid}/remove`, {
+          const res = await fetch(`${API}/api/cart/${user.uid}/remove`, {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ productId: id, quantity: existing?.qty || 1 }),
           });
@@ -276,11 +278,11 @@ export default function HomePage() {
       (async () => {
         try {
           const url = delta > 0 ? "add" : "remove";
-          await fetch(`http://localhost:5000/api/cart/${user.uid}/${url}`, {
+          await fetch(`${API}/api/cart/${user.uid}/${url}`, {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ productId: id, quantity: Math.abs(delta) }),
           });
-          const res = await fetch(`http://localhost:5000/api/cart/${user.uid}`);
+          const res = await fetch(`${API}/api/cart/${user.uid}`);
           const cartDoc = await res.json();
           setCart(cartDoc.items.map(it => {
             const prod = products.find(p => Number(p.productId) === Number(it.productId));
