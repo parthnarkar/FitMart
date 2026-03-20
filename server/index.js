@@ -40,6 +40,7 @@ app.use(logger);
 app.use("/api/products", require("./routes/products"));
 app.use("/api/cart", require("./routes/cart"));
 app.use("/api/orders", require("./routes/orders"));
+app.use("/api/reports", require("./routes/reports"));
 
 // ── Razorpay / payment routes (NO prefix — mounted at root) ─────────────────
 // These handle:  POST /create-order
