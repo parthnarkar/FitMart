@@ -1,5 +1,6 @@
 // server/routes/payment.js
 
+const axios = require("axios");
 const express = require("express");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
@@ -65,6 +66,7 @@ router.post("/create-order", async (req, res) => {
 // POST /verify-payment
 // Body: { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId }
 // ─────────────────────────────────────────────────────────────────────────────
+
 router.post("/verify-payment", async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId } = req.body;
@@ -80,7 +82,27 @@ router.post("/verify-payment", async (req, res) => {
     if (expected !== razorpay_signature)
       return res.status(400).json({ error: "Signature mismatch — payment not verified" });
 
-    res.json({ success: true, paymentId: razorpay_payment_id });
+    // ✅ STEP 1: Prevent duplicate orders
+    const Order = require("../models/Order");
+    const existingOrder = await Order.findOne({ paymentId: razorpay_payment_id });
+
+    if (existingOrder) {
+      return res.json({ success: true, message: "Order already created" });
+    }
+
+    // ✅ STEP 2: Create order using existing route logic
+    const orderResponse = await axios.post("http://localhost:5000/api/orders", {
+      userId
+    });
+
+    // ✅ STEP 3: Attach paymentId to order
+    await Order.findByIdAndUpdate(orderResponse.data._id, {
+      paymentId: razorpay_payment_id,
+      status: "paid"
+    });
+
+    res.json({ success: true, order: orderResponse.data });
+
   } catch (err) {
     console.error("verify-payment error:", err);
     res.status(500).json({ error: err.message });
@@ -112,14 +134,35 @@ router.post("/clear-cart", async (req, res) => {
 // Body: { userId }
 // Skips Razorpay entirely, fakes a payment ID, clears cart, returns success.
 // ─────────────────────────────────────────────────────────────────────────────
+
 router.post("/demo-success", async (req, res) => {
   try {
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ error: "userId is required" });
 
     const fakePaymentId = `pay_DEMO_${Date.now()}`;
-    await releaseAndClearCart(userId);   // same cleanup as real payment
-    res.json({ success: true, paymentId: fakePaymentId });
+
+    const Order = require("../models/Order");
+
+    // prevent duplicate
+    const existingOrder = await Order.findOne({ paymentId: fakePaymentId });
+    if (existingOrder) {
+      return res.json({ success: true, message: "Order already exists" });
+    }
+
+    // create order
+    const orderResponse = await axios.post("http://localhost:5000/api/orders", {
+      userId
+    });
+
+    // attach payment id
+    await Order.findByIdAndUpdate(orderResponse.data._id, {
+      paymentId: fakePaymentId,
+      status: "paid"
+    });
+
+    res.json({ success: true, order: orderResponse.data });
+
   } catch (err) {
     console.error("demo-success error:", err);
     res.status(500).json({ error: err.message });
