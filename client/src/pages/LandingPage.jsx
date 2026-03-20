@@ -62,6 +62,11 @@ export default function LandingPage() {
   const programsRef = useRef(null);
   const aboutRef = useRef(null);
 
+  // custom titles for landing page
+  useEffect(() => {
+    document.title = "FitMart - Fitness & Nutrition Store";
+  }, []);
+
   useEffect(() => {
     setTimeout(() => setVisible(true), 100);
     const onScroll = () => setScrollY(window.scrollY);

@@ -33,6 +33,11 @@ export default function PaymentPage() {
   const [bypassing, setBypassing] = useState(false);
   const [error, setError] = useState(null);
 
+  // custom title for Paymentpage 
+  useEffect(() => {
+    document.title = "My Orders - FitMart";
+  }, []);
+
   const { items = [], total = 0 } = location.state || {};
   useEffect(() => {
     if (!items.length) navigate("/checkout");

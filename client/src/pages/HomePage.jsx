@@ -140,8 +140,8 @@ function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
             <button
               onClick={handleAdd}
               className={`text-xs px-4 py-2 rounded-full transition-all duration-200 ${added
-                  ? "bg-stone-900 text-white"
-                  : "border border-stone-300 text-stone-700 hover:bg-stone-900 hover:text-white hover:border-stone-900"
+                ? "bg-stone-900 text-white"
+                : "border border-stone-300 text-stone-700 hover:bg-stone-900 hover:text-white hover:border-stone-900"
                 }`}
             >
               {added ? "Added ✓" : "Add to cart"}
@@ -166,6 +166,11 @@ export default function HomePage() {
   const [products, setProducts] = useState([]);
   const [backendError, setBackendError] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // custom titles for home page 
+  useEffect(() => {
+    document.title = "FitMart - Fitness & Nutrition Store";
+  }, []);
 
   useEffect(() => {
     setTimeout(() => setVisible(true), 80);
@@ -424,8 +429,8 @@ export default function HomePage() {
                   key={c.value}
                   onClick={() => setActiveCategory(c.value)}
                   className={`text-xs px-4 py-2 rounded-full transition-all ${activeCategory === c.value
-                      ? "bg-stone-900 text-white"
-                      : "bg-white border border-stone-200 text-stone-600 hover:bg-stone-50"
+                    ? "bg-stone-900 text-white"
+                    : "bg-white border border-stone-200 text-stone-600 hover:bg-stone-50"
                     }`}
                 >
                   {c.name}
@@ -462,8 +467,8 @@ export default function HomePage() {
                   {plan.desc}
                 </p>
                 <button className={`text-xs py-2.5 rounded-full transition-colors mt-1 ${i === 0
-                    ? "bg-white text-stone-900 hover:bg-stone-100"
-                    : "border border-stone-300 text-stone-700 hover:bg-stone-50"
+                  ? "bg-white text-stone-900 hover:bg-stone-100"
+                  : "border border-stone-300 text-stone-700 hover:bg-stone-50"
                   }`}>
                   View Plan →
                 </button>

@@ -11,6 +11,11 @@ export default function ProductConfirmation() {
 
   const { items = [], total = 0, paymentId = "" } = location.state || {};
 
+  // custom title for product confirm page 
+  useEffect(() => {
+    document.title = "FitMart";
+  }, []);
+
   // Order date — set once on mount
   const orderDate = useRef(
     new Date().toLocaleDateString("en-IN", {

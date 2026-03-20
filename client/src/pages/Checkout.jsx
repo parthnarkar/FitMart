@@ -12,6 +12,11 @@ export default function Checkout() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // custom title for checkout page 
+  useEffect(() => {
+    document.title = "My Cart - FitMart";
+  }, []);
+
   useEffect(() => {
     // onAuthStateChanged fires once on mount with the current user (or null).
     // This is more reliable than auth.currentUser which can be null on first render

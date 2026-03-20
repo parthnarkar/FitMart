@@ -29,6 +29,11 @@ export default function Authentication() {
   const [resetSent, setResetSent] = useState(false);
   const [visible, setVisible] = useState(false);
 
+  // custom title for login page 
+  useEffect(() => {
+    document.title = "Login - FitMart";
+  }, []);
+
   useEffect(() => {
     setTimeout(() => setVisible(true), 80);
   }, []);
