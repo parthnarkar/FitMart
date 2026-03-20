@@ -46,6 +46,7 @@
 - [Data Models](#-data-models)
 - [Notes & Recommendations](#-notes--recommendations)
 - [Contributing](#-contributing)
+- [Contributors](#-contributors)
 - [License](#-license)
 
 ---
@@ -364,6 +365,16 @@ Please read our **[CONTRIBUTING.md](CONTRIBUTING.md)** for a full guide on:
 - Code style and commit conventions
 
 **New to open source?** Look for issues labelled [`good first issue`](https://github.com/parthnarkar/FitMart/labels/good%20first%20issue) — they're perfect starting points! 🌱
+
+---
+
+## 👥 Contributors
+
+Thanks to everyone who contributes to FitMart.
+
+<a href="https://github.com/parthnarkar/FitMart/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=parthnarkar/FitMart" alt="FitMart contributors" />
+</a>
 
 ---
 
