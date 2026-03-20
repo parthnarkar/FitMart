@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 // src/pages/AdminInventory.jsx
 import { useState, useEffect } from "react";
 
@@ -5,6 +6,7 @@ const LOW_STOCK_THRESHOLD = 5;
 const API_BASE = "http://localhost:5000/api";
 
 export default function AdminInventory() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -56,6 +58,15 @@ export default function AdminInventory() {
 
   return (
     <div className="min-h-screen bg-stone-50 p-8">
+
+      {/* Go to Home Button */}
+      <button
+        onClick={() => navigate('/home')}
+        className="flex items-center gap-2 mb-6 px-4 py-2 bg-white border border-stone-200 rounded-lg shadow-sm text-stone-700 font-medium hover:bg-stone-100 transition"
+      >
+        ← Go to Home
+      </button>
+
       <h1 className="text-2xl font-bold text-stone-800 mb-2">
         Inventory Management
       </h1>
