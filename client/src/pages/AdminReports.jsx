@@ -1,5 +1,6 @@
 // src/pages/AdminReports.jsx
 import { useState, useEffect } from "react";
+import { fmt } from "../utils/formatters";
 
 const API_BASE = `${import.meta.env.VITE_API_URL}/api`;
 
@@ -84,7 +85,7 @@ export default function AdminReports() {
           <div className="bg-white rounded-2xl border border-stone-200 p-6 hover:shadow-sm transition-shadow">
             <p className="text-stone-400 text-xs uppercase tracking-wider mb-3">Total Revenue</p>
             <p className="text-3xl font-bold text-stone-800">
-              ₹{summary.totalRevenue.toLocaleString()}
+              {fmt(summary.totalRevenue)}
             </p>
           </div>
           <div className="bg-white rounded-2xl border border-stone-200 p-6 hover:shadow-sm transition-shadow">
@@ -94,7 +95,7 @@ export default function AdminReports() {
           <div className="bg-white rounded-2xl border border-stone-200 p-6 hover:shadow-sm transition-shadow">
             <p className="text-stone-400 text-xs uppercase tracking-wider mb-3">Avg Order Value</p>
             <p className="text-3xl font-bold text-stone-800">
-              ₹{summary.avgOrderValue.toLocaleString()}
+              {fmt(summary.avgOrderValue)}
             </p>
           </div>
         </div>
@@ -130,7 +131,7 @@ export default function AdminReports() {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right font-semibold text-stone-800">
-                        ₹{row.totalRevenue.toLocaleString()}
+                        {fmt(row.totalRevenue)}
                       </td>
                     </tr>
                   ))}
@@ -174,7 +175,7 @@ export default function AdminReports() {
                       </td>
                       <td className="px-6 py-4 text-center text-stone-600 font-medium">{p.totalQuantitySold}</td>
                       <td className="px-6 py-4 text-right font-semibold text-stone-800">
-                        ₹{p.totalRevenue.toLocaleString()}
+                        {fmt(p.totalRevenue)}
                       </td>
                     </tr>
                   ))}

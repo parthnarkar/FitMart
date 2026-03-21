@@ -509,8 +509,8 @@ export default function HomePage() {
           </div>
           <div className="grid md:grid-cols-2 gap-5">
             {[
-              { tier: "Pro", price: "₹499/mo", desc: "Personalized nutrition plans + 5% flat discount on everything.", cta: "Upgrade to Pro" },
-              { tier: "Elite", price: "₹1,499/mo", desc: "1-on-1 coaching, early access to limited equipment drops, biometric sync.", cta: "Upgrade to Elite" },
+              { tier: "Pro", price: `${fmt(499)}/mo`, desc: "Personalized nutrition plans + 5% flat discount on everything.", cta: "Upgrade to Pro" },
+              { tier: "Elite", price: `${fmt(1499)}/mo`, desc: "1-on-1 coaching, early access to limited equipment drops, biometric sync.", cta: "Upgrade to Elite" },
             ].map((p, i) => (
               <div key={i} className="bg-white border border-stone-200 rounded-2xl p-7 flex
                                       flex-col md:flex-row md:items-center justify-between gap-5">
