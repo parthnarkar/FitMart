@@ -12,6 +12,22 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/products/low-stock - get products with low stock
+// NOTE: This route must be defined before /:id to avoid Express matching
+// "low-stock" as a product ID parameter.
+const LOW_STOCK_THRESHOLD = 5;
+
+router.get('/low-stock', async (req, res) => {
+  try {
+    // only check products where stock is not null
+    const products = await Product.find({ stock: { $ne: null } });
+    const lowStock = products.filter(p => (p.stock - p.reserved) < LOW_STOCK_THRESHOLD);
+    res.json(lowStock);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // GET /api/products/:id - get product by productId
 router.get('/:id', async (req, res) => {
   try {
@@ -54,19 +70,6 @@ router.delete('/:id', async (req, res) => {
     const deleted = await Product.findOneAndDelete({ productId: Number(req.params.id) });
     if (!deleted) return res.status(404).json({ error: 'Product not found' });
     res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-// GET /api/products/low-stock - get products with low stock
-const LOW_STOCK_THRESHOLD = 5;
-
-router.get('/low-stock', async (req, res) => {
-  try {
-    // only check products where stock is not null
-    const products = await Product.find({ stock: { $ne: null } });
-    const lowStock = products.filter(p => (p.stock - p.reserved) < LOW_STOCK_THRESHOLD);
-    res.json(lowStock);
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
