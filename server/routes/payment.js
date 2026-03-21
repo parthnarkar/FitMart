@@ -130,44 +130,50 @@ router.post("/clear-cart", async (req, res) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
-// POST /demo-success   ← TESTING ONLY — remove before going live
+// POST /demo-success   ← DEV / TEST ONLY — disabled in production
 // Body: { userId }
 // Skips Razorpay entirely, fakes a payment ID, clears cart, returns success.
 // ─────────────────────────────────────────────────────────────────────────────
 
-router.post("/demo-success", async (req, res) => {
-  try {
-    const { userId } = req.body;
-    if (!userId) return res.status(400).json({ error: "userId is required" });
+if (process.env.NODE_ENV !== "production") {
+  console.warn(
+    "⚠️  /demo-success payment endpoint is registered — this route must NOT be available in production."
+  );
 
-    const fakePaymentId = `pay_DEMO_${Date.now()}`;
+  router.post("/demo-success", async (req, res) => {
+    try {
+      const { userId } = req.body;
+      if (!userId) return res.status(400).json({ error: "userId is required" });
 
-    const Order = require("../models/Order");
+      const fakePaymentId = `pay_DEMO_${Date.now()}`;
 
-    // prevent duplicate
-    const existingOrder = await Order.findOne({ paymentId: fakePaymentId });
-    if (existingOrder) {
-      return res.json({ success: true, message: "Order already exists" });
+      const Order = require("../models/Order");
+
+      // prevent duplicate
+      const existingOrder = await Order.findOne({ paymentId: fakePaymentId });
+      if (existingOrder) {
+        return res.json({ success: true, message: "Order already exists" });
+      }
+
+      // create order
+      const orderResponse = await axios.post("http://localhost:5000/api/orders", {
+        userId
+      });
+
+      // attach payment id
+      await Order.findByIdAndUpdate(orderResponse.data._id, {
+        paymentId: fakePaymentId,
+        status: "paid"
+      });
+
+      res.json({ success: true, order: orderResponse.data });
+
+    } catch (err) {
+      console.error("demo-success error:", err);
+      res.status(500).json({ error: err.message });
     }
-
-    // create order
-    const orderResponse = await axios.post("http://localhost:5000/api/orders", {
-      userId
-    });
-
-    // attach payment id
-    await Order.findByIdAndUpdate(orderResponse.data._id, {
-      paymentId: fakePaymentId,
-      status: "paid"
-    });
-
-    res.json({ success: true, order: orderResponse.data });
-
-  } catch (err) {
-    console.error("demo-success error:", err);
-    res.status(500).json({ error: err.message });
-  }
-});
+  });
+}
 
 
 module.exports = router;
