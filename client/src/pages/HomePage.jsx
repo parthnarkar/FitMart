@@ -51,9 +51,9 @@ const CATEGORIES = [
 ];
 
 const PLANS = [
-  { name: "Weight Loss", duration: "12 Weeks", desc: "Caloric-deficit nutrition + cardio-focused programming", tag: "MOST POPULAR" },
-  { name: "Muscle Building", duration: "16 Weeks", desc: "Progressive overload training + protein-optimized meal plans", tag: null },
-  { name: "Mobility & Recovery", duration: "8 Weeks", desc: "Flexibility-first programming, ideal for desk workers", tag: null },
+  { name: "Weight Loss", duration: "12 Weeks", desc: "Caloric-deficit nutrition + cardio-focused programming", tag: "MOST POPULAR", route: "/plans/weight-loss" },
+  { name: "Muscle Building", duration: "16 Weeks", desc: "Progressive overload training + protein-optimized meal plans", tag: null, route: "/plans/muscle-building" },
+  { name: "Mobility & Recovery", duration: "8 Weeks", desc: "Flexibility-first programming, ideal for desk workers", tag: null, route: "/plans/mobility-recovery" },
 ];
 
 const Stars = ({ rating }) => (
@@ -453,25 +453,23 @@ export default function HomePage() {
             {PLANS.map((plan, i) => (
               <div
                 key={i}
-                className={`rounded-2xl p-7 flex flex-col gap-4 ${i === 0 ? "bg-stone-900 text-white" : "bg-white border border-stone-200"
-                  }`}
+                className="bg-white border border-stone-200 rounded-2xl p-7 flex flex-col gap-4 hover:border-stone-300 hover:shadow-lg transition-all duration-300"
               >
                 {plan.tag && (
                   <span className="text-[9px] tracking-[0.2em] uppercase text-stone-400">{plan.tag}</span>
                 )}
                 <div>
-                  <h3 className={`font-['DM_Serif_Display'] text-xl ${i === 0 ? "text-white" : "text-stone-900"}`}>
+                  <h3 className="font-['DM_Serif_Display'] text-xl text-stone-900">
                     {plan.name}
                   </h3>
                   <p className="text-xs mt-0.5 text-stone-400">{plan.duration}</p>
                 </div>
-                <p className={`text-sm leading-relaxed flex-1 ${i === 0 ? "text-stone-300" : "text-stone-500"}`}>
+                <p className="text-sm leading-relaxed flex-1 text-stone-500">
                   {plan.desc}
                 </p>
-                <button className={`text-xs py-2.5 rounded-full transition-colors mt-1 ${i === 0
-                  ? "bg-white text-stone-900 hover:bg-stone-100"
-                  : "border border-stone-300 text-stone-700 hover:bg-stone-50"
-                  }`}>
+                <button
+                  onClick={() => navigate(plan.route)}
+                  className="text-xs py-2.5 rounded-full transition-all mt-1 border border-stone-300 text-stone-700 hover:bg-stone-900 hover:text-white hover:border-stone-900">
                   View Plan →
                 </button>
               </div>

@@ -8,6 +8,9 @@ import Payment from "./pages/PaymentPage";
 import ProductConfirmation from "./pages/ProductConfirmation";
 import NotFound from "./pages/NotFound";
 import AdminInventory from "./pages/AdminInventory";
+import WeightLossPlans from "./pages/WeightLossPlans";
+import MuscleBuildingPlans from "./pages/MuscleBuildingPlans";
+import MobilityRecoveryPlans from "./pages/MobilityRecoveryPlans";
 
 export default function App() {
   return (
@@ -20,6 +23,9 @@ export default function App() {
         <Route path="/payment" element={<Payment />} />
         <Route path="/payment-confirmation" element={<ProductConfirmation />} />
         <Route path="/admin/inventory" element={<AdminInventory />} />
+        <Route path="/plans/weight-loss" element={<WeightLossPlans />} />
+        <Route path="/plans/muscle-building" element={<MuscleBuildingPlans />} />
+        <Route path="/plans/mobility-recovery" element={<MobilityRecoveryPlans />} />
 
         {/* ⚠️ Catchall MUST be LAST — it swallows every route below it */}
         <Route path="*" element={<NotFound/>} />
