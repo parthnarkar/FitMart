@@ -1,8 +1,18 @@
 // src/components/CartDrawer.jsx
+import { useEffect } from "react";
 import { fmt } from "../utils/formatters";
 import { Link } from "react-router-dom";
 
 function CartDrawer({ isOpen, onClose, cart, cartCount, cartTotal, updateQty, removeFromCart }) {
+  // Close the drawer when the Escape key is pressed
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && isOpen) onClose();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   return (
     <>
       {/* Overlay */}
