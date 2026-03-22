@@ -80,6 +80,7 @@ router.get('/:userId', verifyFirebaseToken, async (req, res) => {
   if (req.user.uid !== req.params.userId) {
     return res.status(403).json({ error: 'Forbidden — you can only view your own orders' });
   }
+
   try {
     const { userId } = req.params;
     const orders = await Order.find({ userId }).sort({ createdAt: -1 });

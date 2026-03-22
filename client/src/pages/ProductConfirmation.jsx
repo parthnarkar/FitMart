@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { auth } from "../auth/firebase";
+import { fmt } from "../utils/formatters";
 
 export default function ProductConfirmation() {
   const navigate = useNavigate();
@@ -237,10 +238,10 @@ export default function ProductConfirmation() {
           <td>
             <div class="product-brand">${product.brand || ""}</div>
             <div class="product-name">${product.name}</div>
-            <div class="unit-price">₹${product.price.toLocaleString("en-IN")} / unit</div>
+            <div class="unit-price">${fmt(product.price)} / unit</div>
           </td>
           <td style="text-align:center">${quantity}</td>
-          <td>₹${(product.price * quantity).toLocaleString("en-IN")}</td>
+          <td>${fmt(product.price * quantity)}</td>
         </tr>
       `).join("")}
     </tbody>
@@ -250,7 +251,7 @@ export default function ProductConfirmation() {
   <div class="totals">
     <div class="total-row">
       <span>Subtotal</span>
-      <span>₹${total.toLocaleString("en-IN")}</span>
+      <span>${fmt(total)}</span>
     </div>
     <div class="total-row">
       <span>Shipping</span>
@@ -262,7 +263,7 @@ export default function ProductConfirmation() {
     </div>
     <div class="total-row grand">
       <span>Total Paid</span>
-      <span>₹${total.toLocaleString("en-IN")}</span>
+      <span>${fmt(total)}</span>
     </div>
   </div>
 
@@ -383,7 +384,7 @@ export default function ProductConfirmation() {
                     <span className="text-xs text-stone-400">Qty {quantity}</span>
                     <span className="text-stone-200">·</span>
                     <span className="text-xs text-stone-400">
-                      ₹{product.price.toLocaleString("en-IN")} each
+                      {fmt(product.price)} each
                     </span>
                   </div>
                 </div>
@@ -393,7 +394,7 @@ export default function ProductConfirmation() {
                   style={{ fontFamily: "'DM Serif Display', serif" }}
                   className="text-xl text-stone-900 flex-shrink-0"
                 >
-                  ₹{(product.price * quantity).toLocaleString("en-IN")}
+                  {fmt(product.price * quantity)}
                 </p>
               </div>
             ))}
@@ -403,7 +404,7 @@ export default function ProductConfirmation() {
           <div className="bg-stone-50 border-t border-stone-200 px-7 py-5 space-y-2">
             <div className="flex justify-between text-sm text-stone-500">
               <span>Subtotal</span>
-              <span>₹{total.toLocaleString("en-IN")}</span>
+              <span>{fmt(total)}</span>
             </div>
             <div className="flex justify-between text-sm text-stone-500">
               <span>Shipping</span>
@@ -416,7 +417,7 @@ export default function ProductConfirmation() {
                 style={{ fontFamily: "'DM Serif Display', serif" }}
                 className="text-3xl text-stone-900"
               >
-                ₹{total.toLocaleString("en-IN")}
+                {fmt(total)}
               </span>
             </div>
           </div>

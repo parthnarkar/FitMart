@@ -84,7 +84,7 @@ router.post("/verify-payment", verifyFirebaseToken, async (req, res) => {
     if (expected !== razorpay_signature)
       return res.status(400).json({ error: "Signature mismatch — payment not verified" });
 
-    // ✅ STEP 1: Prevent duplicate orders
+    //  STEP 1: Prevent duplicate orders
     const Order = require("../models/Order");
     const existingOrder = await Order.findOne({ paymentId: razorpay_payment_id });
 
@@ -92,12 +92,12 @@ router.post("/verify-payment", verifyFirebaseToken, async (req, res) => {
       return res.json({ success: true, message: "Order already created" });
     }
 
-    // ✅ STEP 2: Create order using existing route logic
+    // STEP 2: Create order using existing route logic
     const orderResponse = await axios.post("http://localhost:5000/api/orders", {
       userId
     });
 
-    // ✅ STEP 3: Attach paymentId to order
+    //  STEP 3: Attach paymentId to order
     await Order.findByIdAndUpdate(orderResponse.data._id, {
       paymentId: razorpay_payment_id,
       status: "paid"
@@ -129,6 +129,12 @@ router.post("/clear-cart", verifyFirebaseToken, async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /demo-success   ← DEV / TEST ONLY — disabled in production
+// Body: { userId }
+// Skips Razorpay entirely, fakes a payment ID, clears cart, returns success.
+// ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * @route   POST /demo-success

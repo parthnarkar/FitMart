@@ -29,6 +29,7 @@ function checkOwnership(req, res) {
  */
 router.get('/:userId', verifyFirebaseToken, async (req, res) => {
   if (!checkOwnership(req, res)) return;
+
   try {
     const { userId } = req.params;
     let cart = await Cart.findOne({ userId });
@@ -48,6 +49,7 @@ router.get('/:userId', verifyFirebaseToken, async (req, res) => {
  */
 router.post('/:userId/add', verifyFirebaseToken, async (req, res) => {
   if (!checkOwnership(req, res)) return;
+
   try {
     const { userId } = req.params;
     const { productId, quantity } = req.body;
@@ -85,6 +87,7 @@ router.post('/:userId/add', verifyFirebaseToken, async (req, res) => {
  */
 router.post('/:userId/remove', verifyFirebaseToken, async (req, res) => {
   if (!checkOwnership(req, res)) return;
+
   try {
     const { userId } = req.params;
     const { productId, quantity } = req.body;
@@ -116,6 +119,7 @@ router.post('/:userId/remove', verifyFirebaseToken, async (req, res) => {
  */
 router.delete('/:userId', verifyFirebaseToken, async (req, res) => {
   if (!checkOwnership(req, res)) return;
+
   try {
     const { userId } = req.params;
     const cart = await Cart.findOne({ userId });

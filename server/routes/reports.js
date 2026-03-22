@@ -2,7 +2,13 @@ const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
 
-// GET /api/reports/sales?range=daily|weekly|monthly
+/**
+ * @route   GET /api/reports/sales
+ * @desc    Returns sales report for a given time range (query: range=daily|weekly|monthly);
+ *          includes a summary of total revenue, order count and average order value,
+ *          revenue breakdown by date, and product performance ranked by revenue
+ * @access  Public
+ */
 router.get('/sales', async (req, res) => {
   try {
     const { range = 'weekly' } = req.query;
