@@ -3,17 +3,20 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5001;
+
+
+
 
 // Display all missing variables at server startup
 const REQUIRED_ENV_VARS = ["RAZORPAY_KEY_ID", "RAZORPAY_KEY_SECRET", "MONGO_DB", "MONGO_URI", "PORT"];
 const missingVars = [];
-REQUIRED_ENV_VARS.forEach((varName) =>{
+REQUIRED_ENV_VARS.forEach((varName) => {
   if (!process.env[varName]) {
     missingVars.push(varName);
   }
 })
-if(missingVars.length > 0){
+if (missingVars.length > 0) {
   console.log(`⚠️ Missing environment variables: ${missingVars.join(", ")}`);
   process.exit(1);
 }
@@ -35,11 +38,16 @@ require("./db");
 // ── Logger (after body parsing, before routes) ──────────────────────────────
 const logger = require("./middleware/logger");
 app.use(logger);
+//Dashboard route needs logger to parse query params for logging
+
+const dashboardRoutes = require('./routes/dashboard');
 
 // ── API routes (prefixed) ───────────────────────────────────────────────────
 app.use("/api/products", require("./routes/products"));
 app.use("/api/cart", require("./routes/cart"));
 app.use("/api/orders", require("./routes/orders"));
+app.use('/api/dashboard', dashboardRoutes);
+app.use("/api/reports", require("./routes/reports"));
 
 // ── Razorpay / payment routes (NO prefix — mounted at root) ─────────────────
 // These handle:  POST /create-order

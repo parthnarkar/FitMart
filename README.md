@@ -26,7 +26,10 @@
 
 <br/>
 
-[Quick Start](#-quick-start) | [Docs](#-api-reference) | [Contribute](CONTRIBUTING.md) | [Report Bug](https://github.com/parthnarkar/FitMart/issues) | [Request Feature](https://github.com/parthnarkar/FitMart/issues)
+[![GitHub Stars](https://img.shields.io/github/stars/parthnarkar/FitMart?style=for-the-badge&logo=github)](https://github.com/parthnarkar/FitMart/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/parthnarkar/FitMart?style=for-the-badge&logo=github)](https://github.com/parthnarkar/FitMart/network/members)
+[![GitHub Issues](https://img.shields.io/github/issues/parthnarkar/FitMart?style=for-the-badge&logo=github)](https://github.com/parthnarkar/FitMart/issues)
+[![GitHub PRs](https://img.shields.io/github/issues-pr/parthnarkar/FitMart?style=for-the-badge&logo=github)](https://github.com/parthnarkar/FitMart/pulls)
 
 </div>
 

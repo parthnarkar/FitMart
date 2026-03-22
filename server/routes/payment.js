@@ -32,11 +32,11 @@ async function releaseAndClearCart(userId) {
   await cart.save();
 }
 
-
-// ─────────────────────────────────────────────────────────────────────────────
-// POST /create-order
-// Body: { amount (₹), currency, userId }
-// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * @route   POST /create-order
+ * @desc    Creates a Razorpay payment order; body: { amount (₹), currency, userId }
+ * @access  Public
+ */
 router.post("/create-order", async (req, res) => {
   try {
     const { amount, currency = "INR", userId } = req.body;
@@ -61,12 +61,13 @@ router.post("/create-order", async (req, res) => {
   }
 });
 
-
-// ─────────────────────────────────────────────────────────────────────────────
-// POST /verify-payment
-// Body: { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId }
-// ─────────────────────────────────────────────────────────────────────────────
-
+/**
+ * @route   POST /verify-payment
+ * @desc    Verifies Razorpay HMAC signature, prevents duplicate orders, creates the
+ *          order record, and attaches the paymentId with status "paid";
+ *          body: { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId }
+ * @access  Public
+ */
 router.post("/verify-payment", async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId } = req.body;
@@ -82,7 +83,7 @@ router.post("/verify-payment", async (req, res) => {
     if (expected !== razorpay_signature)
       return res.status(400).json({ error: "Signature mismatch — payment not verified" });
 
-    // ✅ STEP 1: Prevent duplicate orders
+    //  STEP 1: Prevent duplicate orders
     const Order = require("../models/Order");
     const existingOrder = await Order.findOne({ paymentId: razorpay_payment_id });
 
@@ -90,12 +91,12 @@ router.post("/verify-payment", async (req, res) => {
       return res.json({ success: true, message: "Order already created" });
     }
 
-    // ✅ STEP 2: Create order using existing route logic
+    // STEP 2: Create order using existing route logic
     const orderResponse = await axios.post("http://localhost:5000/api/orders", {
       userId
     });
 
-    // ✅ STEP 3: Attach paymentId to order
+    //  STEP 3: Attach paymentId to order
     await Order.findByIdAndUpdate(orderResponse.data._id, {
       paymentId: razorpay_payment_id,
       status: "paid"
@@ -109,12 +110,12 @@ router.post("/verify-payment", async (req, res) => {
   }
 });
 
-
-// ─────────────────────────────────────────────────────────────────────────────
-// POST /clear-cart
-// Body: { userId }
-// Releases reserved stock AND clears the cart — matches cart.js DELETE logic
-// ─────────────────────────────────────────────────────────────────────────────
+/**
+ * @route   POST /clear-cart
+ * @desc    Releases all reserved stock and clears the user's cart without creating an order;
+ *          body: { userId }
+ * @access  Public
+ */
 router.post("/clear-cart", async (req, res) => {
   try {
     const { userId } = req.body;
@@ -128,13 +129,12 @@ router.post("/clear-cart", async (req, res) => {
   }
 });
 
-
-// ─────────────────────────────────────────────────────────────────────────────
-// POST /demo-success   ← TESTING ONLY — remove before going live
-// Body: { userId }
-// Skips Razorpay entirely, fakes a payment ID, clears cart, returns success.
-// ─────────────────────────────────────────────────────────────────────────────
-
+/**
+ * @route   POST /demo-success
+ * @desc    Simulates a successful payment for testing only — skips Razorpay, generates
+ *          a fake paymentId, creates an order, and marks it as "paid"; body: { userId }
+ * @access  Public — TESTING ONLY, remove before going live
+ */
 router.post("/demo-success", async (req, res) => {
   try {
     const { userId } = req.body;
@@ -168,6 +168,5 @@ router.post("/demo-success", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 module.exports = router;
