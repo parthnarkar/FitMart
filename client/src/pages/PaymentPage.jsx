@@ -2,15 +2,10 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { auth } from "../auth/firebase";
-import { fmt } from "../utils/formatters";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID;
 
-// ── Show the demo bypass button only in development ────────────────────────
-const IS_DEV = import.meta.env.DEV;
-
-// ── Load Razorpay checkout.js once ────────────────────────────────────────
 function useRazorpayScript() {
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
@@ -34,42 +29,57 @@ export default function PaymentPage() {
   const [bypassing, setBypassing] = useState(false);
   const [error, setError] = useState(null);
 
-  // custom title for Paymentpage 
-  useEffect(() => {
-    document.title = "My Orders - FitMart";
-  }, []);
+  // Unpack state passed from Checkout (includes discount info)
+  const {
+    items = [],
+    total = 0,
+    subtotal = 0,
+    discountAmt = 0,
+    discountPercent = 0,
+    discountApplied = false,
+  } = location.state || {};
 
-  const { items = [], total = 0 } = location.state || {};
   useEffect(() => {
     if (!items.length) navigate("/checkout");
   }, [items, navigate]);
 
-  // ── Shared: clear cart then go to confirmation ─────────────────────────
+  // ── Shared post-payment cleanup ────────────────────────────────────────
   const finishOrder = async (userId, paymentId) => {
+    // Clear cart
     await fetch(`${API}/clear-cart`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: "POST", headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ userId }),
     });
+
+    // Mark discount as used if it was applied
+    if (discountApplied) {
+      try {
+        await fetch(`${API}/api/user/use-discount`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ userId }),
+        });
+      } catch (err) {
+        console.error("use-discount error:", err);
+        // non-fatal — order still completes
+      }
+    }
+
     navigate("/payment-confirmation", {
-      state: { items, total, paymentId },
+      state: { items, total, subtotal, discountAmt, discountPercent, discountApplied, paymentId },
     });
   };
 
-  // ── DEMO BYPASS: skip Razorpay entirely ───────────────────────────────
-  // Calls /demo-success on the backend which fakes a verified payment,
-  // clears the cart, then redirects to confirmation.
+  // ── Demo bypass ────────────────────────────────────────────────────────
   const handleDemoSuccess = async () => {
     const user = auth.currentUser;
     if (!user) { navigate("/auth"); return; }
     setBypassing(true);
     setError(null);
-
     try {
       const res = await fetch(`${API}/demo-success`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ userId: user.uid }),
       });
@@ -82,7 +92,7 @@ export default function PaymentPage() {
     }
   };
 
-  // ── REAL PAYMENT: full Razorpay flow ──────────────────────────────────
+  // ── Real Razorpay flow ─────────────────────────────────────────────────
   const handlePay = async () => {
     if (!rzpReady) { setError("Payment SDK not loaded. Please refresh."); return; }
     const user = auth.currentUser;
@@ -93,14 +103,13 @@ export default function PaymentPage() {
 
     try {
       const orderRes = await fetch(`${API}/create-order`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: "POST", headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ amount: total, currency: "INR", userId }),
       });
       if (!orderRes.ok) {
-        const errBody = await orderRes.json().catch(() => ({}));
-        throw new Error(errBody.error || "Could not create order");
+        const e = await orderRes.json().catch(() => ({}));
+        throw new Error(e.error || "Could not create order");
       }
       const order = await orderRes.json();
 
@@ -111,17 +120,13 @@ export default function PaymentPage() {
         name: "FitMart",
         description: `Order #${order.id}`,
         order_id: order.id,
-        prefill: {
-          name: user.displayName || "",
-          email: user.email || "",
-        },
+        prefill: { name: user.displayName || "", email: user.email || "" },
         theme: { color: "#1c1917" },
 
         handler: async (response) => {
           try {
             const verifyRes = await fetch(`${API}/verify-payment`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
+              method: "POST", headers: { "Content-Type": "application/json" },
               credentials: "include",
               body: JSON.stringify({ ...response, userId }),
             });
@@ -156,6 +161,9 @@ export default function PaymentPage() {
 
   const busy = paying || bypassing;
 
+  const fmt = (n) =>
+    new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+
   return (
     <div className="min-h-screen bg-stone-50" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');`}</style>
@@ -179,8 +187,7 @@ export default function PaymentPage() {
             {items.map(({ product, quantity }) => (
               <div key={product.productId} className="flex items-center gap-3">
                 <img
-                  src={product.image}
-                  alt={product.name}
+                  src={product.image} alt={product.name}
                   className="w-10 h-10 object-cover rounded-lg bg-stone-100 flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
@@ -193,26 +200,40 @@ export default function PaymentPage() {
               </div>
             ))}
           </div>
+
           <div className="h-px bg-stone-200 mb-4" />
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-stone-500">Total payable</span>
-            <span
-              style={{ fontFamily: "'DM Serif Display', serif" }}
-              className="text-3xl text-stone-900"
-            >
-              {fmt(total)}
-            </span>
+
+          <div className="space-y-2">
+            {subtotal !== total && (
+              <div className="flex justify-between text-sm text-stone-500">
+                <span>Subtotal</span>
+                <span>{fmt(subtotal)}</span>
+              </div>
+            )}
+            {discountApplied && (
+              <div className="flex justify-between text-sm text-stone-500">
+                <span>Welcome {discountPercent}% off</span>
+                <span>−{fmt(discountAmt)}</span>
+              </div>
+            )}
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-sm text-stone-500">Total payable</span>
+              <span
+                style={{ fontFamily: "'DM Serif Display', serif" }}
+                className="text-3xl text-stone-900"
+              >
+                {fmt(total)}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Error banner */}
         {error && (
           <div className="bg-red-50 border border-red-100 rounded-2xl px-5 py-4 mb-5">
             <p className="text-red-600 text-sm">{error}</p>
           </div>
         )}
 
-        {/* Real Pay button */}
         <button
           onClick={handlePay}
           disabled={busy || !rzpReady}
@@ -225,18 +246,15 @@ export default function PaymentPage() {
               <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               Opening payment…
             </>
-          ) : (
-            `Pay ${fmt(total)} →`
-          )}
+          ) : `Pay ${fmt(total)} →`}
         </button>
 
         <p className="text-xs text-stone-400 text-center mt-4">
           100% secure · powered by Razorpay
         </p>
 
-        {/* ── Demo bypass button (always visible for testing) ── */}
+        {/* Demo bypass */}
         <div className="mt-6">
-          {/* Subtle divider */}
           <div className="flex items-center gap-3 mb-4">
             <div className="flex-1 h-px bg-stone-200" />
             <span className="text-[10px] tracking-[0.15em] uppercase text-stone-400">
@@ -244,7 +262,6 @@ export default function PaymentPage() {
             </span>
             <div className="flex-1 h-px bg-stone-200" />
           </div>
-
           <button
             onClick={handleDemoSuccess}
             disabled={busy}
@@ -258,9 +275,7 @@ export default function PaymentPage() {
                 <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
                 Processing…
               </>
-            ) : (
-              "Simulate Successful Payment ✓"
-            )}
+            ) : "Simulate Successful Payment ✓"}
           </button>
           <p className="text-[10px] text-stone-400 text-center mt-2">
             Skips Razorpay · clears cart · goes to confirmation

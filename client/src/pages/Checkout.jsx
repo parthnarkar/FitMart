@@ -1,7 +1,7 @@
 // src/pages/Checkout.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth } from "../auth/firebase";          // ← Firebase auth instance
+import { auth } from "../auth/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { fmt } from "../utils/formatters";
 
@@ -12,51 +12,42 @@ export default function Checkout() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [discountEligible, setDiscountEligible] = useState(false);
+  const [discountPercent, setDiscountPercent] = useState(10);
 
-  // custom title for checkout page 
-  useEffect(() => {
-    document.title = "My Cart - FitMart";
-  }, []);
+  useEffect(() => { document.title = "My Cart - FitMart"; }, []);
 
   useEffect(() => {
-    // onAuthStateChanged fires once on mount with the current user (or null).
-    // This is more reliable than auth.currentUser which can be null on first render
-    // before Firebase has finished restoring the session.
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        // Not logged in → send to auth page
-        navigate("/auth");
-        return;
-      }
-
-      const userId = user.uid;   // e.g. "yNPWa8lKUTXIO9oIJZPCrXSbF182"
+      if (!user) { navigate("/auth"); return; }
+      const userId = user.uid;
 
       try {
-        // ── Fetch cart ────────────────────────────────────────────────
-        const cartRes = await fetch(`${API}/api/cart/${userId}`, {
-          credentials: "include",
-        });
+        // Fetch cart, products, and discount status in parallel
+        const [cartRes, prodRes, discountRes] = await Promise.all([
+          fetch(`${API}/api/cart/${userId}`, { credentials: "include" }),
+          fetch(`${API}/api/products`, { credentials: "include" }),
+          fetch(`${API}/api/user/discount-status/${userId}`, { credentials: "include" }),
+        ]);
+
         if (!cartRes.ok) throw new Error("Failed to fetch cart");
-        const cart = await cartRes.json();
-
-        if (!cart.items?.length) {
-          setItems([]);
-          setLoading(false);
-          return;
-        }
-
-        // ── Fetch all products ────────────────────────────────────────
-        const prodRes = await fetch(`${API}/api/products`, {
-          credentials: "include",
-        });
         if (!prodRes.ok) throw new Error("Failed to fetch products");
+
+        const cart = await cartRes.json();
         const products = await prodRes.json();
 
-        // ── Join cart items with product details on productId ─────────
+        if (discountRes.ok) {
+          const d = await discountRes.json();
+          setDiscountEligible(d.eligible);
+          setDiscountPercent(d.discountPercent ?? 10);
+        }
+
+        if (!cart.items?.length) { setItems([]); setLoading(false); return; }
+
         const productMap = Object.fromEntries(products.map(p => [p.productId, p]));
         const enriched = cart.items
           .map(item => ({ ...item, product: productMap[item.productId] }))
-          .filter(item => item.product);   // drop any orphaned productIds
+          .filter(item => item.product);
 
         setItems(enriched);
       } catch (err) {
@@ -66,20 +57,27 @@ export default function Checkout() {
       }
     });
 
-    return () => unsubscribe();   // clean up listener on unmount
+    return () => unsubscribe();
   }, [navigate]);
 
   // ── Totals ─────────────────────────────────────────────────────────────
-  const subtotal = items.reduce(
-    (sum, { product, quantity }) => sum + product.price * quantity,
-    0
-  );
+  const subtotal = items.reduce((sum, { product, quantity }) => sum + product.price * quantity, 0);
+  const discountAmt = discountEligible ? Math.round(subtotal * discountPercent / 100) : 0;
+  const total = subtotal - discountAmt;
 
   const handleProceed = () => {
-    navigate("/payment", { state: { items, total: subtotal } });
+    navigate("/payment", {
+      state: {
+        items,
+        total,
+        subtotal,
+        discountAmt,
+        discountPercent: discountEligible ? discountPercent : 0,
+        discountApplied: discountEligible,
+      },
+    });
   };
 
-  // ── Render ─────────────────────────────────────────────────────────────
   if (loading) return <PageShell><Spinner /></PageShell>;
   if (error) return <PageShell><ErrorMsg msg={error} /></PageShell>;
   if (!items.length) return <PageShell><EmptyCart navigate={navigate} /></PageShell>;
@@ -123,7 +121,8 @@ export default function Checkout() {
                     {product.name}
                   </h3>
                   {product.badge && (
-                    <span className="text-[10px] tracking-widest uppercase bg-stone-900 text-white px-2.5 py-1 rounded-full">
+                    <span className="text-[10px] tracking-widest uppercase bg-stone-900
+                                     text-white px-2.5 py-1 rounded-full">
                       {product.badge}
                     </span>
                   )}
@@ -144,6 +143,22 @@ export default function Checkout() {
                 </div>
               </div>
             ))}
+
+            {/* Welcome discount callout */}
+            {discountEligible && (
+              <div className="bg-stone-100 border border-stone-200 rounded-2xl px-6 py-4
+                              flex items-center gap-4">
+                <span className="text-stone-900 text-lg flex-shrink-0">✓</span>
+                <div>
+                  <p className="text-sm font-medium text-stone-900">
+                    Welcome discount applied
+                  </p>
+                  <p className="text-xs text-stone-500 mt-0.5">
+                    {discountPercent}% off your first order — saving you {fmt(discountAmt)}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ── Order summary sidebar ──────────────────────────────── */}
@@ -157,6 +172,16 @@ export default function Checkout() {
                   <span>Subtotal ({items.length} item{items.length > 1 ? "s" : ""})</span>
                   <span>{fmt(subtotal)}</span>
                 </div>
+
+                {discountEligible && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-stone-400">
+                      Welcome {discountPercent}% off
+                    </span>
+                    <span className="text-stone-300">−{fmt(discountAmt)}</span>
+                  </div>
+                )}
+
                 <div className="flex justify-between text-sm text-stone-300">
                   <span>Shipping</span>
                   <span className="text-stone-400">Free</span>
@@ -168,10 +193,11 @@ export default function Checkout() {
                     style={{ fontFamily: "'DM Serif Display', serif" }}
                     className="text-3xl text-white"
                   >
-                    {fmt(subtotal)}
+                    {fmt(total)}
                   </span>
                 </div>
               </div>
+
               <button
                 onClick={handleProceed}
                 className="w-full bg-white text-stone-900 text-sm px-8 py-3.5 rounded-full
@@ -191,7 +217,6 @@ export default function Checkout() {
   );
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
 function PageShell({ children }) {
   return (
     <div className="min-h-screen bg-stone-50" style={{ fontFamily: "'DM Sans', sans-serif" }}>

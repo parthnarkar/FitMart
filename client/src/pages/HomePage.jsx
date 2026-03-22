@@ -41,6 +41,8 @@ import { auth } from "../auth/firebase";
 import CartDrawer from "../components/CartDrawer";
 import { fmt } from "../utils/formatters";
 import FitnessChatBot from "../components/FitnessChatBot";
+import WelcomeBanner from "../components/WelcomeBanner";
+import { useWelcomeDiscount } from "../auth/useWelcomeDiscount";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -169,6 +171,8 @@ export default function HomePage() {
   const [products, setProducts] = useState([]);
   const [backendError, setBackendError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { showBanner, dismissBanner } = useWelcomeDiscount(user);
+
 
   // custom titles for home page 
   useEffect(() => {
@@ -361,6 +365,8 @@ export default function HomePage() {
         .search-expand { max-height:0; overflow:hidden; transition:max-height .3s ease; }
         .search-expand.open { max-height:80px; }
       `}</style>
+
+      {showBanner && <WelcomeBanner onDismiss={dismissBanner} />}
 
       {/* ── NAVBAR ── only these props — no links, no user prop ── */}
       <Navbar
