@@ -8,6 +8,7 @@ import Payment from "./pages/PaymentPage";
 import ProductConfirmation from "./pages/ProductConfirmation";
 import NotFound from "./pages/NotFound";
 import AdminInventory from "./pages/AdminInventory";
+import AdminDashboard from './pages/AdminDashboard';
 import AdminReports from "./pages/AdminReports";
 
 export default function App() {
@@ -21,10 +22,11 @@ export default function App() {
         <Route path="/payment" element={<Payment />} />
         <Route path="/payment-confirmation" element={<ProductConfirmation />} />
         <Route path="/admin/inventory" element={<AdminInventory />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/reports" element={<AdminReports />} />
 
         {/* ⚠️ Catchall MUST be LAST — it swallows every route below it */}
-        <Route path="*" element={<NotFound/>} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
