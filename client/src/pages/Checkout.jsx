@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../auth/firebase";          // ← Firebase auth instance
 import { onAuthStateChanged } from "firebase/auth";
+import { fmt } from "../utils/formatters";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -133,11 +134,11 @@ export default function Checkout() {
                     style={{ fontFamily: "'DM Serif Display', serif" }}
                     className="text-2xl text-stone-900"
                   >
-                    ₹{(product.price * quantity).toLocaleString("en-IN")}
+                    {fmt(product.price * quantity)}
                   </p>
                   {product.originalPrice > product.price && (
                     <p className="text-xs text-stone-400 line-through">
-                      ₹{(product.originalPrice * quantity).toLocaleString("en-IN")}
+                      {fmt(product.originalPrice * quantity)}
                     </p>
                   )}
                 </div>
@@ -154,7 +155,7 @@ export default function Checkout() {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-sm text-stone-300">
                   <span>Subtotal ({items.length} item{items.length > 1 ? "s" : ""})</span>
-                  <span>₹{subtotal.toLocaleString("en-IN")}</span>
+                  <span>{fmt(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm text-stone-300">
                   <span>Shipping</span>
@@ -167,7 +168,7 @@ export default function Checkout() {
                     style={{ fontFamily: "'DM Serif Display', serif" }}
                     className="text-3xl text-white"
                   >
-                    ₹{subtotal.toLocaleString("en-IN")}
+                    {fmt(subtotal)}
                   </span>
                 </div>
               </div>

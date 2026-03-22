@@ -1,8 +1,8 @@
 // src/components/Navbar.jsx
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { signOut } from "firebase/auth";
 import { auth } from "../auth/firebase";
+import { useAuth } from "../auth/useAuth";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Props
@@ -28,16 +28,7 @@ export default function Navbar({
   const navigate = useNavigate();
 
   // Firebase auth state — synced here so BOTH pages know if user is logged in
-  const [user, setUser] = useState(null);
-  const [authLoading, setAuthLoading] = useState(true);
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u);
-      setAuthLoading(false);
-    });
-    return () => unsub();
-  }, []);
+  const { user, loading: authLoading } = useAuth();
 
   const handleSignOut = async () => {
     if (onSignOut) {

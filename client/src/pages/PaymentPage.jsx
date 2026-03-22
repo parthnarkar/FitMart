@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { auth } from "../auth/firebase";
+import { fmt } from "../utils/formatters";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID;
@@ -187,7 +188,7 @@ export default function PaymentPage() {
                   <p className="text-xs text-stone-400">Qty {quantity}</p>
                 </div>
                 <p className="text-sm text-stone-900 flex-shrink-0">
-                  ₹{(product.price * quantity).toLocaleString("en-IN")}
+                  {fmt(product.price * quantity)}
                 </p>
               </div>
             ))}
@@ -199,7 +200,7 @@ export default function PaymentPage() {
               style={{ fontFamily: "'DM Serif Display', serif" }}
               className="text-3xl text-stone-900"
             >
-              ₹{total.toLocaleString("en-IN")}
+              {fmt(total)}
             </span>
           </div>
         </div>
@@ -225,7 +226,7 @@ export default function PaymentPage() {
               Opening payment…
             </>
           ) : (
-            `Pay ₹${total.toLocaleString("en-IN")} →`
+            `Pay ${fmt(total)} →`
           )}
         </button>
 
