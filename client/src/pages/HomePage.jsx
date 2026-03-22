@@ -43,6 +43,7 @@ import { fmt } from "../utils/formatters";
 import FitnessChatBot from "../components/FitnessChatBot";
 import WelcomeBanner from "../components/WelcomeBanner";
 import { useWelcomeDiscount } from "../auth/useWelcomeDiscount";
+import BMICalculator from "../components/BMICalculator";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -502,6 +503,11 @@ export default function HomePage() {
               Learn More
             </button>
           </div>
+        </section>
+
+        {/* BMI & Calorie Calculator */}
+        <section>
+          <BMICalculator />
         </section>
 
         {/* Upgrade */}

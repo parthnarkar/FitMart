@@ -30,7 +30,6 @@ export default function App() {
         <Route path="/plans/mobility-recovery" element={<MobilityRecoveryPlans />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/reports" element={<AdminReports />} />
-
         {/* ⚠️ Catchall MUST be LAST — it swallows every route below it */}
         <Route path="*" element={<NotFound />} />
       </Routes>
