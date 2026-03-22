@@ -49,6 +49,10 @@ export default function WeightLossPlans() {
     setTimeout(() => setVisible(true), 80);
   }, []);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const handleSignOut = async () => {
     await signOut(auth);
     navigate("/");
@@ -65,8 +69,8 @@ export default function WeightLossPlans() {
 
       <Navbar
         variant="home"
-        onSearchToggle={() => {}}
-        onCartOpen={() => {}}
+        onSearchToggle={() => { }}
+        onCartOpen={() => { }}
         cartCount={0}
         menuOpen={menuOpen}
         setMenuOpen={setMenuOpen}
@@ -76,22 +80,24 @@ export default function WeightLossPlans() {
       {/* Hero */}
       <section className="bg-stone-900 text-white">
         <div className="max-w-7xl mx-auto px-5 lg:px-10 py-16 md:py-20">
-          <div className={`fade-in d1 ${visible ? "show" : ""}`}>
+          <div className={`fade-in d1 ${visible ? "show" : ""} flex justify-between items-start`}>
+            <div>
+              <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-3">
+                Digital Coaching
+              </p>
+              <h1 className="font-['DM_Serif_Display'] text-4xl md:text-6xl text-white leading-tight max-w-2xl mb-4">
+                Weight Loss <em className="not-italic text-stone-400">Plans</em>
+              </h1>
+              <p className="text-sm text-stone-300 max-w-lg leading-relaxed">
+                Caloric-deficit nutrition, cardio-focused programming, and expert coaching designed to help you shed weight sustainably.
+              </p>
+            </div>
             <button
               onClick={() => navigate("/home")}
-              className="text-xs tracking-[0.15em] uppercase text-stone-400 hover:text-stone-200 transition-colors mb-6 inline-flex items-center gap-2"
+              className="text-xs tracking-[0.15em] uppercase text-stone-400 hover:text-stone-200 transition-colors inline-flex items-center gap-2"
             >
               ← Back to Home
             </button>
-            <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-3">
-              Digital Coaching
-            </p>
-            <h1 className="font-['DM_Serif_Display'] text-4xl md:text-6xl text-white leading-tight max-w-2xl mb-4">
-              Weight Loss <em className="not-italic text-stone-400">Plans</em>
-            </h1>
-            <p className="text-sm text-stone-300 max-w-lg leading-relaxed">
-              Caloric-deficit nutrition, cardio-focused programming, and expert coaching designed to help you shed weight sustainably.
-            </p>
           </div>
         </div>
       </section>
