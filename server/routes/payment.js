@@ -8,6 +8,7 @@ const router = express.Router();
 
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
+const verifyFirebaseToken = require("../middleware/verifyFirebaseToken");
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -32,12 +33,12 @@ async function releaseAndClearCart(userId) {
   await cart.save();
 }
 
-
-// ─────────────────────────────────────────────────────────────────────────────
-// POST /create-order
-// Body: { amount (₹), currency, userId }
-// ─────────────────────────────────────────────────────────────────────────────
-router.post("/create-order", async (req, res) => {
+/**
+ * @route   POST /create-order
+ * @desc    Creates a Razorpay payment order; body: { amount (₹), currency, userId }
+ * @access  Private
+ */
+router.post("/create-order", verifyFirebaseToken, async (req, res) => {
   try {
     const { amount, currency = "INR", userId } = req.body;
     if (!amount || !userId)
@@ -61,13 +62,14 @@ router.post("/create-order", async (req, res) => {
   }
 });
 
-
-// ─────────────────────────────────────────────────────────────────────────────
-// POST /verify-payment
-// Body: { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId }
-// ─────────────────────────────────────────────────────────────────────────────
-
-router.post("/verify-payment", async (req, res) => {
+/**
+ * @route   POST /verify-payment
+ * @desc    Verifies Razorpay HMAC signature, prevents duplicate orders, creates the
+ *          order record, and attaches the paymentId with status "paid";
+ *          body: { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId }
+ * @access  Private
+ */
+router.post("/verify-payment", verifyFirebaseToken, async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId } = req.body;
 
@@ -109,13 +111,13 @@ router.post("/verify-payment", async (req, res) => {
   }
 });
 
-
-// ─────────────────────────────────────────────────────────────────────────────
-// POST /clear-cart
-// Body: { userId }
-// Releases reserved stock AND clears the cart — matches cart.js DELETE logic
-// ─────────────────────────────────────────────────────────────────────────────
-router.post("/clear-cart", async (req, res) => {
+/**
+ * @route   POST /clear-cart
+ * @desc    Releases all reserved stock and clears the user's cart without creating an order;
+ *          body: { userId }
+ * @access  Private
+ */
+router.post("/clear-cart", verifyFirebaseToken, async (req, res) => {
   try {
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ error: "userId is required" });
@@ -128,14 +130,13 @@ router.post("/clear-cart", async (req, res) => {
   }
 });
 
-
-// ─────────────────────────────────────────────────────────────────────────────
-// POST /demo-success   ← TESTING ONLY — remove before going live
-// Body: { userId }
-// Skips Razorpay entirely, fakes a payment ID, clears cart, returns success.
-// ─────────────────────────────────────────────────────────────────────────────
-
-router.post("/demo-success", async (req, res) => {
+/**
+ * @route   POST /demo-success
+ * @desc    Simulates a successful payment for testing only — skips Razorpay, generates
+ *          a fake paymentId, creates an order, and marks it as "paid"; body: { userId }
+ * @access  Private — TESTING ONLY, remove before going live
+ */
+router.post("/demo-success", verifyFirebaseToken, async (req, res) => {
   try {
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ error: "userId is required" });
@@ -168,6 +169,5 @@ router.post("/demo-success", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 module.exports = router;
