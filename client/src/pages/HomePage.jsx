@@ -40,6 +40,7 @@ import { signOut } from "firebase/auth";
 import { auth } from "../auth/firebase";
 import CartDrawer from "../components/CartDrawer";
 import { fmt } from "../utils/formatters";
+import FitnessChatBot from "../components/FitnessChatBot";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -553,6 +554,8 @@ export default function HomePage() {
         updateQty={updateQty}
         removeFromCart={removeFromCart}
       />
+
+      <FitnessChatBot />
     </div>
   );
 }

@@ -151,39 +151,34 @@ if (process.env.NODE_ENV !== "production") {
       const { userId } = req.body;
       if (!userId) return res.status(400).json({ error: "userId is required" });
 
-      router.post("/demo-success", async (req, res) => {
-        try {
-          const { userId } = req.body;
-          if (!userId) return res.status(400).json({ error: "userId is required" });
+      const fakePaymentId = `pay_DEMO_${Date.now()}`;
 
-          const fakePaymentId = `pay_DEMO_${Date.now()}`;
+      const Order = require("../models/Order");
 
-          const Order = require("../models/Order");
+      // prevent duplicate
+      const existingOrder = await Order.findOne({ paymentId: fakePaymentId });
+      if (existingOrder) {
+        return res.json({ success: true, message: "Order already exists" });
+      }
 
-          // prevent duplicate
-          const existingOrder = await Order.findOne({ paymentId: fakePaymentId });
-          if (existingOrder) {
-            return res.json({ success: true, message: "Order already exists" });
-          }
-
-          // create order
-          const orderResponse = await axios.post("http://localhost:5000/api/orders", {
-            userId
-          });
-
-          // attach payment id
-          await Order.findByIdAndUpdate(orderResponse.data._id, {
-            paymentId: fakePaymentId,
-            status: "paid"
-          });
-
-          res.json({ success: true, order: orderResponse.data });
-
-        } catch (err) {
-          console.error("demo-success error:", err);
-          res.status(500).json({ error: err.message });
-        }
+      // create order
+      const orderResponse = await axios.post("http://localhost:5000/api/orders", {
+        userId
       });
+
+      // attach payment id
+      await Order.findByIdAndUpdate(orderResponse.data._id, {
+        paymentId: fakePaymentId,
+        status: "paid"
+      });
+
+      res.json({ success: true, order: orderResponse.data });
+
+    } catch (err) {
+      console.error("demo-success error:", err);
+      res.status(500).json({ error: err.message });
     }
+  });
+}
 
 module.exports = router;
