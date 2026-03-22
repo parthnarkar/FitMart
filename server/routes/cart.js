@@ -12,7 +12,11 @@ async function adjustReserved(productId, delta) {
   return prod;
 }
 
-// GET /api/cart/:userId - get or create cart for user
+/**
+ * @route   GET /api/cart/:userId
+ * @desc    Get or create a cart for the given user
+ * @access  Public
+ */
 router.get('/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
@@ -26,7 +30,11 @@ router.get('/:userId', async (req, res) => {
   }
 });
 
-// POST /api/cart/:userId/add - body: { productId, quantity }
+/**
+ * @route   POST /api/cart/:userId/add
+ * @desc    Add an item to the user's cart and reserve stock; body: { productId, quantity }
+ * @access  Public
+ */
 router.post('/:userId/add', async (req, res) => {
   try {
     const { userId } = req.params;
@@ -61,7 +69,11 @@ router.post('/:userId/add', async (req, res) => {
   }
 });
 
-// POST /api/cart/:userId/remove - body: { productId, quantity }
+/**
+ * @route   POST /api/cart/:userId/remove
+ * @desc    Remove an item (or reduce its quantity) from the user's cart and release reserved stock; body: { productId, quantity }
+ * @access  Public
+ */
 router.post('/:userId/remove', async (req, res) => {
   try {
     const { userId } = req.params;
@@ -89,7 +101,11 @@ router.post('/:userId/remove', async (req, res) => {
   }
 });
 
-// DELETE /api/cart/:userId - clear cart and release reserved stock
+/**
+ * @route   DELETE /api/cart/:userId
+ * @desc    Clear all items from the user's cart and release all reserved stock
+ * @access  Public
+ */
 router.delete('/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
