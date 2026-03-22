@@ -6,7 +6,16 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Display all missing variables at server startup
-const REQUIRED_ENV_VARS = ["RAZORPAY_KEY_ID", "RAZORPAY_KEY_SECRET", "MONGO_DB", "MONGO_URI", "PORT"];
+const REQUIRED_ENV_VARS = [
+  "RAZORPAY_KEY_ID",
+  "RAZORPAY_KEY_SECRET",
+  "MONGO_DB",
+  "MONGO_URI",
+  "PORT",
+  "FIREBASE_PROJECT_ID",
+  "FIREBASE_CLIENT_EMAIL",
+  "FIREBASE_PRIVATE_KEY",
+];
 const missingVars = [];
 REQUIRED_ENV_VARS.forEach((varName) => {
   if (!process.env[varName]) {

@@ -3,19 +3,26 @@ const router = express.Router();
 const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
+const verifyFirebaseToken = require('../middleware/verifyFirebaseToken');
 
 /**
  * @route   POST /api/orders
  * @desc    Creates a new order from explicit items or the user's cart; snapshots product
  *          prices at time of purchase, deducts stock, and clears the user's cart;
  *          body: { userId, items?: [{ productId, quantity }] }
- * @access  Public
+ * @access  Private
  */
-router.post('/', async (req, res) => {
-  try {
-    const { userId, items } = req.body;
-    if (!userId) return res.status(400).json({ error: 'userId required' });
+router.post('/', verifyFirebaseToken, async (req, res) => {
+  const { userId, items } = req.body;
 
+  if (!userId) return res.status(400).json({ error: 'userId required' });
+
+  // ownership check — token uid must match the userId in the body
+  if (req.user.uid !== userId) {
+    return res.status(403).json({ error: 'Forbidden — you can only create orders for yourself' });
+  }
+
+  try {
     let orderItems = items;
     if (!orderItems || !orderItems.length) {
       const cart = await Cart.findOne({ userId });
@@ -33,8 +40,8 @@ router.post('/', async (req, res) => {
       if (p.stock !== null) {
         const available = p.stock - p.reserved;
         if (available < it.quantity) {
-          return res.status(400).json({ 
-            error: `Insufficient stock for ${p.name}. Available: ${available}` 
+          return res.status(400).json({
+            error: `Insufficient stock for ${p.name}. Available: ${available}`
           });
         }
       }
@@ -67,9 +74,13 @@ router.post('/', async (req, res) => {
 /**
  * @route   GET /api/orders/:userId
  * @desc    Returns all orders for a given user, sorted by most recent first
- * @access  Public
+ * @access  Private
  */
-router.get('/:userId', async (req, res) => {
+router.get('/:userId', verifyFirebaseToken, async (req, res) => {
+  if (req.user.uid !== req.params.userId) {
+    return res.status(403).json({ error: 'Forbidden — you can only view your own orders' });
+  }
+
   try {
     const { userId } = req.params;
     const orders = await Order.find({ userId }).sort({ createdAt: -1 });
