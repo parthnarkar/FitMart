@@ -11,9 +11,9 @@ const statusConfig = (p) => {
   const available = isUnlimited ? null : p.stock - p.reserved;
   const isLow = !isUnlimited && available < LOW_STOCK_THRESHOLD;
 
-  if (isUnlimited) return { label: "Unlimited", style: "border border-stone-200 text-stone-400" };
-  if (isLow) return { label: "Low Stock", style: "bg-red-50 border border-red-100 text-red-600" };
-  return { label: "In Stock", style: "bg-stone-900 text-white" };
+  if (isUnlimited) return { label: "Unlimited", style: "bg-yellow-50 border border-yellow-200 text-yellow-700" };
+  if (isLow) return { label: "Low Stock", style: "bg-red-50 border border-red-200 text-red-600" };
+  return { label: "In Stock", style: "bg-green-50 border border-green-200 text-green-700" };
 };
 
 // ── Skeleton row ──────────────────────────────────────────────────────────
