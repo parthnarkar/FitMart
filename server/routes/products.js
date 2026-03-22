@@ -21,6 +21,7 @@ router.get('/', async (req, res) => {
  * @desc    Returns all products where available stock (stock - reserved) is below threshold of 5
  * @access  Public
  */
+// GET /api/products/low-stock - get products with low stock
 const LOW_STOCK_THRESHOLD = 5;
 
 router.get('/low-stock', async (req, res) => {
@@ -39,6 +40,7 @@ router.get('/low-stock', async (req, res) => {
  * @desc    Returns a single product by its productId
  * @access  Public
  */
+// GET /api/products/:id - get product by productId
 router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findOne({ productId: Number(req.params.id) });
