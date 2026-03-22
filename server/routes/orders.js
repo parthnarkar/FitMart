@@ -4,7 +4,13 @@ const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 
-// POST /api/orders - create an order from provided cart or explicit items
+/**
+ * @route   POST /api/orders
+ * @desc    Creates a new order from explicit items or the user's cart; snapshots product
+ *          prices at time of purchase, deducts stock, and clears the user's cart;
+ *          body: { userId, items?: [{ productId, quantity }] }
+ * @access  Public
+ */
 router.post('/', async (req, res) => {
   try {
     const { userId, items } = req.body;
@@ -21,7 +27,6 @@ router.post('/', async (req, res) => {
     const populated = [];
     let total = 0;
     for (const it of orderItems) {
-
       const p = await Product.findOne({ productId: Number(it.productId) });
       if (!p) return res.status(400).json({ error: `Product ${it.productId} not found` });
       // Oversell guard - skip check if stock is null (unlimited)
@@ -36,6 +41,7 @@ router.post('/', async (req, res) => {
       populated.push({ productId: p.productId, quantity: it.quantity, price: p.price });
       total += p.price * it.quantity;
     }
+
     // After order is created, deduct stock and reserved for each item
     const order = await Order.create({ userId, items: populated, total });
     for (const it of orderItems) {
@@ -48,7 +54,6 @@ router.post('/', async (req, res) => {
       }
     }
 
-
     // clear cart (do NOT release reserved - purchasing finalizes reservation)
     await Cart.findOneAndUpdate({ userId }, { items: [] });
 
@@ -59,7 +64,11 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET /api/orders/:userId - list orders for user
+/**
+ * @route   GET /api/orders/:userId
+ * @desc    Returns all orders for a given user, sorted by most recent first
+ * @access  Public
+ */
 router.get('/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
