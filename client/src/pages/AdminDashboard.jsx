@@ -10,7 +10,6 @@ import {
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-// ── Helpers ────────────────────────────────────────────────────────────────
 const fmt = (n) =>
   new Intl.NumberFormat("en-IN", {
     style: "currency", currency: "INR", maximumFractionDigits: 0,
@@ -25,7 +24,6 @@ const STATUS_STYLES = {
   failed: "bg-red-50 border border-red-100 text-red-600",
 };
 
-// ── Custom Recharts Tooltip ────────────────────────────────────────────────
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
@@ -40,16 +38,13 @@ const CustomTooltip = ({ active, payload, label }) => {
   );
 };
 
-// ── KPI Card ──────────────────────────────────────────────────────────────
 const KPICard = ({ label, value, sub, icon }) => (
   <div className="bg-white border border-stone-200 rounded-2xl p-7
                   hover:border-stone-300 hover:shadow-lg transition-all duration-300">
     <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-5">{label}</p>
     <div className="flex items-end justify-between">
-      <p
-        style={{ fontFamily: "'DM Serif Display', serif" }}
-        className="text-3xl md:text-4xl text-stone-900 leading-none"
-      >
+      <p style={{ fontFamily: "'DM Serif Display', serif" }}
+        className="text-3xl md:text-4xl text-stone-900 leading-none">
         {value}
       </p>
       <span className="text-2xl opacity-40 mb-0.5">{icon}</span>
@@ -58,29 +53,24 @@ const KPICard = ({ label, value, sub, icon }) => (
   </div>
 );
 
-// ── Section Card ──────────────────────────────────────────────────────────
 const SectionCard = ({ title, eyebrow, children }) => (
   <div className="bg-white border border-stone-200 rounded-2xl p-7
                   hover:border-stone-300 transition-all duration-300">
     {eyebrow && (
       <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-1">{eyebrow}</p>
     )}
-    <h2
-      style={{ fontFamily: "'DM Serif Display', serif" }}
-      className="text-xl text-stone-900 mb-6"
-    >
+    <h2 style={{ fontFamily: "'DM Serif Display', serif" }}
+      className="text-xl text-stone-900 mb-6">
       {title}
     </h2>
     {children}
   </div>
 );
 
-// ── Skeleton ──────────────────────────────────────────────────────────────
 const Skeleton = ({ className = "" }) => (
   <div className={`bg-stone-100 rounded-2xl animate-pulse ${className}`} />
 );
 
-// ── Empty State ───────────────────────────────────────────────────────────
 const Empty = () => (
   <div className="flex flex-col items-center justify-center py-12 text-center">
     <p className="text-3xl text-stone-300 mb-3">∅</p>
@@ -88,7 +78,30 @@ const Empty = () => (
   </div>
 );
 
-// ── Main Component ─────────────────────────────────────────────────────────
+// ── Customer Avatar ────────────────────────────────────────────────────────
+// Mirrors Navbar.jsx: shows photoURL if available, falls back to initial letter
+const CustomerAvatar = ({ name, photoURL }) => (
+  <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0
+                  bg-stone-200 flex items-center justify-center">
+    {photoURL ? (
+      <img
+        src={photoURL}
+        alt={name || "avatar"}
+        className="w-full h-full object-cover"
+        referrerPolicy="no-referrer"
+        onError={e => {
+          // If image fails to load, hide it and let the parent show the initial
+          e.currentTarget.style.display = "none";
+        }}
+      />
+    ) : (
+      <span className="text-[11px] font-medium text-stone-600">
+        {(name?.[0] || "?").toUpperCase()}
+      </span>
+    )}
+  </div>
+);
+
 export default function AdminDashboard() {
   const [range, setRange] = useState("month");
   const [data, setData] = useState(null);
@@ -122,21 +135,17 @@ export default function AdminDashboard() {
         @keyframes fmFadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
       `}</style>
 
-      {/* ── Top bar ─────────────────────────────────────────────────────── */}
+      {/* Top bar */}
       <div className="bg-white border-b border-stone-200 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-5 lg:px-10 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <span
-              style={{ fontFamily: "'DM Serif Display', serif" }}
-              className="text-xl text-stone-900 tracking-tight"
-            >
+            <span style={{ fontFamily: "'DM Serif Display', serif" }}
+              className="text-xl text-stone-900 tracking-tight">
               FitMart
             </span>
             <div className="h-4 w-px bg-stone-200" />
             <p className="text-xs tracking-[0.2em] uppercase text-stone-400">Admin</p>
           </div>
-
-          {/* Range filter */}
           <div className="flex items-center gap-2">
             {[
               { key: "today", label: "Today" },
@@ -158,29 +167,21 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ── Page content ────────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-5 lg:px-10 py-12">
-
         <div className="mb-10">
           <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2">Overview</p>
-          <h1
-            style={{ fontFamily: "'DM Serif Display', serif" }}
-            className="text-4xl md:text-5xl text-stone-900"
-          >
+          <h1 style={{ fontFamily: "'DM Serif Display', serif" }}
+            className="text-4xl md:text-5xl text-stone-900">
             Command Centre
           </h1>
         </div>
 
-        {/* Error */}
         {error && (
           <div className="bg-red-50 border border-red-100 rounded-2xl px-6 py-5 mb-8">
-            <p className="text-sm text-red-600">
-              ⚠ {error} — make sure the backend server is running.
-            </p>
+            <p className="text-sm text-red-600">⚠ {error} — make sure the backend server is running.</p>
           </div>
         )}
 
-        {/* Loading skeletons */}
         {loading && (
           <div className="space-y-5">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
@@ -194,7 +195,6 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* Dashboard content */}
         {!loading && data && (
           <div className="fade-in space-y-5">
 
@@ -261,26 +261,16 @@ export default function AdminDashboard() {
               </SectionCard>
             </div>
 
-            {/* ── Recent Orders table ────────────────────────────────────── */}
+            {/* Recent Orders */}
             <SectionCard eyebrow="Transactions" title="Recent Orders">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-stone-100">
-                      {[
-                        "Order ID",
-                        "Customer",      // displayName from Firebase
-                        "Email",         // email from Firebase
-                        "Items",
-                        "Total",
-                        "Status",
-                        "Date",
-                      ].map((h) => (
-                        <th
-                          key={h}
+                      {["Order ID", "Customer", "Email", "Items", "Total", "Status", "Date"].map((h) => (
+                        <th key={h}
                           className="pb-4 text-left text-xs tracking-[0.15em] uppercase
-                                     text-stone-400 font-normal whitespace-nowrap pr-6 last:pr-0"
-                        >
+                                       text-stone-400 font-normal whitespace-nowrap pr-6 last:pr-0">
                           {h}
                         </th>
                       ))}
@@ -305,34 +295,27 @@ export default function AdminDashboard() {
                             </span>
                           </td>
 
-                          {/* Customer Name
-                              — uses customerName if enriched by backend (Firebase Admin SDK)
-                              — falls back to first 12 chars of userId if not yet enriched */}
+                          {/* Customer — photo + name (mirrors Navbar avatar pattern) */}
                           <td className="py-4 pr-6">
                             {order.customerName && order.customerName !== "—" ? (
-                              <div className="flex items-center gap-2">
-                                {/* Avatar initial */}
-                                <div className="w-6 h-6 rounded-full bg-stone-200 flex items-center
-                                                justify-center flex-shrink-0">
-                                  <span className="text-[10px] font-medium text-stone-600">
-                                    {order.customerName[0]?.toUpperCase() ?? "?"}
-                                  </span>
-                                </div>
+                              <div className="flex items-center gap-2.5">
+                                <CustomerAvatar
+                                  name={order.customerName}
+                                  photoURL={order.customerPhoto}
+                                />
                                 <span className="text-xs text-stone-700 font-medium">
                                   {order.customerName}
                                 </span>
                               </div>
                             ) : (
-                              // Fallback: show truncated userId
+                              // Backend not yet enriched — show truncated UID
                               <span className="text-xs text-stone-400 font-mono">
                                 {order.userId?.slice(0, 12)}…
                               </span>
                             )}
                           </td>
 
-                          {/* Customer Email
-                              — uses customerEmail if enriched
-                              — shows "—" if not available */}
+                          {/* Email */}
                           <td className="py-4 pr-6">
                             {order.customerEmail && order.customerEmail !== "—" ? (
                               <span className="text-xs text-stone-500">
@@ -350,21 +333,17 @@ export default function AdminDashboard() {
 
                           {/* Total */}
                           <td className="py-4 pr-6">
-                            <span
-                              style={{ fontFamily: "'DM Serif Display', serif" }}
-                              className="text-base text-stone-900"
-                            >
+                            <span style={{ fontFamily: "'DM Serif Display', serif" }}
+                              className="text-base text-stone-900">
                               {fmt(order.total)}
                             </span>
                           </td>
 
                           {/* Status */}
                           <td className="py-4 pr-6">
-                            <span
-                              className={`text-[10px] tracking-widest uppercase px-2.5 py-1
-                                          rounded-full font-medium whitespace-nowrap
-                                          ${STATUS_STYLES[order.status] || "border border-stone-200 text-stone-500"}`}
-                            >
+                            <span className={`text-[10px] tracking-widest uppercase px-2.5 py-1
+                                              rounded-full font-medium whitespace-nowrap
+                                              ${STATUS_STYLES[order.status] || "border border-stone-200 text-stone-500"}`}>
                               {order.status}
                             </span>
                           </td>
@@ -385,7 +364,6 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* Footer */}
       <footer className="border-t border-stone-200 bg-white mt-12">
         <div className="max-w-7xl mx-auto px-5 lg:px-10 py-6 flex justify-between items-center">
           <span style={{ fontFamily: "'DM Serif Display', serif" }} className="text-stone-900">

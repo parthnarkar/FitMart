@@ -22,6 +22,7 @@ async function resolveFirebaseUser(uid) {
     return {
       displayName: userRecord.displayName || "—",
       email: userRecord.email || "—",
+      photoURL: userRecord.photoURL || null,
     };
   } catch {
     return { displayName: "—", email: "—" };
@@ -132,11 +133,12 @@ router.get('/', async (req, res) => {
       })
     );
 
-    // Attach customerName + customerEmail to each order
+    // Attach customerName + customerEmail + customerPhoto to each order
     const recentOrders = rawOrders.map(order => ({
       ...order,
       customerName: userMap[order.userId]?.displayName ?? '—',
       customerEmail: userMap[order.userId]?.email ?? '—',
+      customerPhoto: userMap[order.userId]?.photoURL ?? null,
     }));
 
     // ── Response ──────────────────────────────────────────────────────────
