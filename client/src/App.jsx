@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import Authentication from "./pages/Authentication";
 import HomePage from "./pages/HomePage";
+import ProductPage from "./pages/ProductPage";
 import Checkout from "./pages/Checkout";
 import Payment from "./pages/PaymentPage";
 import ProductConfirmation from "./pages/ProductConfirmation";
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/auth" element={<Authentication />} />
         <Route path="/home" element={<HomePage />} />
+        <Route path="/product/:productId" element={<ProductPage />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/payment" element={<Payment />} />
         <Route path="/payment-confirmation" element={<ProductConfirmation />} />

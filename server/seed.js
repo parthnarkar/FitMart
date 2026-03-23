@@ -15,7 +15,7 @@ const PRODUCTS = [
     brand: 'PowerFlex',
     category: 'Equipment',
     price: 15999,
-    originalPrice: 15999,
+    originalPrice: 17999,
     rating: 4.8,
     reviews: 214,
     badge: 'Best Seller',

@@ -32,7 +32,6 @@ const Stars = ({ rating }) => (
   </span>
 );
 
-// ── Helper: map raw cartDoc.items → enriched cart array ──────────────────────
 function mapCart(cartDoc, products) {
   return cartDoc.items.map(it => {
     const prod = products.find(p => Number(p.productId) === Number(it.productId));
@@ -41,13 +40,16 @@ function mapCart(cartDoc, products) {
   });
 }
 
-// ── ProductCard ───────────────────────────────────────────────────────────────
+// ── ProductCard — image + name navigate to product page ──────────────────
 function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
+  const navigate = useNavigate();
   const [added, setAdded] = useState(false);
   const cartItem = cartItems.find(item => item.id === (product.productId || product.id));
   const quantity = cartItem?.qty || 0;
+  const productId = product.productId || product.id;
 
-  const handleAdd = () => {
+  const handleAdd = (e) => {
+    e.stopPropagation();
     onAdd(product);
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
@@ -60,7 +62,13 @@ function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
   return (
     <div className="group bg-white border border-stone-100 rounded-2xl overflow-hidden
                     hover:border-stone-200 hover:shadow-lg transition-all duration-300">
-      <div className="relative bg-stone-100 aspect-square flex items-center justify-center overflow-hidden">
+
+      {/* ── Clickable image → product page ── */}
+      <div
+        onClick={() => navigate(`/product/${productId}`)}
+        className="relative bg-stone-100 aspect-square flex items-center justify-center
+                   overflow-hidden cursor-pointer"
+      >
         {product.image ? (
           <img
             src={product.image} alt={product.name}
@@ -88,11 +96,21 @@ function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
 
       <div className="p-5">
         <p className="text-[10px] tracking-[0.15em] uppercase text-stone-400 mb-1">{product.brand}</p>
-        <h3 className="text-sm font-medium text-stone-900 leading-snug mb-2 line-clamp-2">{product.name}</h3>
+
+        {/* ── Clickable name → product page ── */}
+        <h3
+          onClick={() => navigate(`/product/${productId}`)}
+          className="text-sm font-medium text-stone-900 leading-snug mb-2 line-clamp-2
+                     cursor-pointer hover:text-stone-600 transition-colors"
+        >
+          {product.name}
+        </h3>
+
         <div className="flex items-center gap-1.5 mb-3">
           <Stars rating={product.rating} />
           <span className="text-[10px] text-stone-400">({product.reviews})</span>
         </div>
+
         <div className="flex items-end justify-between">
           <div>
             <span className="text-base font-semibold text-stone-900">{fmt(product.price)}</span>
@@ -100,17 +118,22 @@ function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
               <span className="text-xs text-stone-400 line-through ml-2">{fmt(product.originalPrice)}</span>
             )}
           </div>
+
+          {/* ── Qty controls or Add button ── */}
           {quantity > 0 ? (
-            <div className="flex items-center border border-stone-300 rounded-full overflow-hidden">
+            <div
+              className="flex items-center border border-stone-300 rounded-full overflow-hidden"
+              onClick={e => e.stopPropagation()}
+            >
               <button
-                onClick={() => updateQty(product.id || product.productId, -1)}
+                onClick={e => { e.stopPropagation(); updateQty(productId, -1); }}
                 className="w-8 h-8 flex items-center justify-center text-stone-600 hover:bg-stone-100 transition-colors"
               >
                 <span className="text-lg leading-none">−</span>
               </button>
               <span className="w-8 text-xs text-stone-900 text-center font-medium">{quantity}</span>
               <button
-                onClick={() => updateQty(product.id || product.productId, 1)}
+                onClick={e => { e.stopPropagation(); updateQty(productId, 1); }}
                 className="w-8 h-8 flex items-center justify-center text-stone-600 hover:bg-stone-100 transition-colors"
               >
                 <span className="text-lg leading-none">+</span>
@@ -161,7 +184,6 @@ export default function HomePage() {
     return () => unsub();
   }, [navigate]);
 
-  // Load products
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -181,7 +203,6 @@ export default function HomePage() {
     })();
   }, []);
 
-  // Load cart from server once products are ready
   useEffect(() => {
     if (!user || !products.length) return;
     (async () => {
@@ -202,23 +223,18 @@ export default function HomePage() {
     navigate("/");
   };
 
-  // ── Cart operations — each sends the Firebase token ─────────────────────
   const addToCart = async (product) => {
     if (!user) return;
     try {
       const headers = await getAuthHeaders();
       const res = await fetch(`${API}/api/cart/${user.uid}/add`, {
-        method: "POST",
-        headers,
-        credentials: "include",
+        method: "POST", headers, credentials: "include",
         body: JSON.stringify({ productId: product.productId || product.id, quantity: 1 }),
       });
       if (!res.ok) throw new Error("Failed to add to cart");
       const cartDoc = await res.json();
       setCart(mapCart(cartDoc, products));
-    } catch (err) {
-      console.error("Add to cart failed:", err);
-    }
+    } catch (err) { console.error("Add to cart failed:", err); }
   };
 
   const removeFromCart = async (id) => {
@@ -227,17 +243,13 @@ export default function HomePage() {
       const existing = cart.find(i => i.id === id);
       const headers = await getAuthHeaders();
       const res = await fetch(`${API}/api/cart/${user.uid}/remove`, {
-        method: "POST",
-        headers,
-        credentials: "include",
+        method: "POST", headers, credentials: "include",
         body: JSON.stringify({ productId: id, quantity: existing?.qty || 1 }),
       });
       if (!res.ok) throw new Error("Failed to remove");
       const cartDoc = await res.json();
       setCart(mapCart(cartDoc, products));
-    } catch (err) {
-      console.error("Remove from cart failed:", err);
-    }
+    } catch (err) { console.error("Remove from cart failed:", err); }
   };
 
   const updateQty = async (id, delta) => {
@@ -246,18 +258,13 @@ export default function HomePage() {
       const url = delta > 0 ? "add" : "remove";
       const headers = await getAuthHeaders();
       await fetch(`${API}/api/cart/${user.uid}/${url}`, {
-        method: "POST",
-        headers,
-        credentials: "include",
+        method: "POST", headers, credentials: "include",
         body: JSON.stringify({ productId: id, quantity: Math.abs(delta) }),
       });
-      // Refresh cart
       const res = await fetch(`${API}/api/cart/${user.uid}`, { headers, credentials: "include" });
       const cartDoc = await res.json();
       setCart(mapCart(cartDoc, products));
-    } catch (err) {
-      console.error("Update qty failed:", err);
-    }
+    } catch (err) { console.error("Update qty failed:", err); }
   };
 
   const cartTotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
@@ -333,21 +340,17 @@ export default function HomePage() {
         onSignOut={handleSignOut}
       />
 
-      {/* Search expand */}
       <div className={`search-expand ${searchOpen ? "open" : ""} border-t border-stone-100`}>
         <div className="max-w-7xl mx-auto px-5 lg:px-10 py-3">
           <input
-            autoFocus={searchOpen}
-            type="text"
+            autoFocus={searchOpen} type="text"
             placeholder="Search products, brands…"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
+            value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
             className="w-full text-sm text-stone-800 placeholder-stone-300 bg-transparent focus:outline-none"
           />
         </div>
       </div>
 
-      {/* Hero */}
       <section className="bg-stone-900 text-white">
         <div className="max-w-7xl mx-auto px-5 lg:px-10 py-14">
           <div className={`fade-in d1 ${visible ? "show" : ""}`}>
@@ -374,7 +377,6 @@ export default function HomePage() {
 
       <div className="max-w-7xl mx-auto px-5 lg:px-10 py-10 space-y-16">
 
-        {/* Products */}
         <section>
           <div className={`fade-in d1 ${visible ? "show" : ""} flex items-center justify-between mb-6`}>
             <h2 className="font-['DM_Serif_Display'] text-2xl md:text-3xl text-stone-900">Featured Products</h2>
@@ -385,9 +387,7 @@ export default function HomePage() {
           {!backendError && !loading && (
             <div className={`fade-in d2 ${visible ? "show" : ""} flex gap-2 flex-wrap mb-8`}>
               {CATEGORIES.map(c => (
-                <button
-                  key={c.value}
-                  onClick={() => setActiveCategory(c.value)}
+                <button key={c.value} onClick={() => setActiveCategory(c.value)}
                   className={`text-xs px-4 py-2 rounded-full transition-all ${activeCategory === c.value
                       ? "bg-stone-900 text-white"
                       : "bg-white border border-stone-200 text-stone-600 hover:bg-stone-50"
@@ -401,7 +401,6 @@ export default function HomePage() {
           {renderProductGrid()}
         </section>
 
-        {/* Plans */}
         <section id="plans">
           <div className="mb-8">
             <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2">Digital Coaching</p>
@@ -409,24 +408,18 @@ export default function HomePage() {
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             {PLANS.map((plan, i) => (
-              <div
-                key={i}
+              <div key={i}
                 className="bg-white border border-stone-200 rounded-2xl p-7 flex flex-col gap-4
-                           hover:border-stone-300 hover:shadow-lg transition-all duration-300"
-              >
-                {plan.tag && (
-                  <span className="text-[9px] tracking-[0.2em] uppercase text-stone-400">{plan.tag}</span>
-                )}
+                           hover:border-stone-300 hover:shadow-lg transition-all duration-300">
+                {plan.tag && <span className="text-[9px] tracking-[0.2em] uppercase text-stone-400">{plan.tag}</span>}
                 <div>
                   <h3 className="font-['DM_Serif_Display'] text-xl text-stone-900">{plan.name}</h3>
                   <p className="text-xs mt-0.5 text-stone-400">{plan.duration}</p>
                 </div>
                 <p className="text-sm leading-relaxed flex-1 text-stone-500">{plan.desc}</p>
-                <button
-                  onClick={() => navigate(plan.route)}
+                <button onClick={() => navigate(plan.route)}
                   className="text-xs py-2.5 rounded-full transition-all mt-1 border border-stone-300
-                             text-stone-700 hover:bg-stone-900 hover:text-white hover:border-stone-900"
-                >
+                             text-stone-700 hover:bg-stone-900 hover:text-white hover:border-stone-900">
                   View Plan →
                 </button>
               </div>
@@ -434,7 +427,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* FitRewards */}
         <section>
           <div className="bg-stone-100 rounded-2xl p-8 md:p-10 flex flex-col md:flex-row
                           md:items-center justify-between gap-6">
@@ -452,7 +444,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Upgrade */}
         <section className="pb-8">
           <div className="mb-8">
             <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2">Membership</p>
@@ -483,7 +474,6 @@ export default function HomePage() {
         </section>
       </div>
 
-      {/* Footer */}
       <footer className="border-t border-stone-200 bg-white">
         <div className="max-w-7xl mx-auto px-5 lg:px-10 py-8 flex flex-col md:flex-row
                         justify-between items-center gap-4">
@@ -498,15 +488,10 @@ export default function HomePage() {
       </footer>
 
       <CartDrawer
-        isOpen={cartOpen}
-        onClose={() => setCartOpen(false)}
-        cart={cart}
-        cartCount={cartCount}
-        cartTotal={cartTotal}
-        updateQty={updateQty}
-        removeFromCart={removeFromCart}
+        isOpen={cartOpen} onClose={() => setCartOpen(false)}
+        cart={cart} cartCount={cartCount} cartTotal={cartTotal}
+        updateQty={updateQty} removeFromCart={removeFromCart}
       />
-
       <FitnessChatBot />
     </div>
   );
