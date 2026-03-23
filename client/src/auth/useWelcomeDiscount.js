@@ -1,8 +1,6 @@
 // src/auth/useWelcomeDiscount.js
-// Handles the full first-login banner + discount lifecycle.
-// Import this hook in HomePage — it talks to /api/user/login once per login session.
-
 import { useState, useEffect, useRef } from "react";
+import { getAuthHeaders } from "../utils/getAuthHeaders";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -10,7 +8,7 @@ export function useWelcomeDiscount(user) {
   const [showBanner, setShowBanner] = useState(false);
   const [discountEligible, setDiscountEligible] = useState(false);
   const [discountPercent, setDiscountPercent] = useState(10);
-  const calledRef = useRef(false);   // prevent double-call in React StrictMode
+  const calledRef = useRef(false);
 
   useEffect(() => {
     if (!user || calledRef.current) return;
@@ -18,15 +16,15 @@ export function useWelcomeDiscount(user) {
 
     (async () => {
       try {
+        const headers = await getAuthHeaders();
         const res = await fetch(`${API}/api/user/login`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           credentials: "include",
           body: JSON.stringify({ userId: user.uid }),
         });
         if (!res.ok) return;
         const data = await res.json();
-
         if (data.showBanner && !data.discountUsed) {
           setShowBanner(true);
           setDiscountEligible(true);
@@ -42,9 +40,10 @@ export function useWelcomeDiscount(user) {
     setShowBanner(false);
     if (!user) return;
     try {
+      const headers = await getAuthHeaders();
       await fetch(`${API}/api/user/dismiss-banner`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         credentials: "include",
         body: JSON.stringify({ userId: user.uid }),
       });
