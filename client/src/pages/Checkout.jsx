@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../auth/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { fmt } from "../utils/formatters";
+import { getAuthHeaders } from "../utils/getAuthHeaders";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -23,10 +24,12 @@ export default function Checkout() {
       const userId = user.uid;
 
       try {
-        // Fetch cart, products, and discount status in parallel
+        const headers = await getAuthHeaders();
+
+        // Fetch cart, products, discount status in parallel
         const [cartRes, prodRes, discountRes] = await Promise.all([
-          fetch(`${API}/api/cart/${userId}`, { credentials: "include" }),
-          fetch(`${API}/api/products`, { credentials: "include" }),
+          fetch(`${API}/api/cart/${userId}`, { headers, credentials: "include" }),
+          fetch(`${API}/api/products`),
           fetch(`${API}/api/user/discount-status/${userId}`, { credentials: "include" }),
         ]);
 
@@ -60,21 +63,13 @@ export default function Checkout() {
     return () => unsubscribe();
   }, [navigate]);
 
-  // ── Totals ─────────────────────────────────────────────────────────────
   const subtotal = items.reduce((sum, { product, quantity }) => sum + product.price * quantity, 0);
   const discountAmt = discountEligible ? Math.round(subtotal * discountPercent / 100) : 0;
   const total = subtotal - discountAmt;
 
   const handleProceed = () => {
     navigate("/payment", {
-      state: {
-        items,
-        total,
-        subtotal,
-        discountAmt,
-        discountPercent: discountEligible ? discountPercent : 0,
-        discountApplied: discountEligible,
-      },
+      state: { items, total, subtotal, discountAmt, discountPercent: discountEligible ? discountPercent : 0, discountApplied: discountEligible },
     });
   };
 
@@ -88,71 +83,47 @@ export default function Checkout() {
 
       <div className="max-w-7xl mx-auto px-5 lg:px-10 py-16">
         <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-3">Review</p>
-        <h1
-          style={{ fontFamily: "'DM Serif Display', serif" }}
-          className="text-4xl text-stone-900 mb-10"
-        >
+        <h1 style={{ fontFamily: "'DM Serif Display', serif" }} className="text-4xl text-stone-900 mb-10">
           Your Order
         </h1>
 
         <div className="grid lg:grid-cols-3 gap-8">
-
-          {/* ── Product list ───────────────────────────────────────── */}
           <div className="lg:col-span-2 space-y-4">
             {items.map(({ product, quantity }) => (
-              <div
-                key={product.productId}
+              <div key={product.productId}
                 className="bg-white border border-stone-200 rounded-2xl p-6 flex gap-5
-                           hover:border-stone-300 hover:shadow-lg transition-all duration-300"
-              >
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-24 h-24 object-cover rounded-xl flex-shrink-0 bg-stone-100"
-                />
+                              hover:border-stone-300 hover:shadow-lg transition-all duration-300">
+                <img src={product.image} alt={product.name}
+                  className="w-24 h-24 object-cover rounded-xl flex-shrink-0 bg-stone-100" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] tracking-[0.15em] uppercase text-stone-400 mb-1">
-                    {product.brand}
-                  </p>
-                  <h3
-                    style={{ fontFamily: "'DM Serif Display', serif" }}
-                    className="text-xl text-stone-900 leading-tight mb-2 truncate"
-                  >
+                  <p className="text-[10px] tracking-[0.15em] uppercase text-stone-400 mb-1">{product.brand}</p>
+                  <h3 style={{ fontFamily: "'DM Serif Display', serif" }}
+                    className="text-xl text-stone-900 leading-tight mb-2 truncate">
                     {product.name}
                   </h3>
                   {product.badge && (
-                    <span className="text-[10px] tracking-widest uppercase bg-stone-900
-                                     text-white px-2.5 py-1 rounded-full">
+                    <span className="text-[10px] tracking-widest uppercase bg-stone-900 text-white px-2.5 py-1 rounded-full">
                       {product.badge}
                     </span>
                   )}
                 </div>
                 <div className="text-right flex-shrink-0">
                   <p className="text-xs text-stone-400 mb-1">Qty {quantity}</p>
-                  <p
-                    style={{ fontFamily: "'DM Serif Display', serif" }}
-                    className="text-2xl text-stone-900"
-                  >
+                  <p style={{ fontFamily: "'DM Serif Display', serif" }} className="text-2xl text-stone-900">
                     {fmt(product.price * quantity)}
                   </p>
                   {product.originalPrice > product.price && (
-                    <p className="text-xs text-stone-400 line-through">
-                      {fmt(product.originalPrice * quantity)}
-                    </p>
+                    <p className="text-xs text-stone-400 line-through">{fmt(product.originalPrice * quantity)}</p>
                   )}
                 </div>
               </div>
             ))}
 
-            {/* Welcome discount callout */}
             {discountEligible && (
-              <div className="bg-stone-100 border border-stone-200 rounded-2xl px-6 py-4
-                              flex items-center gap-4">
+              <div className="bg-stone-100 border border-stone-200 rounded-2xl px-6 py-4 flex items-center gap-4">
                 <span className="text-stone-900 text-lg flex-shrink-0">✓</span>
                 <div>
-                  <p className="text-sm font-medium text-stone-900">
-                    Welcome discount applied
-                  </p>
+                  <p className="text-sm font-medium text-stone-900">Welcome discount applied</p>
                   <p className="text-xs text-stone-500 mt-0.5">
                     {discountPercent}% off your first order — saving you {fmt(discountAmt)}
                   </p>
@@ -161,27 +132,20 @@ export default function Checkout() {
             )}
           </div>
 
-          {/* ── Order summary sidebar ──────────────────────────────── */}
           <div className="lg:col-span-1">
             <div className="bg-stone-900 rounded-2xl p-8 sticky top-8">
-              <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-6">
-                Summary
-              </p>
+              <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-6">Summary</p>
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-sm text-stone-300">
                   <span>Subtotal ({items.length} item{items.length > 1 ? "s" : ""})</span>
                   <span>{fmt(subtotal)}</span>
                 </div>
-
                 {discountEligible && (
                   <div className="flex justify-between text-sm">
-                    <span className="text-stone-400">
-                      Welcome {discountPercent}% off
-                    </span>
+                    <span className="text-stone-400">Welcome {discountPercent}% off</span>
                     <span className="text-stone-300">−{fmt(discountAmt)}</span>
                   </div>
                 )}
-
                 <div className="flex justify-between text-sm text-stone-300">
                   <span>Shipping</span>
                   <span className="text-stone-400">Free</span>
@@ -189,28 +153,19 @@ export default function Checkout() {
                 <div className="h-px bg-stone-700 my-2" />
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-white font-medium">Total</span>
-                  <span
-                    style={{ fontFamily: "'DM Serif Display', serif" }}
-                    className="text-3xl text-white"
-                  >
+                  <span style={{ fontFamily: "'DM Serif Display', serif" }} className="text-3xl text-white">
                     {fmt(total)}
                   </span>
                 </div>
               </div>
-
-              <button
-                onClick={handleProceed}
+              <button onClick={handleProceed}
                 className="w-full bg-white text-stone-900 text-sm px-8 py-3.5 rounded-full
-                           hover:bg-stone-100 transition-colors font-medium"
-              >
+                                 hover:bg-stone-100 transition-colors font-medium">
                 Proceed to Payment →
               </button>
-              <p className="text-xs text-stone-500 text-center mt-4">
-                Secured by Razorpay
-              </p>
+              <p className="text-xs text-stone-500 text-center mt-4">Secured by Razorpay</p>
             </div>
           </div>
-
         </div>
       </div>
     </PageShell>
@@ -218,11 +173,7 @@ export default function Checkout() {
 }
 
 function PageShell({ children }) {
-  return (
-    <div className="min-h-screen bg-stone-50" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-      {children}
-    </div>
-  );
+  return <div className="min-h-screen bg-stone-50" style={{ fontFamily: "'DM Sans', sans-serif" }}>{children}</div>;
 }
 function Spinner() {
   return (
@@ -243,10 +194,8 @@ function EmptyCart({ navigate }) {
     <div className="flex flex-col items-center justify-center h-64 text-center gap-4">
       <p className="text-4xl text-stone-300">∅</p>
       <p className="text-stone-500 text-sm">Your cart is empty</p>
-      <button
-        onClick={() => navigate("/home")}
-        className="bg-stone-900 text-white text-sm px-8 py-3 rounded-full hover:bg-stone-700 transition-colors"
-      >
+      <button onClick={() => navigate("/home")}
+        className="bg-stone-900 text-white text-sm px-8 py-3 rounded-full hover:bg-stone-700 transition-colors">
         Continue Shopping
       </button>
     </div>
