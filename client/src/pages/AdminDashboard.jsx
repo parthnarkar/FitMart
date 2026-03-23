@@ -112,10 +112,7 @@ export default function AdminDashboard() {
   }, [range]);
 
   return (
-    <div
-      className="min-h-screen bg-stone-50"
-      style={{ fontFamily: "'DM Sans', sans-serif" }}
-    >
+    <div className="min-h-screen bg-stone-50" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
         .fitmart-chart .recharts-cartesian-grid-horizontal line,
@@ -164,11 +161,8 @@ export default function AdminDashboard() {
       {/* ── Page content ────────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-5 lg:px-10 py-12">
 
-        {/* Page heading */}
         <div className="mb-10">
-          <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2">
-            Overview
-          </p>
+          <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2">Overview</p>
           <h1
             style={{ fontFamily: "'DM Serif Display', serif" }}
             className="text-4xl md:text-5xl text-stone-900"
@@ -177,7 +171,7 @@ export default function AdminDashboard() {
           </h1>
         </div>
 
-        {/* ── Error ─────────────────────────────────────────────────────── */}
+        {/* Error */}
         {error && (
           <div className="bg-red-50 border border-red-100 rounded-2xl px-6 py-5 mb-8">
             <p className="text-sm text-red-600">
@@ -186,7 +180,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ── Loading skeletons ──────────────────────────────────────────── */}
+        {/* Loading skeletons */}
         {loading && (
           <div className="space-y-5">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
@@ -200,47 +194,27 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* ── Dashboard content ──────────────────────────────────────────── */}
+        {/* Dashboard content */}
         {!loading && data && (
           <div className="fade-in space-y-5">
 
             {/* KPI row */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
-              <KPICard
-                label="Total Revenue"
-                value={fmt(data.kpis.totalRevenue)}
-                icon="₹"
-              />
-              <KPICard
-                label="Total Orders"
-                value={data.kpis.totalOrders.toLocaleString()}
-                icon="◎"
-              />
-              <KPICard
-                label="Customers"
-                value={data.kpis.totalCustomers.toLocaleString()}
-                icon="⚡"
-              />
-              <KPICard
-                label="Low on Stock"
-                value={data.kpis.lowStockCount}
-                sub="Products below 10 units"
-                icon="─"
-              />
+              <KPICard label="Total Revenue" value={fmt(data.kpis.totalRevenue)} icon="₹" />
+              <KPICard label="Total Orders" value={data.kpis.totalOrders.toLocaleString()} icon="◎" />
+              <KPICard label="Customers" value={data.kpis.totalCustomers.toLocaleString()} icon="⚡" />
+              <KPICard label="Low on Stock" value={data.kpis.lowStockCount}
+                sub="Products below 10 units" icon="─" />
             </div>
 
             {/* Charts row */}
             <div className="grid md:grid-cols-2 gap-5">
-
-              {/* Revenue over time */}
               <SectionCard eyebrow="Analytics" title="Revenue Over Time">
                 {data.revenueOverTime.length === 0 ? <Empty /> : (
                   <div className="fitmart-chart">
                     <ResponsiveContainer width="100%" height={220}>
-                      <AreaChart
-                        data={data.revenueOverTime}
-                        margin={{ top: 4, right: 0, left: 0, bottom: 0 }}
-                      >
+                      <AreaChart data={data.revenueOverTime}
+                        margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
                         <defs>
                           <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
                             <stop offset="0%" stopColor="#1c1917" stopOpacity={0.12} />
@@ -248,58 +222,38 @@ export default function AdminDashboard() {
                           </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e3" />
-                        <XAxis
-                          dataKey="date"
+                        <XAxis dataKey="date"
                           tick={{ fill: "#78716c", fontSize: 11, fontFamily: "'DM Sans'" }}
+                          tickLine={false} axisLine={false} />
+                        <YAxis tick={{ fill: "#78716c", fontSize: 11, fontFamily: "'DM Sans'" }}
                           tickLine={false} axisLine={false}
-                        />
-                        <YAxis
-                          tick={{ fill: "#78716c", fontSize: 11, fontFamily: "'DM Sans'" }}
-                          tickLine={false} axisLine={false}
-                          tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`}
-                        />
+                          tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}k`} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Area
-                          type="monotone" dataKey="revenue" name="revenue"
-                          stroke="#1c1917" strokeWidth={2}
-                          fill="url(#revGrad)"
-                          dot={false}
-                          activeDot={{ r: 4, fill: "#1c1917", strokeWidth: 0 }}
-                        />
+                        <Area type="monotone" dataKey="revenue" name="revenue"
+                          stroke="#1c1917" strokeWidth={2} fill="url(#revGrad)"
+                          dot={false} activeDot={{ r: 4, fill: "#1c1917", strokeWidth: 0 }} />
                       </AreaChart>
                     </ResponsiveContainer>
                   </div>
                 )}
               </SectionCard>
 
-              {/* Top products */}
               <SectionCard eyebrow="Performance" title="Top 5 Selling Products">
                 {data.topProducts.length === 0 ? <Empty /> : (
                   <div className="fitmart-chart">
                     <ResponsiveContainer width="100%" height={220}>
-                      <BarChart
-                        data={data.topProducts}
-                        layout="vertical"
-                        margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
-                      >
+                      <BarChart data={data.topProducts} layout="vertical"
+                        margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e7e5e3" horizontal={false} />
-                        <XAxis
-                          type="number"
+                        <XAxis type="number"
                           tick={{ fill: "#78716c", fontSize: 11, fontFamily: "'DM Sans'" }}
-                          tickLine={false} axisLine={false}
-                        />
-                        <YAxis
-                          dataKey="name" type="category"
+                          tickLine={false} axisLine={false} />
+                        <YAxis dataKey="name" type="category"
                           tick={{ fill: "#78716c", fontSize: 11, fontFamily: "'DM Sans'" }}
-                          tickLine={false} axisLine={false}
-                          width={110}
-                        />
+                          tickLine={false} axisLine={false} width={110} />
                         <Tooltip content={<CustomTooltip />} />
-                        <Bar
-                          dataKey="totalQuantity" name="revenue"
-                          fill="#1c1917"
-                          radius={[0, 6, 6, 0]}
-                        />
+                        <Bar dataKey="totalQuantity" name="revenue"
+                          fill="#1c1917" radius={[0, 6, 6, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -307,36 +261,43 @@ export default function AdminDashboard() {
               </SectionCard>
             </div>
 
-            {/* Recent orders */}
+            {/* ── Recent Orders table ────────────────────────────────────── */}
             <SectionCard eyebrow="Transactions" title="Recent Orders">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-stone-100">
-                      {["Order ID", "Customer", "Items", "Total", "Status", "Date"].map((h) => (
+                      {[
+                        "Order ID",
+                        "Customer",      // displayName from Firebase
+                        "Email",         // email from Firebase
+                        "Items",
+                        "Total",
+                        "Status",
+                        "Date",
+                      ].map((h) => (
                         <th
                           key={h}
                           className="pb-4 text-left text-xs tracking-[0.15em] uppercase
-                                     text-stone-400 font-normal"
+                                     text-stone-400 font-normal whitespace-nowrap pr-6 last:pr-0"
                         >
                           {h}
                         </th>
                       ))}
                     </tr>
                   </thead>
+
                   <tbody className="divide-y divide-stone-100">
                     {data.recentOrders.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="py-12 text-center text-stone-400 text-sm">
+                        <td colSpan={7} className="py-12 text-center text-stone-400 text-sm">
                           ∅ No recent orders
                         </td>
                       </tr>
                     ) : (
                       data.recentOrders.map((order) => (
-                        <tr
-                          key={order._id}
-                          className="hover:bg-stone-50 transition-colors"
-                        >
+                        <tr key={order._id} className="hover:bg-stone-50 transition-colors">
+
                           {/* Order ID */}
                           <td className="py-4 pr-6">
                             <span className="font-mono text-xs text-stone-400">
@@ -344,9 +305,42 @@ export default function AdminDashboard() {
                             </span>
                           </td>
 
-                          {/* Customer */}
-                          <td className="py-4 pr-6 text-stone-700 text-xs">
-                            {order.userId?.slice(0, 12)}…
+                          {/* Customer Name
+                              — uses customerName if enriched by backend (Firebase Admin SDK)
+                              — falls back to first 12 chars of userId if not yet enriched */}
+                          <td className="py-4 pr-6">
+                            {order.customerName && order.customerName !== "—" ? (
+                              <div className="flex items-center gap-2">
+                                {/* Avatar initial */}
+                                <div className="w-6 h-6 rounded-full bg-stone-200 flex items-center
+                                                justify-center flex-shrink-0">
+                                  <span className="text-[10px] font-medium text-stone-600">
+                                    {order.customerName[0]?.toUpperCase() ?? "?"}
+                                  </span>
+                                </div>
+                                <span className="text-xs text-stone-700 font-medium">
+                                  {order.customerName}
+                                </span>
+                              </div>
+                            ) : (
+                              // Fallback: show truncated userId
+                              <span className="text-xs text-stone-400 font-mono">
+                                {order.userId?.slice(0, 12)}…
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Customer Email
+                              — uses customerEmail if enriched
+                              — shows "—" if not available */}
+                          <td className="py-4 pr-6">
+                            {order.customerEmail && order.customerEmail !== "—" ? (
+                              <span className="text-xs text-stone-500">
+                                {order.customerEmail}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-stone-300">—</span>
+                            )}
                           </td>
 
                           {/* Items */}
@@ -368,7 +362,7 @@ export default function AdminDashboard() {
                           <td className="py-4 pr-6">
                             <span
                               className={`text-[10px] tracking-widest uppercase px-2.5 py-1
-                                          rounded-full font-medium
+                                          rounded-full font-medium whitespace-nowrap
                                           ${STATUS_STYLES[order.status] || "border border-stone-200 text-stone-500"}`}
                             >
                               {order.status}
@@ -376,7 +370,7 @@ export default function AdminDashboard() {
                           </td>
 
                           {/* Date */}
-                          <td className="py-4 text-xs text-stone-400">
+                          <td className="py-4 text-xs text-stone-400 whitespace-nowrap">
                             {fmtDate(order.createdAt)}
                           </td>
                         </tr>
@@ -391,13 +385,10 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* ── Footer ──────────────────────────────────────────────────────── */}
+      {/* Footer */}
       <footer className="border-t border-stone-200 bg-white mt-12">
         <div className="max-w-7xl mx-auto px-5 lg:px-10 py-6 flex justify-between items-center">
-          <span
-            style={{ fontFamily: "'DM Serif Display', serif" }}
-            className="text-stone-900"
-          >
+          <span style={{ fontFamily: "'DM Serif Display', serif" }} className="text-stone-900">
             FitMart
           </span>
           <p className="text-xs text-stone-400">Admin Dashboard · © 2026</p>

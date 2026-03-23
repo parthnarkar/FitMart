@@ -1,19 +1,42 @@
+// server/routes/dashboard.js
 const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const admin = require('firebase-admin');
 
-// Helper: get the start date based on the time range filter
+// ── Initialize Firebase Admin once ────────────────────────────────────────
+// Reads credentials from GOOGLE_APPLICATION_CREDENTIALS env var
+// which points to your serviceAccountKey.json file
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.applicationDefault(),
+  });
+}
+
+// ── Helper: resolve Firebase UID → { displayName, email } ─────────────────
+// Returns "—" gracefully if user is deleted or UID is invalid
+async function resolveFirebaseUser(uid) {
+  try {
+    const userRecord = await admin.auth().getUser(uid);
+    return {
+      displayName: userRecord.displayName || "—",
+      email: userRecord.email || "—",
+    };
+  } catch {
+    return { displayName: "—", email: "—" };
+  }
+}
+
+// ── Helper: get the start date based on the time range filter ─────────────
 const getStartDate = (range) => {
   const now = new Date();
   if (range === 'today') {
     return new Date(now.getFullYear(), now.getMonth(), now.getDate());
   } else if (range === 'week') {
-    const day = now.getDay(); // 0 (Sun) to 6 (Sat)
-    const diff = now.getDate() - day;
+    const diff = now.getDate() - now.getDay();
     return new Date(now.getFullYear(), now.getMonth(), diff);
   } else {
-    // Default: this month
     return new Date(now.getFullYear(), now.getMonth(), 1);
   }
 };
@@ -24,77 +47,44 @@ router.get('/', async (req, res) => {
     const range = req.query.range || 'month';
     const startDate = getStartDate(range);
 
-    // ── 1. KPI: Total Revenue & Total Orders (paid orders only) ─
+    // ── 1. KPI: Total Revenue & Total Orders ──────────────────────────────
     const orderStats = await Order.aggregate([
-      {
-        $match: {
-          status: 'paid',
-          createdAt: { $gte: startDate },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          totalRevenue: { $sum: '$total' },
-          totalOrders: { $sum: 1 },
-        },
-      },
+      { $match: { status: 'paid', createdAt: { $gte: startDate } } },
+      { $group: { _id: null, totalRevenue: { $sum: '$total' }, totalOrders: { $sum: 1 } } },
     ]);
 
     const totalRevenue = orderStats[0]?.totalRevenue || 0;
     const totalOrders = orderStats[0]?.totalOrders || 0;
 
-    // ── 2. KPI: Total Unique Customers ──
+    // ── 2. KPI: Total Unique Customers ────────────────────────────────────
     const uniqueCustomers = await Order.distinct('userId', {
       status: 'paid',
       createdAt: { $gte: startDate },
     });
     const totalCustomers = uniqueCustomers.length;
 
-    // ── 3. KPI: Products Low on Stock (stock < 10, stock not null) ───────────
+    // ── 3. KPI: Products Low on Stock ─────────────────────────────────────
     const LOW_STOCK_THRESHOLD = 10;
     const lowStockCount = await Product.countDocuments({
       stock: { $ne: null, $lt: LOW_STOCK_THRESHOLD },
     });
 
-    // ── 4. Chart: Revenue Over Time ────
-    // Groups by date (YYYY-MM-DD) for week/month, or by hour for today
+    // ── 4. Chart: Revenue Over Time ───────────────────────────────────────
     const revenueGroupFormat =
       range === 'today'
         ? { $dateToString: { format: '%H:00', date: '$createdAt' } }
         : { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } };
 
     const revenueOverTime = await Order.aggregate([
-      {
-        $match: {
-          status: 'paid',
-          createdAt: { $gte: startDate },
-        },
-      },
-      {
-        $group: {
-          _id: revenueGroupFormat,
-          revenue: { $sum: '$total' },
-        },
-      },
+      { $match: { status: 'paid', createdAt: { $gte: startDate } } },
+      { $group: { _id: revenueGroupFormat, revenue: { $sum: '$total' } } },
       { $sort: { _id: 1 } },
-      {
-        $project: {
-          _id: 0,
-          date: '$_id',
-          revenue: 1,
-        },
-      },
+      { $project: { _id: 0, date: '$_id', revenue: 1 } },
     ]);
 
-    // ── 5. Chart: Top 5 Selling Products ───
+    // ── 5. Chart: Top 5 Selling Products ─────────────────────────────────
     const topProducts = await Order.aggregate([
-      {
-        $match: {
-          status: 'paid',
-          createdAt: { $gte: startDate },
-        },
-      },
+      { $match: { status: 'paid', createdAt: { $gte: startDate } } },
       { $unwind: '$items' },
       {
         $group: {
@@ -105,7 +95,6 @@ router.get('/', async (req, res) => {
       },
       { $sort: { totalQuantity: -1 } },
       { $limit: 5 },
-      // Lookup product name from Product collection
       {
         $lookup: {
           from: 'products',
@@ -125,14 +114,32 @@ router.get('/', async (req, res) => {
       },
     ]);
 
-    // ── 6. Recent Orders Table (latest 10 paid orders) ──
-    const recentOrders = await Order.find({ status: 'paid' })
+    // ── 6. Recent Orders — fetch raw, then enrich with Firebase user info ──
+    const rawOrders = await Order.find({ status: 'paid' })
       .sort({ createdAt: -1 })
       .limit(10)
       .select('userId items total status createdAt paymentId')
       .lean();
 
-    // ── Response ───
+    // Deduplicate userIds so we only call Firebase once per unique user
+    // (multiple orders from the same user → one Admin SDK call)
+    const uniqueUids = [...new Set(rawOrders.map(o => o.userId).filter(Boolean))];
+
+    const userMap = {};
+    await Promise.all(
+      uniqueUids.map(async (uid) => {
+        userMap[uid] = await resolveFirebaseUser(uid);
+      })
+    );
+
+    // Attach customerName + customerEmail to each order
+    const recentOrders = rawOrders.map(order => ({
+      ...order,
+      customerName: userMap[order.userId]?.displayName ?? '—',
+      customerEmail: userMap[order.userId]?.email ?? '—',
+    }));
+
+    // ── Response ──────────────────────────────────────────────────────────
     res.json({
       success: true,
       range,
@@ -144,8 +151,9 @@ router.get('/', async (req, res) => {
       },
       revenueOverTime,
       topProducts,
-      recentOrders,
+      recentOrders,   // each order now has customerName + customerEmail
     });
+
   } catch (err) {
     console.error('Dashboard route error:', err);
     res.status(500).json({ success: false, message: 'Failed to load dashboard data' });
