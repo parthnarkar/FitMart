@@ -15,7 +15,7 @@ const Stars = ({ rating, size = "sm" }) => {
   const empty = 5 - full - (half ? 1 : 0);
   return (
     <span className={`${size === "lg" ? "text-base" : "text-xs"} text-stone-700 tracking-tight`}>
-      {"★".repeat(full)}{half ? "½" : ""}{"☆".repeat(empty)}
+      {"★".repeat(full)}{half ? "⯪" : ""}{"☆".repeat(empty)}
     </span>
   );
 };
