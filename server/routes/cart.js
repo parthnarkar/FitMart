@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
+const verifyFirebaseToken = require('../middleware/verifyFirebaseToken');
 
 // Helper: adjust product reserved count
 async function adjustReserved(productId, delta) {
@@ -12,8 +13,23 @@ async function adjustReserved(productId, delta) {
   return prod;
 }
 
-// GET /api/cart/:userId - get or create cart for user
-router.get('/:userId', async (req, res) => {
+// Helper: check that the token uid matches the userId in the route
+function checkOwnership(req, res) {
+  if (req.user.uid !== req.params.userId) {
+    res.status(403).json({ error: 'Forbidden — you can only access your own cart' });
+    return false;
+  }
+  return true;
+}
+
+/**
+ * @route   GET /api/cart/:userId
+ * @desc    Get or create a cart for the given user
+ * @access  Private
+ */
+router.get('/:userId', verifyFirebaseToken, async (req, res) => {
+  if (!checkOwnership(req, res)) return;
+
   try {
     const { userId } = req.params;
     let cart = await Cart.findOne({ userId });
@@ -26,8 +42,14 @@ router.get('/:userId', async (req, res) => {
   }
 });
 
-// POST /api/cart/:userId/add - body: { productId, quantity }
-router.post('/:userId/add', async (req, res) => {
+/**
+ * @route   POST /api/cart/:userId/add
+ * @desc    Add an item to the user's cart and reserve stock; body: { productId, quantity }
+ * @access  Private
+ */
+router.post('/:userId/add', verifyFirebaseToken, async (req, res) => {
+  if (!checkOwnership(req, res)) return;
+
   try {
     const { userId } = req.params;
     const { productId, quantity } = req.body;
@@ -39,7 +61,6 @@ router.post('/:userId/add', async (req, res) => {
     const available = product.stock == null ? Infinity : (product.stock - (product.reserved || 0));
     if (available < quantity) return res.status(400).json({ error: 'Insufficient stock available' });
 
-    // upsert cart
     let cart = await Cart.findOne({ userId });
     if (!cart) cart = new Cart({ userId, items: [] });
 
@@ -50,9 +71,7 @@ router.post('/:userId/add', async (req, res) => {
       cart.items.push({ productId: Number(productId), quantity: Number(quantity) });
     }
 
-    // reserve stock
     await adjustReserved(productId, Number(quantity));
-
     await cart.save();
     res.json(cart);
   } catch (err) {
@@ -61,8 +80,14 @@ router.post('/:userId/add', async (req, res) => {
   }
 });
 
-// POST /api/cart/:userId/remove - body: { productId, quantity }
-router.post('/:userId/remove', async (req, res) => {
+/**
+ * @route   POST /api/cart/:userId/remove
+ * @desc    Remove an item (or reduce its quantity) from the user's cart and release reserved stock; body: { productId, quantity }
+ * @access  Private
+ */
+router.post('/:userId/remove', verifyFirebaseToken, async (req, res) => {
+  if (!checkOwnership(req, res)) return;
+
   try {
     const { userId } = req.params;
     const { productId, quantity } = req.body;
@@ -78,9 +103,7 @@ router.post('/:userId/remove', async (req, res) => {
     cart.items[itemIdx].quantity -= removeQty;
     if (cart.items[itemIdx].quantity <= 0) cart.items.splice(itemIdx, 1);
 
-    // release reserved stock
     await adjustReserved(productId, -removeQty);
-
     await cart.save();
     res.json(cart);
   } catch (err) {
@@ -89,14 +112,19 @@ router.post('/:userId/remove', async (req, res) => {
   }
 });
 
-// DELETE /api/cart/:userId - clear cart and release reserved stock
-router.delete('/:userId', async (req, res) => {
+/**
+ * @route   DELETE /api/cart/:userId
+ * @desc    Clear all items from the user's cart and release all reserved stock
+ * @access  Private
+ */
+router.delete('/:userId', verifyFirebaseToken, async (req, res) => {
+  if (!checkOwnership(req, res)) return;
+
   try {
     const { userId } = req.params;
     const cart = await Cart.findOne({ userId });
     if (!cart) return res.status(404).json({ error: 'Cart not found' });
 
-    // release all reserved quantities
     for (const item of cart.items) {
       await adjustReserved(item.productId, -item.quantity);
     }

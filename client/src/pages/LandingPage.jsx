@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { auth } from "../auth/firebase";
+import { fmt } from "../utils/formatters";
 
 // ── Static data ────────────────────────────────────────────────────────────
 const STATS = [
@@ -333,9 +334,9 @@ export default function LandingPage() {
           </div>
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {[
-              { name: "Freemium", price: "₹0", perks: ["Store access", "Public workout blogs", "Product reviews"], cta: "Start Free" },
-              { name: "Pro", price: "₹499", perks: ["Personalized nutrition plans", "5% discount on all products", "Priority support"], cta: "Go Pro", highlight: true },
-              { name: "Elite", price: "₹1,499", perks: ["1-on-1 digital coaching", "Early access to drops", "Biometric data sync"], cta: "Go Elite" },
+              { name: "Freemium", price: 0, perks: ["Store access", "Public workout blogs", "Product reviews"], cta: "Start Free" },
+              { name: "Pro", price: 499, perks: ["Personalized nutrition plans", "5% discount on all products", "Priority support"], cta: "Go Pro", highlight: true },
+              { name: "Elite", price: 1499, perks: ["1-on-1 digital coaching", "Early access to drops", "Biometric data sync"], cta: "Go Elite" },
             ].map((plan, i) => (
               <div
                 key={i}
@@ -349,9 +350,9 @@ export default function LandingPage() {
                   <p className="text-xs tracking-widest uppercase text-stone-400">{plan.name}</p>
                   <div className="flex items-baseline gap-1 mt-2">
                     <span className={`font-['DM_Serif_Display'] text-4xl ${plan.highlight ? "text-white" : "text-stone-900"}`}>
-                      {plan.price}
+                      {fmt(plan.price)}
                     </span>
-                    {plan.price !== "₹0" && (
+                    {plan.price !== 0 && (
                       <span className="text-xs text-stone-400">/mo</span>
                     )}
                   </div>

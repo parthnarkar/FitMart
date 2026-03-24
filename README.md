@@ -26,7 +26,10 @@
 
 <br/>
 
-[Quick Start](#-quick-start) | [Docs](#-api-reference) | [Contribute](CONTRIBUTING.md) | [Report Bug](https://github.com/parthnarkar/FitMart/issues) | [Request Feature](https://github.com/parthnarkar/FitMart/issues)
+[![GitHub Stars](https://img.shields.io/github/stars/parthnarkar/FitMart?style=for-the-badge&logo=github)](https://github.com/parthnarkar/FitMart/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/parthnarkar/FitMart?style=for-the-badge&logo=github)](https://github.com/parthnarkar/FitMart/network/members)
+[![GitHub Issues](https://img.shields.io/github/issues/parthnarkar/FitMart?style=for-the-badge&logo=github)](https://github.com/parthnarkar/FitMart/issues)
+[![GitHub PRs](https://img.shields.io/github/issues-pr/parthnarkar/FitMart?style=for-the-badge&logo=github)](https://github.com/parthnarkar/FitMart/pulls)
 
 </div>
 
@@ -46,6 +49,7 @@
 - [Data Models](#-data-models)
 - [Notes & Recommendations](#-notes--recommendations)
 - [Contributing](#-contributing)
+- [Contributors](#-contributors)
 - [License](#-license)
 
 ---
@@ -197,14 +201,30 @@ npm run dev
 > ⚠️ **Never commit your `.env` files or API secrets to GitHub!** They are already in `.gitignore`.
 
 ### Server — `server/.env`
-
 ```env
 MONGO_URI=<your_mongodb_connection_string>
 MONGO_DB=<your_database_name>           # optional
 PORT=5000
 RAZORPAY_KEY_ID=<your_razorpay_key_id>
 RAZORPAY_KEY_SECRET=<your_razorpay_key_secret>
+
+# Firebase Admin SDK (required for auth middleware)
+FIREBASE_PROJECT_ID=<your_firebase_project_id>
+FIREBASE_CLIENT_EMAIL=<your_firebase_client_email>
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
+
+#### Getting Firebase Admin credentials
+
+1. Go to [Firebase Console](https://console.firebase.google.com) and open your project
+2. Click the gear icon → **Project Settings** → **Service Accounts** tab
+3. Make sure **Node.js** is selected
+4. Click **"Generate new private key"** → **"Generate key"**
+5. A `.json` file will download — open it and copy:
+   - `project_id` → `FIREBASE_PROJECT_ID`
+   - `client_email` → `FIREBASE_CLIENT_EMAIL`
+   - `private_key` → `FIREBASE_PRIVATE_KEY` (wrap in double quotes, keep all `\n` as-is)
+6. Delete the `.json` file after copying — never commit it to GitHub
 
 ### Client — `client/.env`
 
@@ -364,6 +384,16 @@ Please read our **[CONTRIBUTING.md](CONTRIBUTING.md)** for a full guide on:
 - Code style and commit conventions
 
 **New to open source?** Look for issues labelled [`good first issue`](https://github.com/parthnarkar/FitMart/labels/good%20first%20issue) — they're perfect starting points! 🌱
+
+---
+
+## 👥 Contributors
+
+Thanks to everyone who contributes to FitMart.
+
+<a href="https://github.com/parthnarkar/FitMart/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=parthnarkar/FitMart" alt="FitMart contributors" />
+</a>
 
 ---
 
