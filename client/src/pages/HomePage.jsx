@@ -1,38 +1,4 @@
 // src/pages/HomePage.jsx
-// ── ONLY THE NAVBAR SECTION CHANGES — rest of HomePage is identical ──────────
-// Replace your existing Navbar import and usage with this:
-//
-// OLD:
-//   <Navbar
-//     links={["Shop", "Plans", "Community"]}
-//     variant="home"
-//     onSearchToggle={...}
-//     onCartOpen={...}
-//     cartCount={cartCount}
-//     user={user}                  ← REMOVE
-//     menuOpen={menuOpen}
-//     setMenuOpen={setMenuOpen}
-//     onSignOut={handleSignOut}
-//   />
-//
-// NEW (copy-paste this block into your HomePage.jsx):
-//
-//   <Navbar
-//     variant="home"
-//     onSearchToggle={() => { setSearchOpen(p => !p); setSearchQuery(""); }}
-//     onCartOpen={() => setCartOpen(true)}
-//     cartCount={cartCount}
-//     menuOpen={menuOpen}
-//     setMenuOpen={setMenuOpen}
-//     onSignOut={handleSignOut}
-//   />
-//
-// That's the ONLY change needed in HomePage.jsx.
-// - Remove the `links` prop (no nav links in new Navbar)
-// - Remove the `user` prop (Navbar now manages its own Firebase auth state)
-// - Keep everything else exactly as-is
-
-// ── Full updated HomePage for reference ─────────────────────────────────────
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
@@ -40,6 +6,13 @@ import { signOut } from "firebase/auth";
 import { auth } from "../auth/firebase";
 import CartDrawer from "../components/CartDrawer";
 import { fmt } from "../utils/formatters";
+import { getAuthHeaders } from "../utils/getAuthHeaders";
+import FitnessChatBot from "../components/FitnessChatBot";
+import WelcomeBanner from "../components/WelcomeBanner";
+import { useWelcomeDiscount } from "../auth/useWelcomeDiscount";
+import BMICalculator from "../components/BMICalculator";
+
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const CATEGORIES = [
   { name: "All", value: "all" },
@@ -49,9 +22,9 @@ const CATEGORIES = [
 ];
 
 const PLANS = [
-  { name: "Weight Loss", duration: "12 Weeks", desc: "Caloric-deficit nutrition + cardio-focused programming", tag: "MOST POPULAR" },
-  { name: "Muscle Building", duration: "16 Weeks", desc: "Progressive overload training + protein-optimized meal plans", tag: null },
-  { name: "Mobility & Recovery", duration: "8 Weeks", desc: "Flexibility-first programming, ideal for desk workers", tag: null },
+  { name: "Weight Loss", duration: "12 Weeks", desc: "Caloric-deficit nutrition + cardio-focused programming", tag: "MOST POPULAR", route: "/plans/weight-loss" },
+  { name: "Muscle Building", duration: "16 Weeks", desc: "Progressive overload training + protein-optimized meal plans", tag: null, route: "/plans/muscle-building" },
+  { name: "Mobility & Recovery", duration: "8 Weeks", desc: "Flexibility-first programming, ideal for desk workers", tag: null, route: "/plans/mobility-recovery" },
 ];
 
 const Stars = ({ rating }) => (
@@ -60,12 +33,24 @@ const Stars = ({ rating }) => (
   </span>
 );
 
+function mapCart(cartDoc, products) {
+  return cartDoc.items.map(it => {
+    const prod = products.find(p => Number(p.productId) === Number(it.productId));
+    if (!prod) return { id: it.productId, qty: it.quantity, name: "Unknown", price: 0 };
+    return { ...prod, id: prod.id || prod.productId, qty: it.quantity };
+  });
+}
+
+// ── ProductCard — image + name navigate to product page ──────────────────
 function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
+  const navigate = useNavigate();
   const [added, setAdded] = useState(false);
   const cartItem = cartItems.find(item => item.id === (product.productId || product.id));
   const quantity = cartItem?.qty || 0;
+  const productId = product.productId || product.id;
 
-  const handleAdd = () => {
+  const handleAdd = (e) => {
+    e.stopPropagation();
     onAdd(product);
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
@@ -78,7 +63,13 @@ function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
   return (
     <div className="group bg-white border border-stone-100 rounded-2xl overflow-hidden
                     hover:border-stone-200 hover:shadow-lg transition-all duration-300">
-      <div className="relative bg-stone-100 aspect-square flex items-center justify-center overflow-hidden">
+
+      {/* ── Clickable image → product page ── */}
+      <div
+        onClick={() => navigate(`/product/${productId}`)}
+        className="relative bg-stone-100 aspect-square flex items-center justify-center
+                   overflow-hidden cursor-pointer"
+      >
         {product.image ? (
           <img
             src={product.image} alt={product.name}
@@ -106,11 +97,21 @@ function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
 
       <div className="p-5">
         <p className="text-[10px] tracking-[0.15em] uppercase text-stone-400 mb-1">{product.brand}</p>
-        <h3 className="text-sm font-medium text-stone-900 leading-snug mb-2 line-clamp-2">{product.name}</h3>
+
+        {/* ── Clickable name → product page ── */}
+        <h3
+          onClick={() => navigate(`/product/${productId}`)}
+          className="text-sm font-medium text-stone-900 leading-snug mb-2 line-clamp-2
+                     cursor-pointer hover:text-stone-600 transition-colors"
+        >
+          {product.name}
+        </h3>
+
         <div className="flex items-center gap-1.5 mb-3">
           <Stars rating={product.rating} />
           <span className="text-[10px] text-stone-400">({product.reviews})</span>
         </div>
+
         <div className="flex items-end justify-between">
           <div>
             <span className="text-base font-semibold text-stone-900">{fmt(product.price)}</span>
@@ -118,20 +119,23 @@ function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
               <span className="text-xs text-stone-400 line-through ml-2">{fmt(product.originalPrice)}</span>
             )}
           </div>
+
+          {/* ── Qty controls or Add button ── */}
           {quantity > 0 ? (
-            <div className="flex items-center border border-stone-300 rounded-full overflow-hidden">
+            <div
+              className="flex items-center border border-stone-300 rounded-full overflow-hidden"
+              onClick={e => e.stopPropagation()}
+            >
               <button
-                onClick={() => updateQty(product.id || product.productId, -1)}
-                className="w-8 h-8 flex items-center justify-center text-stone-600
-                           hover:bg-stone-100 transition-colors"
+                onClick={e => { e.stopPropagation(); updateQty(productId, -1); }}
+                className="w-8 h-8 flex items-center justify-center text-stone-600 hover:bg-stone-100 transition-colors"
               >
                 <span className="text-lg leading-none">−</span>
               </button>
               <span className="w-8 text-xs text-stone-900 text-center font-medium">{quantity}</span>
               <button
-                onClick={() => updateQty(product.id || product.productId, 1)}
-                className="w-8 h-8 flex items-center justify-center text-stone-600
-                           hover:bg-stone-100 transition-colors"
+                onClick={e => { e.stopPropagation(); updateQty(productId, 1); }}
+                className="w-8 h-8 flex items-center justify-center text-stone-600 hover:bg-stone-100 transition-colors"
               >
                 <span className="text-lg leading-none">+</span>
               </button>
@@ -140,8 +144,8 @@ function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
             <button
               onClick={handleAdd}
               className={`text-xs px-4 py-2 rounded-full transition-all duration-200 ${added
-                  ? "bg-stone-900 text-white"
-                  : "border border-stone-300 text-stone-700 hover:bg-stone-900 hover:text-white hover:border-stone-900"
+                ? "bg-stone-900 text-white"
+                : "border border-stone-300 text-stone-700 hover:bg-stone-900 hover:text-white hover:border-stone-900"
                 }`}
             >
               {added ? "Added ✓" : "Add to cart"}
@@ -153,6 +157,7 @@ function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
   );
 }
 
+// ── Main ──────────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -167,6 +172,10 @@ export default function HomePage() {
   const [backendError, setBackendError] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const { showBanner, dismissBanner } = useWelcomeDiscount(user);
+
+  useEffect(() => { document.title = "FitMart - Fitness & Nutrition Store"; }, []);
+
   useEffect(() => {
     setTimeout(() => setVisible(true), 80);
     const unsub = auth.onAuthStateChanged(u => {
@@ -177,30 +186,11 @@ export default function HomePage() {
   }, [navigate]);
 
   useEffect(() => {
-    async function loadCartFromServer(u) {
-      try {
-        const res = await fetch(`http://localhost:5000/api/cart/${u.uid}`);
-        if (!res.ok) return;
-        const cartDoc = await res.json();
-        const mapped = cartDoc.items.map(it => {
-          const prod = products.find(p => Number(p.productId) === Number(it.productId));
-          if (!prod) return { id: it.productId, qty: it.quantity, name: "Unknown", price: 0 };
-          return { ...prod, id: prod.id || prod.productId, qty: it.quantity };
-        });
-        setCart(mapped);
-      } catch (err) {
-        console.error("Error loading cart from server", err);
-      }
-    }
-    if (user && products.length > 0) loadCartFromServer(user);
-  }, [user, products]);
-
-  useEffect(() => {
     (async () => {
       setLoading(true);
       setBackendError(false);
       try {
-        const res = await fetch("http://localhost:5000/api/products");
+        const res = await fetch(`${API}/api/products`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         setProducts(data.map(p => ({ ...p, id: p.productId || p.id })));
@@ -214,85 +204,68 @@ export default function HomePage() {
     })();
   }, []);
 
+  useEffect(() => {
+    if (!user || !products.length) return;
+    (async () => {
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API}/api/cart/${user.uid}`, { headers, credentials: "include" });
+        if (!res.ok) return;
+        const cartDoc = await res.json();
+        setCart(mapCart(cartDoc, products));
+      } catch (err) {
+        console.error("Error loading cart:", err);
+      }
+    })();
+  }, [user, products]);
+
   const handleSignOut = async () => {
     await signOut(auth);
     navigate("/");
   };
 
-  const addToCart = product => {
-    if (user) {
-      (async () => {
-        try {
-          const res = await fetch(`http://localhost:5000/api/cart/${user.uid}/add`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ productId: product.productId || product.id, quantity: 1 }),
-          });
-          if (!res.ok) throw new Error("Failed to add to cart");
-          const cartDoc = await res.json();
-          setCart(cartDoc.items.map(it => {
-            const prod = products.find(p => Number(p.productId) === Number(it.productId));
-            return prod
-              ? { ...prod, id: prod.id || prod.productId, qty: it.quantity }
-              : { id: it.productId, qty: it.quantity, name: "Unknown", price: 0 };
-          }));
-        } catch (err) { console.error("Add to cart failed", err); }
-      })();
-      return;
-    }
-    setCart(prev => {
-      const ex = prev.find(i => i.id === product.id);
-      return ex
-        ? prev.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i)
-        : [...prev, { ...product, qty: 1 }];
-    });
+  const addToCart = async (product) => {
+    if (!user) return;
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch(`${API}/api/cart/${user.uid}/add`, {
+        method: "POST", headers, credentials: "include",
+        body: JSON.stringify({ productId: product.productId || product.id, quantity: 1 }),
+      });
+      if (!res.ok) throw new Error("Failed to add to cart");
+      const cartDoc = await res.json();
+      setCart(mapCart(cartDoc, products));
+    } catch (err) { console.error("Add to cart failed:", err); }
   };
 
-  const removeFromCart = id => {
-    if (user) {
-      (async () => {
-        try {
-          const existing = cart.find(i => i.id === id);
-          const res = await fetch(`http://localhost:5000/api/cart/${user.uid}/remove`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ productId: id, quantity: existing?.qty || 1 }),
-          });
-          if (!res.ok) throw new Error("Failed to remove");
-          const cartDoc = await res.json();
-          setCart(cartDoc.items.map(it => {
-            const prod = products.find(p => Number(p.productId) === Number(it.productId));
-            return prod
-              ? { ...prod, id: prod.id || prod.productId, qty: it.quantity }
-              : { id: it.productId, qty: it.quantity, name: "Unknown", price: 0 };
-          }));
-        } catch (err) { console.error("Remove failed", err); }
-      })();
-      return;
-    }
-    setCart(prev => prev.filter(i => i.id !== id));
+  const removeFromCart = async (id) => {
+    if (!user) return;
+    try {
+      const existing = cart.find(i => i.id === id);
+      const headers = await getAuthHeaders();
+      const res = await fetch(`${API}/api/cart/${user.uid}/remove`, {
+        method: "POST", headers, credentials: "include",
+        body: JSON.stringify({ productId: id, quantity: existing?.qty || 1 }),
+      });
+      if (!res.ok) throw new Error("Failed to remove");
+      const cartDoc = await res.json();
+      setCart(mapCart(cartDoc, products));
+    } catch (err) { console.error("Remove from cart failed:", err); }
   };
 
-  const updateQty = (id, delta) => {
-    if (user) {
-      (async () => {
-        try {
-          const url = delta > 0 ? "add" : "remove";
-          await fetch(`http://localhost:5000/api/cart/${user.uid}/${url}`, {
-            method: "POST", headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ productId: id, quantity: Math.abs(delta) }),
-          });
-          const res = await fetch(`http://localhost:5000/api/cart/${user.uid}`);
-          const cartDoc = await res.json();
-          setCart(cartDoc.items.map(it => {
-            const prod = products.find(p => Number(p.productId) === Number(it.productId));
-            return prod
-              ? { ...prod, id: prod.id || prod.productId, qty: it.quantity }
-              : { id: it.productId, qty: it.quantity, name: "Unknown", price: 0 };
-          }));
-        } catch (err) { console.error("Update qty failed", err); }
-      })();
-      return;
-    }
-    setCart(prev => prev.map(i => i.id === id ? { ...i, qty: i.qty + delta } : i).filter(i => i.qty > 0));
+  const updateQty = async (id, delta) => {
+    if (!user) return;
+    try {
+      const url = delta > 0 ? "add" : "remove";
+      const headers = await getAuthHeaders();
+      await fetch(`${API}/api/cart/${user.uid}/${url}`, {
+        method: "POST", headers, credentials: "include",
+        body: JSON.stringify({ productId: id, quantity: Math.abs(delta) }),
+      });
+      const res = await fetch(`${API}/api/cart/${user.uid}`, { headers, credentials: "include" });
+      const cartDoc = await res.json();
+      setCart(mapCart(cartDoc, products));
+    } catch (err) { console.error("Update qty failed:", err); }
   };
 
   const cartTotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
@@ -301,7 +274,9 @@ export default function HomePage() {
 
   const filtered = products.filter(p => {
     const matchCat = activeCategory === "all" || p.category === activeCategory;
-    const matchSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.brand.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchSearch = !searchQuery
+      || p.name.toLowerCase().includes(searchQuery.toLowerCase())
+      || p.brand?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchCat && matchSearch;
   });
 
@@ -317,7 +292,7 @@ export default function HomePage() {
       <div className="text-center py-16 text-stone-400">
         <p className="text-3xl mb-2">🔌</p>
         <p className="text-sm mb-2">Cannot connect to the server</p>
-        <p className="text-xs text-stone-400">Make sure the backend is running on port 5000</p>
+        <p className="text-xs">Make sure the backend is running on port 5000</p>
         <button onClick={() => window.location.reload()}
           className="mt-4 text-xs bg-stone-900 text-white px-4 py-2 rounded-full hover:bg-stone-700 transition-colors">
           Retry Connection
@@ -354,7 +329,8 @@ export default function HomePage() {
         .search-expand.open { max-height:80px; }
       `}</style>
 
-      {/* ── NAVBAR ── only these props — no links, no user prop ── */}
+      {showBanner && <WelcomeBanner onDismiss={dismissBanner} />}
+
       <Navbar
         variant="home"
         onSearchToggle={() => { setSearchOpen(p => !p); setSearchQuery(""); }}
@@ -365,40 +341,33 @@ export default function HomePage() {
         onSignOut={handleSignOut}
       />
 
-      {/* Search expand */}
       <div className={`search-expand ${searchOpen ? "open" : ""} border-t border-stone-100`}>
         <div className="max-w-7xl mx-auto px-5 lg:px-10 py-3">
           <input
-            autoFocus={searchOpen}
-            type="text"
+            autoFocus={searchOpen} type="text"
             placeholder="Search products, brands…"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
+            value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
             className="w-full text-sm text-stone-800 placeholder-stone-300 bg-transparent focus:outline-none"
           />
         </div>
       </div>
 
-      {/* Hero banner */}
       <section className="bg-stone-900 text-white">
         <div className="max-w-7xl mx-auto px-5 lg:px-10 py-14">
           <div className={`fade-in d1 ${visible ? "show" : ""}`}>
             <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-3">
               Welcome back, {firstName}
             </p>
-            <h1 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-white
-                           leading-tight max-w-xl mb-5">
+            <h1 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-white leading-tight max-w-xl mb-5">
               Build something <em className="not-italic text-stone-400">stronger</em> today.
             </h1>
             <div className="flex flex-wrap gap-3">
-              <button className="text-sm bg-white text-stone-900 px-6 py-2.5 rounded-full
-                                 hover:bg-stone-100 transition-colors">
+              <button className="text-sm bg-white text-stone-900 px-6 py-2.5 rounded-full hover:bg-stone-100 transition-colors">
                 Shop Now
               </button>
               <button
                 onClick={() => document.getElementById("plans")?.scrollIntoView({ behavior: "smooth" })}
-                className="text-sm border border-stone-700 text-stone-300 px-6 py-2.5
-                           rounded-full hover:bg-stone-800 transition-colors"
+                className="text-sm border border-stone-700 text-stone-300 px-6 py-2.5 rounded-full hover:bg-stone-800 transition-colors"
               >
                 View Plans
               </button>
@@ -409,7 +378,6 @@ export default function HomePage() {
 
       <div className="max-w-7xl mx-auto px-5 lg:px-10 py-10 space-y-16">
 
-        {/* Products */}
         <section>
           <div className={`fade-in d1 ${visible ? "show" : ""} flex items-center justify-between mb-6`}>
             <h2 className="font-['DM_Serif_Display'] text-2xl md:text-3xl text-stone-900">Featured Products</h2>
@@ -420,12 +388,10 @@ export default function HomePage() {
           {!backendError && !loading && (
             <div className={`fade-in d2 ${visible ? "show" : ""} flex gap-2 flex-wrap mb-8`}>
               {CATEGORIES.map(c => (
-                <button
-                  key={c.value}
-                  onClick={() => setActiveCategory(c.value)}
+                <button key={c.value} onClick={() => setActiveCategory(c.value)}
                   className={`text-xs px-4 py-2 rounded-full transition-all ${activeCategory === c.value
-                      ? "bg-stone-900 text-white"
-                      : "bg-white border border-stone-200 text-stone-600 hover:bg-stone-50"
+                    ? "bg-stone-900 text-white"
+                    : "bg-white border border-stone-200 text-stone-600 hover:bg-stone-50"
                     }`}
                 >
                   {c.name}
@@ -436,7 +402,6 @@ export default function HomePage() {
           {renderProductGrid()}
         </section>
 
-        {/* Plans */}
         <section id="plans">
           <div className="mb-8">
             <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2">Digital Coaching</p>
@@ -444,27 +409,18 @@ export default function HomePage() {
           </div>
           <div className="grid md:grid-cols-3 gap-5">
             {PLANS.map((plan, i) => (
-              <div
-                key={i}
-                className={`rounded-2xl p-7 flex flex-col gap-4 ${i === 0 ? "bg-stone-900 text-white" : "bg-white border border-stone-200"
-                  }`}
-              >
-                {plan.tag && (
-                  <span className="text-[9px] tracking-[0.2em] uppercase text-stone-400">{plan.tag}</span>
-                )}
+              <div key={i}
+                className="bg-white border border-stone-200 rounded-2xl p-7 flex flex-col gap-4
+                           hover:border-stone-300 hover:shadow-lg transition-all duration-300">
+                {plan.tag && <span className="text-[9px] tracking-[0.2em] uppercase text-stone-400">{plan.tag}</span>}
                 <div>
-                  <h3 className={`font-['DM_Serif_Display'] text-xl ${i === 0 ? "text-white" : "text-stone-900"}`}>
-                    {plan.name}
-                  </h3>
+                  <h3 className="font-['DM_Serif_Display'] text-xl text-stone-900">{plan.name}</h3>
                   <p className="text-xs mt-0.5 text-stone-400">{plan.duration}</p>
                 </div>
-                <p className={`text-sm leading-relaxed flex-1 ${i === 0 ? "text-stone-300" : "text-stone-500"}`}>
-                  {plan.desc}
-                </p>
-                <button className={`text-xs py-2.5 rounded-full transition-colors mt-1 ${i === 0
-                    ? "bg-white text-stone-900 hover:bg-stone-100"
-                    : "border border-stone-300 text-stone-700 hover:bg-stone-50"
-                  }`}>
+                <p className="text-sm leading-relaxed flex-1 text-stone-500">{plan.desc}</p>
+                <button onClick={() => navigate(plan.route)}
+                  className="text-xs py-2.5 rounded-full transition-all mt-1 border border-stone-300
+                             text-stone-700 hover:bg-stone-900 hover:text-white hover:border-stone-900">
                   View Plan →
                 </button>
               </div>
@@ -472,17 +428,14 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* FitRewards banner */}
         <section>
           <div className="bg-stone-100 rounded-2xl p-8 md:p-10 flex flex-col md:flex-row
                           md:items-center justify-between gap-6">
             <div>
               <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2">Loyalty Program</p>
-              <h3 className="font-['DM_Serif_Display'] text-2xl md:text-3xl text-stone-900 mb-2">
-                Earn FitRewards
-              </h3>
+              <h3 className="font-['DM_Serif_Display'] text-2xl md:text-3xl text-stone-900 mb-2">Earn FitRewards</h3>
               <p className="text-sm text-stone-500 max-w-md leading-relaxed">
-                Points for every purchase, and every fitness milestone. Redeem against equipment, supplements, or coaching.
+                Points for every purchase and every fitness milestone. Redeem against equipment, supplements, or coaching.
               </p>
             </div>
             <button className="shrink-0 bg-stone-900 text-white text-sm px-7 py-3 rounded-full
@@ -492,13 +445,16 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* BMI & Calorie Calculator */}
+        <section>
+          <BMICalculator />
+        </section>
+
         {/* Upgrade */}
         <section className="pb-8">
           <div className="mb-8">
             <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2">Membership</p>
-            <h2 className="font-['DM_Serif_Display'] text-2xl md:text-3xl text-stone-900">
-              Upgrade your experience
-            </h2>
+            <h2 className="font-['DM_Serif_Display'] text-2xl md:text-3xl text-stone-900">Upgrade your experience</h2>
           </div>
           <div className="grid md:grid-cols-2 gap-5">
             {[
@@ -525,7 +481,6 @@ export default function HomePage() {
         </section>
       </div>
 
-      {/* Footer */}
       <footer className="border-t border-stone-200 bg-white">
         <div className="max-w-7xl mx-auto px-5 lg:px-10 py-8 flex flex-col md:flex-row
                         justify-between items-center gap-4">
@@ -540,14 +495,11 @@ export default function HomePage() {
       </footer>
 
       <CartDrawer
-        isOpen={cartOpen}
-        onClose={() => setCartOpen(false)}
-        cart={cart}
-        cartCount={cartCount}
-        cartTotal={cartTotal}
-        updateQty={updateQty}
-        removeFromCart={removeFromCart}
+        isOpen={cartOpen} onClose={() => setCartOpen(false)}
+        cart={cart} cartCount={cartCount} cartTotal={cartTotal}
+        updateQty={updateQty} removeFromCart={removeFromCart}
       />
+      <FitnessChatBot />
     </div>
   );
 }
