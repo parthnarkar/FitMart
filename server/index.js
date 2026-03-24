@@ -9,10 +9,12 @@ const port = process.env.PORT || 5000;
 
 // Single CORS config — having two app.use(cors(...)) calls means the first
 // one (permissive) wins. Use one explicit config instead.
-app.use(cors({
-  origin: "http://localhost:5173",   // your Vite dev server
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: "http://localhost:5173", // your Vite dev server
+    credentials: true,
+  }),
+);
 
 app.use(express.json());
 
@@ -28,11 +30,11 @@ app.use("/api/products", require("./routes/products"));
 app.use("/api/cart", require("./routes/cart"));
 app.use("/api/orders", require("./routes/orders"));
 
-// ── Razorpay / payment routes (NO prefix — mounted at root) ─────────────────
+// ── // Razorpay / payment routes (prefixed with /api/payment) ─────────────────
 // These handle:  POST /create-order
 //                POST /verify-payment
 //                POST /clear-cart
-app.use(require("./routes/payment"));
+app.use("/api/payment", require("./routes/payment"));
 
 // ── Health check ─────────────────────────────────────────────────────────────
 app.get("/", (req, res) => res.send("FitMart server running"));

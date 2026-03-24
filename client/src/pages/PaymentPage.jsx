@@ -40,7 +40,7 @@ export default function PaymentPage() {
 
   // ── Shared: clear cart then go to confirmation ─────────────────────────
   const finishOrder = async (userId, paymentId) => {
-    await fetch(`${API}/clear-cart`, {
+    await fetch(`${API}/api/payment/clear-cart`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -61,7 +61,7 @@ export default function PaymentPage() {
     setError(null);
 
     try {
-      const res = await fetch(`${API}/demo-success`, {
+      const res = await fetch(`${API}/api/payment/demo-success`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -86,7 +86,7 @@ export default function PaymentPage() {
     setError(null);
 
     try {
-      const orderRes = await fetch(`${API}/create-order`, {
+      const orderRes = await fetch(`${API}/api/payment/create-order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -113,7 +113,7 @@ export default function PaymentPage() {
 
         handler: async (response) => {
           try {
-            const verifyRes = await fetch(`${API}/verify-payment`, {
+            const verifyRes = await fetch(`${API}/api/payment/verify-payment`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               credentials: "include",
