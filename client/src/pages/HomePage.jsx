@@ -219,6 +219,15 @@ export default function HomePage() {
     })();
   }, [user, products]);
 
+  useEffect(() => {
+    // Use instant scrolling to ensure it happens immediately
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'instant' // or 'auto' for instant scroll
+    });
+  }, []);
+
   const handleSignOut = async () => {
     await signOut(auth);
     navigate("/");
