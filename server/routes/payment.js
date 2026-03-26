@@ -134,42 +134,31 @@ router.post("/clear-cart", verifyFirebaseToken, async (req, res) => {
 // POST /demo-success   ← DEV / TEST ONLY — disabled in production
 // Body: { userId }
 // Skips Razorpay entirely, fakes a payment ID, clears cart, returns success.
+// NOTE: This route does NOT require Firebase authentication for testing purposes
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
  * @route   POST /demo-success
- * @desc    Simulates a successful payment for testing only — skips Razorpay, generates
- *          a fake paymentId, creates an order, and marks it as "paid"; body: { userId }
- * @access  Private — TESTING ONLY, remove before going live
+ * @desc    Simulates a successful payment for testing only — skips Razorpay, clears cart,
+ *          and returns success without creating an order
+ * @access  Public (TESTING ONLY) - No authentication required
  */
-router.post("/demo-success", verifyFirebaseToken, async (req, res) => {
+router.post("/demo-success", async (req, res) => {
   try {
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ error: "userId is required" });
 
+    // Generate a fake payment ID that looks like a real Razorpay one
     const fakePaymentId = `pay_DEMO_${Date.now()}`;
 
-    const Order = require("../models/Order");
+    // Clear the cart exactly like a real payment would
+    await Cart.findOneAndUpdate(
+      { userId },
+      { $set: { items: [] } },
+      { new: true }
+    );
 
-    // prevent duplicate
-    const existingOrder = await Order.findOne({ paymentId: fakePaymentId });
-    if (existingOrder) {
-      return res.json({ success: true, message: "Order already exists" });
-    }
-
-    // create order
-    const orderResponse = await axios.post("http://localhost:5000/api/orders", {
-      userId
-    });
-
-    // attach payment id
-    await Order.findByIdAndUpdate(orderResponse.data._id, {
-      paymentId: fakePaymentId,
-      status: "paid"
-    });
-
-    res.json({ success: true, order: orderResponse.data });
-
+    res.json({ success: true, paymentId: fakePaymentId });
   } catch (err) {
     console.error("demo-success error:", err);
     res.status(500).json({ error: err.message });
