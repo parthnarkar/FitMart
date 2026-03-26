@@ -47,7 +47,13 @@ const KPICard = ({ label, value, sub, icon }) => (
         className="text-3xl md:text-4xl text-stone-900 leading-none">
         {value}
       </p>
-      <span className="text-2xl opacity-40 mb-0.5">{icon}</span>
+      <div className="text-2xl opacity-40 mb-0.5">
+        {typeof icon === 'string' ? (
+          <span>{icon}</span>
+        ) : (
+          icon
+        )}
+      </div>
     </div>
     {sub && <p className="text-xs text-stone-400 mt-3">{sub}</p>}
   </div>
@@ -156,8 +162,8 @@ export default function AdminDashboard() {
                 key={key}
                 onClick={() => setRange(key)}
                 className={`text-xs px-4 py-2 rounded-full transition-all ${range === key
-                    ? "bg-stone-900 text-white"
-                    : "border border-stone-200 text-stone-600 hover:bg-stone-100"
+                  ? "bg-stone-900 text-white"
+                  : "border border-stone-200 text-stone-600 hover:bg-stone-100"
                   }`}
               >
                 {label}
@@ -171,10 +177,110 @@ export default function AdminDashboard() {
         <div className="mb-10">
           <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2">Overview</p>
           <h1 style={{ fontFamily: "'DM Serif Display', serif" }}
-            className="text-4xl md:text-5xl text-stone-900">
+            className="text-4xl md:text-5xl text-stone-900 mb-8">
             Command Centre
           </h1>
+
+          {/* Admin Feature Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* Inventory Card */}
+            <div
+              onClick={() => window.location.href = '/admin/inventory'}
+              className="group cursor-pointer bg-white border border-stone-200 rounded-2xl p-6 
+                 hover:border-stone-300 hover:shadow-lg transition-all duration-300
+                 hover:-translate-y-0.5"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center
+                      group-hover:bg-stone-900 transition-colors duration-300">
+                  <svg className="w-6 h-6 text-stone-600 group-hover:text-white transition-colors duration-300"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                </div>
+              </div>
+              <h3 style={{ fontFamily: "'DM Serif Display', serif" }}
+                className="text-xl text-stone-900 mb-2">
+                Inventory
+              </h3>
+              <p className="text-sm text-stone-500 leading-relaxed mb-4">
+                Manage products, track stock levels, and update pricing across your catalog.
+              </p>
+              <div className="flex items-center text-xs text-stone-400 group-hover:text-stone-600 transition-colors">
+                <span>Manage inventory →</span>
+              </div>
+            </div>
+
+            {/* Customers Card */}
+            <div
+              onClick={() => window.location.href = '/admin/customers'}
+              className="group cursor-pointer bg-white border border-stone-200 rounded-2xl p-6 
+                 hover:border-stone-300 hover:shadow-lg transition-all duration-300
+                 hover:-translate-y-0.5"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center
+                      group-hover:bg-stone-900 transition-colors duration-300">
+                  <svg className="w-6 h-6 text-stone-600 group-hover:text-white transition-colors duration-300"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+              </div>
+              <h3 style={{ fontFamily: "'DM Serif Display', serif" }}
+                className="text-xl text-stone-900 mb-2">
+                Customers
+              </h3>
+              <p className="text-sm text-stone-500 leading-relaxed mb-4">
+                View customer profiles, order history, and engagement analytics.
+              </p>
+              <div className="flex items-center text-xs text-stone-400 group-hover:text-stone-600 transition-colors">
+                <span>View customers →</span>
+              </div>
+            </div>
+
+            {/* Reports Card */}
+            <div
+              onClick={() => window.location.href = '/admin/reports'}
+              className="group cursor-pointer bg-white border border-stone-200 rounded-2xl p-6 
+                 hover:border-stone-300 hover:shadow-lg transition-all duration-300
+                 hover:-translate-y-0.5"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-stone-100 flex items-center justify-center
+                      group-hover:bg-stone-900 transition-colors duration-300">
+                  <svg className="w-6 h-6 text-stone-600 group-hover:text-white transition-colors duration-300"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+              </div>
+              <h3 style={{ fontFamily: "'DM Serif Display', serif" }}
+                className="text-xl text-stone-900 mb-2">
+                Reports
+              </h3>
+              <p className="text-sm text-stone-500 leading-relaxed mb-4">
+                Generate insights with sales analytics, revenue tracking, and performance metrics.
+              </p>
+              <div className="flex items-center text-xs text-stone-400 group-hover:text-stone-600 transition-colors">
+                <span>View reports →</span>
+              </div>
+            </div>
+          </div>
+
+
         </div>
+
+        <div className="">
+          <h1 style={{ fontFamily: "'DM Serif Display', serif" }}
+            className="text-4xl md:text-4xl text-stone-900 mb-8">
+            Dashboard
+          </h1>
+        </div>
+
 
         {error && (
           <div className="bg-red-50 border border-red-100 rounded-2xl px-6 py-5 mb-8">
@@ -202,9 +308,18 @@ export default function AdminDashboard() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
               <KPICard label="Total Revenue" value={fmt(data.kpis.totalRevenue)} icon="₹" />
               <KPICard label="Total Orders" value={data.kpis.totalOrders.toLocaleString()} icon="◎" />
-              <KPICard label="Customers" value={data.kpis.totalCustomers.toLocaleString()} icon="⚡" />
+              <KPICard
+                label="Customers"
+                value={data.kpis.totalCustomers.toLocaleString()}
+                icon={
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                }
+              />
               <KPICard label="Low on Stock" value={data.kpis.lowStockCount}
-                sub="Products below 10 units" icon="─" />
+                sub="Products below 5 units" icon="─" />
             </div>
 
             {/* Charts row */}
