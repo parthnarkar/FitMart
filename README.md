@@ -313,12 +313,10 @@ cd server && npm start
 
 ### 💳 Payments
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/create-order` | Create a Razorpay order |
-| `POST` | `/verify-payment` | Verify HMAC signature |
-| `POST` | `/clear-cart` | Release stock & clear cart — body: `{ userId }` |
-| `POST` | `/demo-success` | Simulate successful payment (testing only) |
+| `POST` | `/api/payment/create-order` | Create a Razorpay order |
+| `POST` | `/api/payment/verify-payment` | Verify HMAC signature |
+| `POST` | `/api/payment/clear-cart` | Release stock & clear cart — body: `{ userId }` |
+| `POST` | `/api/payment/demo-success` | Simulate successful payment (testing only) |
 
 > **Security:** Payment verification uses HMAC-SHA256 on `razorpay_order_id|razorpay_payment_id` with `RAZORPAY_KEY_SECRET`.
 

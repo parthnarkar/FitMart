@@ -46,7 +46,7 @@ export default function PaymentPage() {
   // ── Shared post-payment cleanup ────────────────────────────────────────
   const finishOrder = async (userId, paymentId) => {
     // Clear cart
-    await fetch(`${API}/clear-cart`, {
+    await fetch(`${API}/api/payment/clear-cart`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ userId }),
@@ -78,8 +78,9 @@ export default function PaymentPage() {
     setBypassing(true);
     setError(null);
     try {
-      const res = await fetch(`${API}/demo-success`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
+      const res = await fetch(`${API}/api/payment/demo-success`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ userId: user.uid }),
       });
@@ -102,8 +103,9 @@ export default function PaymentPage() {
     setError(null);
 
     try {
-      const orderRes = await fetch(`${API}/create-order`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
+      const orderRes = await fetch(`${API}/api/payment/create-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ amount: total, currency: "INR", userId }),
       });
@@ -125,8 +127,9 @@ export default function PaymentPage() {
 
         handler: async (response) => {
           try {
-            const verifyRes = await fetch(`${API}/verify-payment`, {
-              method: "POST", headers: { "Content-Type": "application/json" },
+            const verifyRes = await fetch(`${API}/api/payment/verify-payment`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
               credentials: "include",
               body: JSON.stringify({ ...response, userId }),
             });

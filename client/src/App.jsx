@@ -12,8 +12,10 @@ import AdminInventory from "./pages/AdminInventory";
 import WeightLossPlans from "./pages/WeightLossPlans";
 import MuscleBuildingPlans from "./pages/MuscleBuildingPlans";
 import MobilityRecoveryPlans from "./pages/MobilityRecoveryPlans";
-import AdminDashboard from './pages/AdminDashboard';
+import AdminDashboard from "./pages/AdminDashboard";
 import AdminReports from "./pages/AdminReports";
+import AdminCustomers from "./pages/AdminCustomers";
+import AdminCustomerDetail from "./pages/AdminCustomerDetail";
 
 export default function App() {
   return (
@@ -32,6 +34,9 @@ export default function App() {
         <Route path="/plans/mobility-recovery" element={<MobilityRecoveryPlans />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/admin/reports" element={<AdminReports />} />
+        <Route path="/admin/customers" element={<AdminCustomers />} />
+        <Route path="/admin/customers/:userId" element={<AdminCustomerDetail />} />
+
         {/* ⚠️ Catchall MUST be LAST — it swallows every route below it */}
         <Route path="*" element={<NotFound />} />
       </Routes>
