@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { auth } from "../auth/firebase";
+import Navbar from "../components/Navbar"; // Make sure to import Navbar
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID;
@@ -28,6 +29,7 @@ export default function PaymentPage() {
   const [paying, setPaying] = useState(false);
   const [bypassing, setBypassing] = useState(false);
   const [error, setError] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false); // Add this state for Navbar
 
   // Unpack state passed from Checkout (includes discount info)
   const {
@@ -42,6 +44,10 @@ export default function PaymentPage() {
   useEffect(() => {
     if (!items.length) navigate("/checkout");
   }, [items, navigate]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // ── Shared post-payment cleanup ────────────────────────────────────────
   const finishOrder = async (userId, paymentId) => {
@@ -168,7 +174,14 @@ export default function PaymentPage() {
     new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
 
   return (
+    // REPLACE this entire wrapper div with the new one containing Navbar
     <div className="min-h-screen bg-stone-50" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      <Navbar
+        variant="home"
+        menuOpen={menuOpen}
+        setMenuOpen={setMenuOpen}
+      />
+      {/* The rest of your content goes here */}
       <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');`}</style>
 
       <div className="max-w-xl mx-auto px-5 py-16">

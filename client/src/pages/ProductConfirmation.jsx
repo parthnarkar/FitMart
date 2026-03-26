@@ -40,6 +40,10 @@ export default function ProductConfirmation() {
     return () => clearTimeout(t);
   }, []);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   // ── PDF Invoice Generation (pure browser, no extra library needed) ───────
   const downloadInvoice = () => {
     setDownloading(true);
