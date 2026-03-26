@@ -73,7 +73,7 @@ export default function AdminCustomers() {
 
       {/* Sticky top bar */}
       <div className="bg-white border-b border-stone-200 sticky top-0 z-30">
-        <div className="max-w-5xl mx-auto px-5 lg:px-10 h-16 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-5 lg:px-10 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <span
               style={{ fontFamily: "'DM Serif Display', serif" }}
@@ -88,7 +88,7 @@ export default function AdminCustomers() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-5 lg:px-10 py-12">
+      <div className="max-w-6xl mx-auto px-5 lg:px-10 py-12">
 
         {/* Page heading */}
         <div className="mb-10">
