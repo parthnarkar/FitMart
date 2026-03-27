@@ -93,9 +93,11 @@ router.post("/verify-payment", verifyFirebaseToken, async (req, res) => {
     }
 
     // STEP 2: Create order using existing route logic
-    const orderResponse = await axios.post("http://localhost:5000/api/orders", {
-      userId
-    });
+    const orderResponse = await axios.post(
+      "http://localhost:5000/api/orders",
+      { userId },
+      { headers: { Authorization: req.headers.authorization } }
+    );
 
     //  STEP 3: Attach paymentId to order
     await Order.findByIdAndUpdate(orderResponse.data._id, {
@@ -150,19 +152,53 @@ router.post("/demo-success", async (req, res) => {
 
     // Generate a fake payment ID that looks like a real Razorpay one
     const fakePaymentId = `pay_DEMO_${Date.now()}`;
+    // Create an order from the user's cart (snapshot prices, deduct stock, finalize reservation)
+    const Order = require("../models/Order");
 
-    // Clear the cart exactly like a real payment would
-    await Cart.findOneAndUpdate(
-      { userId },
-      { $set: { items: [] } },
-      { new: true }
-    );
+    const cart = await Cart.findOne({ userId });
+    if (!cart || !cart.items.length) {
+      // Still clear any empty cart just in case
+      await Cart.findOneAndUpdate({ userId }, { $set: { items: [] } }, { new: true });
+      return res.status(400).json({ error: "Cart is empty" });
+    }
 
-    res.json({ success: true, paymentId: fakePaymentId });
+    const populated = [];
+    let total = 0;
+    for (const it of cart.items) {
+      const p = await Product.findOne({ productId: Number(it.productId) });
+      if (!p) return res.status(400).json({ error: `Product ${it.productId} not found` });
+      if (p.stock !== null) {
+        const available = p.stock - p.reserved;
+        if (available < it.quantity) {
+          return res.status(400).json({ error: `Insufficient stock for ${p.name}. Available: ${available}` });
+        }
+      }
+      populated.push({ productId: p.productId, quantity: it.quantity, price: p.price });
+      total += p.price * it.quantity;
+    }
+
+    const order = await Order.create({ userId, items: populated, total, paymentId: fakePaymentId, status: "paid" });
+
+    // Deduct stock and reserved for each item
+    for (const it of cart.items) {
+      const p = await Product.findOne({ productId: Number(it.productId) });
+      if (p && p.stock !== null) {
+        await Product.findOneAndUpdate(
+          { productId: p.productId },
+          { $inc: { stock: -it.quantity, reserved: -it.quantity } }
+        );
+      }
+    }
+
+    // Clear cart (purchasing finalizes reservation)
+    await Cart.findOneAndUpdate({ userId }, { items: [] });
+
+    res.json({ success: true, paymentId: fakePaymentId, order });
   } catch (err) {
     console.error("demo-success error:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 module.exports = router;
