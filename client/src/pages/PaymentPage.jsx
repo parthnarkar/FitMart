@@ -118,9 +118,10 @@ export default function PaymentPage() {
     setError(null);
 
     try {
+      const headers = await getAuthHeaders();
       const orderRes = await fetch(`${API}/api/payment/create-order`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         credentials: "include",
         body: JSON.stringify({ amount: total, currency: "INR", userId }),
       });
@@ -142,9 +143,10 @@ export default function PaymentPage() {
 
         handler: async (response) => {
           try {
+            const headers = await getAuthHeaders();
             const verifyRes = await fetch(`${API}/api/payment/verify-payment`, {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers,
               credentials: "include",
               body: JSON.stringify({ ...response, userId }),
             });
