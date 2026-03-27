@@ -1,5 +1,6 @@
 // src/pages/AdminDashboard.jsx
 import { useState, useEffect } from "react";
+import AdminNavbar from "../components/AdminNavbar";
 import {
   AreaChart, Area,
   BarChart, Bar,
@@ -113,6 +114,7 @@ export default function AdminDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -132,6 +134,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-stone-50" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      <AdminNavbar range={range} setRange={setRange} menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
         .fitmart-chart .recharts-cartesian-grid-horizontal line,
@@ -141,37 +144,7 @@ export default function AdminDashboard() {
         @keyframes fmFadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
       `}</style>
 
-      {/* Top bar */}
-      <div className="bg-white border-b border-stone-200 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-5 lg:px-10 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <span style={{ fontFamily: "'DM Serif Display', serif" }}
-              className="text-xl text-stone-900 tracking-tight">
-              FitMart
-            </span>
-            <div className="h-4 w-px bg-stone-200" />
-            <p className="text-xs tracking-[0.2em] uppercase text-stone-400">Admin</p>
-          </div>
-          <div className="flex items-center gap-2">
-            {[
-              { key: "today", label: "Today" },
-              { key: "week", label: "This Week" },
-              { key: "month", label: "This Month" },
-            ].map(({ key, label }) => (
-              <button
-                key={key}
-                onClick={() => setRange(key)}
-                className={`text-xs px-4 py-2 rounded-full transition-all ${range === key
-                  ? "bg-stone-900 text-white"
-                  : "border border-stone-200 text-stone-600 hover:bg-stone-100"
-                  }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+
 
       <div className="max-w-7xl mx-auto px-5 lg:px-10 py-12">
         <div className="mb-10">

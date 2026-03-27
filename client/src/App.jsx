@@ -17,19 +17,20 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminReports from "./pages/AdminReports";
 import AdminCustomers from "./pages/AdminCustomers";
 import AdminCustomerDetail from "./pages/AdminCustomerDetail";
+import NonAdminRoute from "./components/NonAdminRoute";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        // Public routes
-        <Route path="/" element={<LandingPage />} />
+        // Public routes (redirect admin users to admin dashboard)
+        <Route path="/" element={<NonAdminRoute><LandingPage /></NonAdminRoute>} />
         <Route path="/auth" element={<Authentication />} />
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/product/:productId" element={<ProductPage />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/payment" element={<Payment />} />
-        <Route path="/payment-confirmation" element={<ProductConfirmation />} />
+        <Route path="/home" element={<NonAdminRoute><HomePage /></NonAdminRoute>} />
+        <Route path="/product/:productId" element={<NonAdminRoute><ProductPage /></NonAdminRoute>} />
+        <Route path="/checkout" element={<NonAdminRoute><Checkout /></NonAdminRoute>} />
+        <Route path="/payment" element={<NonAdminRoute><Payment /></NonAdminRoute>} />
+        <Route path="/payment-confirmation" element={<NonAdminRoute><ProductConfirmation /></NonAdminRoute>} />
         <Route path="/plans/weight-loss" element={<WeightLossPlans />} />
         <Route path="/plans/muscle-building" element={<MuscleBuildingPlans />} />
         <Route path="/plans/mobility-recovery" element={<MobilityRecoveryPlans />} />

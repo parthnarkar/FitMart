@@ -1,6 +1,7 @@
 // src/pages/AdminCustomerDetail.jsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import AdminNavbar from "../components/AdminNavbar";
 import { fmt } from "../utils/formatters";
 
 const API_BASE = `${import.meta.env.VITE_API_URL}/api`;
@@ -56,6 +57,7 @@ export default function AdminCustomerDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState({});
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const toggleOrder = (id) =>
     setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
@@ -83,29 +85,7 @@ export default function AdminCustomerDetail() {
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
       `}</style>
 
-      {/* Sticky top bar */}
-      <div className="bg-white border-b border-stone-200 sticky top-0 z-30">
-        <div className="max-w-6xl mx-auto px-5 lg:px-10 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <span
-              style={{ fontFamily: "'DM Serif Display', serif" }}
-              className="text-xl text-stone-900 tracking-tight cursor-pointer"
-              onClick={() => navigate("/home")}
-            >
-              FitMart
-            </span>
-            <div className="h-4 w-px bg-stone-200" />
-            <p className="text-xs tracking-[0.2em] uppercase text-stone-400">Admin</p>
-          </div>
-          <button
-            onClick={() => navigate("/admin/customers")}
-            className="text-xs px-4 py-2 rounded-full border border-stone-200 text-stone-600
-                       hover:bg-stone-100 transition-all"
-          >
-            ← All Customers
-          </button>
-        </div>
-      </div>
+      <AdminNavbar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
       <div className="max-w-6xl mx-auto px-5 lg:px-10 py-12">
 
