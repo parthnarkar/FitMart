@@ -205,6 +205,7 @@ npm run dev
 MONGO_URI=<your_mongodb_connection_string>
 MONGO_DB=<your_database_name>           # optional
 PORT=5000
+ALLOWED_ORIGIN=http://localhost:5173    # allowed frontend origin for CORS
 RAZORPAY_KEY_ID=<your_razorpay_key_id>
 RAZORPAY_KEY_SECRET=<your_razorpay_key_secret>
 

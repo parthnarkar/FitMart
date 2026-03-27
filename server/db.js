@@ -18,9 +18,9 @@ async function connect() {
       useUnifiedTopology: true,
       ...(MONGO_DB ? { dbName: MONGO_DB } : {}),
     });
-    console.log('MongoDB connected —', 'database:', mongoose.connection.name, 'host:', mongoose.connection.host);
+    console.log("MongoDB connected successfully");
   } catch (err) {
-    console.error('MongoDB connection error:', err);
+    console.error("MongoDB connection failed:", err.message);
     process.exit(1);
   }
 }

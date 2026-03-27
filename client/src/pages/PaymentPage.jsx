@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { auth } from "../auth/firebase";
+import { getAuthHeaders } from "../utils/getAuthHeaders";
 import Navbar from "../components/Navbar"; // Make sure to import Navbar
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -52,17 +53,25 @@ export default function PaymentPage() {
   // ── Shared post-payment cleanup ────────────────────────────────────────
   const finishOrder = async (userId, paymentId) => {
     // Clear cart
-    await fetch(`${API}/api/payment/clear-cart`, {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ userId }),
-    });
+    try {
+      const headers = await getAuthHeaders();
+      await fetch(`${API}/api/payment/clear-cart`, {
+        method: "POST",
+        headers,
+        credentials: "include",
+        body: JSON.stringify({ userId }),
+      });
+    } catch (err) {
+      console.error('clear-cart failed:', err);
+    }
 
     // Mark discount as used if it was applied
     if (discountApplied) {
       try {
+        const headers = await getAuthHeaders();
         await fetch(`${API}/api/user/use-discount`, {
-          method: "POST", headers: { "Content-Type": "application/json" },
+          method: "POST",
+          headers,
           credentials: "include",
           body: JSON.stringify({ userId }),
         });
@@ -109,9 +118,10 @@ export default function PaymentPage() {
     setError(null);
 
     try {
+      const headers = await getAuthHeaders();
       const orderRes = await fetch(`${API}/api/payment/create-order`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         credentials: "include",
         body: JSON.stringify({ amount: total, currency: "INR", userId }),
       });
@@ -133,9 +143,10 @@ export default function PaymentPage() {
 
         handler: async (response) => {
           try {
+            const headers = await getAuthHeaders();
             const verifyRes = await fetch(`${API}/api/payment/verify-payment`, {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers,
               credentials: "include",
               body: JSON.stringify({ ...response, userId }),
             });
