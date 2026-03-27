@@ -86,7 +86,7 @@ export default function AdminInventory() {
             <span
               style={{ fontFamily: "'DM Serif Display', serif" }}
               className="text-xl text-stone-900 tracking-tight cursor-pointer"
-              onClick={() => navigate("/home")}
+              onClick={() => navigate("/admin/dashboard")}
             >
               FitMart
             </span>
@@ -95,12 +95,12 @@ export default function AdminInventory() {
           </div>
 
           <button
-            onClick={() => navigate("/home")}
+            onClick={() => navigate("/admin/dashboard")}
             className="border border-stone-200 text-stone-600 text-xs px-5 py-2
                        rounded-full hover:bg-stone-900 hover:text-white hover:border-stone-900
                        transition-all"
           >
-            ← Home
+            ← Go to Dashboard
           </button>
         </div>
       </div>

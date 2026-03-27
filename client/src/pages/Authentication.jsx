@@ -11,7 +11,7 @@ import {
 } from "firebase/auth";
 import { auth } from "../auth/firebase";
 
-const ADMIN_UID = import.meta.env.VITE_ADMIN_UID || "n5LtrXIGVSVjNktRn1PgDXZbHgq1";
+const ADMIN_UID = import.meta.env.VITE_ADMIN_UID;
 
 const GoogleIcon = () => (
   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
