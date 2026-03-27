@@ -2,8 +2,11 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
 const app = express();
 const port = process.env.PORT || 5000;
+const allowedOrigin = process.env.ALLOWED_ORIGIN || "http://localhost:5173";
 
 // Display all missing variables at server startup
 const REQUIRED_ENV_VARS = [
@@ -29,16 +32,35 @@ if (missingVars.length > 0) {
 
 // ── Middleware ──────────────────────────────────────────────────────────────
 
-// Single CORS config — having two app.use(cors(...)) calls means the first
-// one (permissive) wins. Use one explicit config instead.
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { error: "Too many requests, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const paymentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { error: "Too many payment requests, please try again later." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 app.use(
   cors({
-    origin: "http://localhost:5173", // your Vite dev server
+    origin: allowedOrigin,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   }),
 );
 
+app.use(helmet());
 app.use(express.json());
+app.use("/api", apiLimiter);
+app.use("/api/payment/create-order", paymentLimiter);
+app.use("/api/payment/verify-payment", paymentLimiter);
 
 // ── Database ────────────────────────────────────────────────────────────────
 require("./db");
@@ -80,4 +102,5 @@ app.use((err, req, res, next) => {
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
+  console.log(`CORS allowed origin: ${allowedOrigin}`);
 });
