@@ -2,20 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
-const admin = require('firebase-admin');
-
-// ── Initialize Firebase Admin once ────────────────────────────────────────
-// Uses the same explicit env vars as the rest of your server
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      // .env stores the private key with literal \n — replace to real newlines
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
-}
+const admin = require('../firebaseAdmin');
 
 // ── Helper: resolve Firebase UID → { displayName, email, photoURL } ───────
 async function resolveFirebaseUser(uid) {

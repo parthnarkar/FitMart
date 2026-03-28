@@ -3,16 +3,7 @@ const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
 const Product = require('../models/Product');
-const admin = require('firebase-admin');
-
-// ── Initialize Firebase Admin once ────────────────────────────────────────
-// Reads credentials from GOOGLE_APPLICATION_CREDENTIALS env var
-// which points to your serviceAccountKey.json file
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.applicationDefault(),
-  });
-}
+const admin = require('../firebaseAdmin');
 
 // ── Helper: resolve Firebase UID → { displayName, email } ─────────────────
 // Returns "—" gracefully if user is deleted or UID is invalid
