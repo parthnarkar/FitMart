@@ -63,16 +63,20 @@ export default function Navbar({
       <div className="max-w-7xl mx-auto px-5 lg:px-10 h-16 flex items-center justify-between">
 
         {/* ── Brand ──────────────────────────────────────────────── */}
-        <span
-          className={`font-['DM_Serif_Display'] text-xl tracking-tight cursor-pointer
-                       transition-colors ${logoColor}`}
+        <button
+          type="button"
           onClick={() => {
             if (isLanding) window.scrollTo({ top: 0, behavior: "smooth" });
             else navigate("/home");
           }}
+          className={`font-['DM_Serif_Display'] text-xl tracking-tight
+               transition-colors bg-transparent border-none p-0
+               cursor-pointer focus:outline-none focus:ring-2 focus:ring-stone-400
+               ${logoColor}`}
+          aria-label="Go to homepage"
         >
           FitMart
-        </span>
+        </button>
 
         {/* ── Right side actions ──────────────────────────────────── */}
         <div className="flex items-center gap-1.5">
