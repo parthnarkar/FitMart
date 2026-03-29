@@ -7,6 +7,7 @@ const rateLimit = require("express-rate-limit");
 const app = express();
 const port = process.env.PORT || 5000;
 const allowedOrigin = process.env.ALLOWED_ORIGIN || "http://localhost:5173";
+const allowedOrigins = allowedOrigin.split(",").map((s) => s.trim()).filter(Boolean);
 
 // Display all missing variables at server startup
 const REQUIRED_ENV_VARS = [
@@ -50,7 +51,11 @@ const paymentLimiter = rateLimit({
 
 app.use(
   cors({
-    origin: allowedOrigin,
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
   }),
@@ -102,5 +107,5 @@ app.use((err, req, res, next) => {
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
-  console.log(`CORS allowed origin: ${allowedOrigin}`);
+  console.log(`CORS allowed origins: ${allowedOrigins.join(", ")}`);
 });
