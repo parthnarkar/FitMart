@@ -152,11 +152,9 @@ function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
         <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-1 mt-auto w-full">
           <div className="min-w-0 pr-2 text-left sm:text-left w-full sm:w-auto">
             <div className="text-sm sm:text-base font-semibold text-stone-900 truncate">{fmt(product.price)}</div>
-            {product.originalPrice && (
-              <div className="text-[10px] sm:text-xs text-stone-400 line-through mt-0.5">
-                {fmt(product.originalPrice)}
-              </div>
-            )}
+            <div className="text-[10px] sm:text-xs text-stone-400 line-through mt-0.5">
+              {product.originalPrice ? fmt(product.originalPrice) : <span className="invisible">&nbsp;</span>}
+            </div>
           </div>
 
           <div className="flex items-center justify-center sm:justify-end shrink-0 w-full sm:w-auto">
