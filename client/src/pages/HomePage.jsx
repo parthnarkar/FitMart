@@ -138,8 +138,12 @@ function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
         {/* Clickable name */}
         <h3
           onClick={() => navigate(`/product/${productId}`)}
+          onPointerDown={(e) => { if (e?.nativeEvent?.pointerType === 'touch') e.preventDefault(); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/product/${productId}`); } }}
+          role="button"
+          tabIndex={0}
           className="text-xs sm:text-sm font-medium text-stone-900 leading-snug mb-1.5 sm:mb-2
-                     line-clamp-2 cursor-pointer hover:text-stone-600 transition-colors"
+                     line-clamp-2 cursor-pointer hover:text-stone-600 transition-colors select-none sm:select-auto"
         >
           {product.name}
         </h3>

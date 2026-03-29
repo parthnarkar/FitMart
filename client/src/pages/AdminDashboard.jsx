@@ -213,8 +213,12 @@ export default function AdminDashboard() {
                 ),
               },
             ].map(card => (
-              <div key={card.href} onClick={() => window.location.href = card.href}
-                className="group cursor-pointer bg-white border border-stone-200 rounded-2xl p-5 sm:p-6
+              <div key={card.href}
+                onClick={() => window.location.href = card.href}
+                onPointerDown={(e) => { if (e?.nativeEvent?.pointerType === 'touch') e.preventDefault(); }}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); window.location.href = card.href; } }}
+                role="button" tabIndex={0}
+                className="group cursor-pointer select-none sm:select-auto bg-white border border-stone-200 rounded-2xl p-5 sm:p-6
                            hover:border-stone-300 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-stone-100 flex items-center justify-center
@@ -223,8 +227,8 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 <h3 style={{ fontFamily: "'DM Serif Display', serif" }}
-                  className="text-xl text-stone-900 mb-2">{card.title}</h3>
-                <p className="text-sm text-stone-500 leading-relaxed mb-4">{card.desc}</p>
+                  className="text-xl text-stone-900 mb-2 select-none sm:select-auto">{card.title}</h3>
+                <p className="text-sm text-stone-500 leading-relaxed mb-4 select-none sm:select-auto">{card.desc}</p>
                 <div className="flex items-center text-xs text-stone-400 group-hover:text-stone-600 transition-colors">
                   <span>{card.cta}</span>
                 </div>
