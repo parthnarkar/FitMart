@@ -231,7 +231,7 @@ export default function LandingPage() {
             <div className={`fade-up ${visible ? "visible" : ""} delay-5 mt-6`}>
               <p className="text-xs text-stone-400 flex items-center gap-1.5 flex-wrap">
                 <GithubIcon className="w-3.5 h-3.5" />
-                Open-source · Built by the{" "}
+                Open-source · Built by{" "}
                 <a
                   href={INSTAGRAM}
                   target="_blank"
@@ -239,9 +239,9 @@ export default function LandingPage() {
                   className="underline underline-offset-2 decoration-stone-300 hover:text-stone-700
                   transition-colors"
                 >
-                  parth.builds
+                  parth.builds community
                 </a>
-                {" "}community · 20 contributors · 21 forks
+                {" "}
               </p>
             </div>
           </div>
