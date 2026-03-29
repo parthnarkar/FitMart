@@ -27,11 +27,16 @@ const PLANS = [
   { name: "Mobility & Recovery", duration: "8 Weeks", desc: "Flexibility-first programming, ideal for desk workers", tag: null, route: "/plans/mobility-recovery" },
 ];
 
-const Stars = ({ rating }) => (
-  <span className="text-stone-500 text-xs">
-    {"★".repeat(Math.round(rating))}{"☆".repeat(5 - Math.round(rating))}
-  </span>
-);
+const Stars = ({ rating, size = "sm" }) => {
+  const full = Math.floor(rating || 0);
+  const half = (rating || 0) % 1 >= 0.5;
+  const empty = 5 - full - (half ? 1 : 0);
+  return (
+    <span className={`${size === "lg" ? "text-base" : "text-xs"} text-stone-500 tracking-tight`}>
+      {"★".repeat(full)}{half ? "⯪" : ""}{"☆".repeat(empty)}
+    </span>
+  );
+};
 
 function mapCart(cartDoc, products) {
   return cartDoc.items.map(it => {
@@ -62,7 +67,8 @@ function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
 
   return (
     <div className="group bg-white border border-stone-100 rounded-2xl overflow-hidden
-                    hover:border-stone-200 hover:shadow-lg transition-all duration-300">
+            hover:border-stone-200 hover:shadow-lg transition-all duration-300
+            flex flex-col h-full">
 
       {/* Clickable image */}
       <div
@@ -96,7 +102,7 @@ function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
         )}
       </div>
 
-      <div className="p-3 sm:p-5">
+      <div className="p-3 sm:p-5 flex flex-col flex-1">
         <p className="text-[9px] sm:text-[10px] tracking-[0.15em] uppercase text-stone-400 mb-1">
           {product.brand}
         </p>
@@ -115,7 +121,7 @@ function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
           <span className="text-[9px] sm:text-[10px] text-stone-400">({product.reviews})</span>
         </div>
 
-        <div className="flex items-end justify-between gap-1">
+        <div className="flex items-end justify-between gap-1 mt-auto">
           <div className="min-w-0">
             <span className="text-sm sm:text-base font-semibold text-stone-900">{fmt(product.price)}</span>
             {product.originalPrice && (
