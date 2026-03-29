@@ -148,10 +148,10 @@ export default function Authentication() {
 
         <div className="grid grid-cols-2 gap-4">
           {[
-            { v: "50K+", l: "Members" },
-            { v: "200+", l: "Products" },
-            { v: "100%", l: "Authentic" },
-            { v: "4.9★", l: "Rating" },
+            { v: "16★", l: "Github Stars" },
+            { v: "21", l: "Forks" },
+            { v: "20", l: "Contributors" },
+            { v: "65+", l: "Commits" },
           ].map((s, i) => (
             <div key={i} className="bg-stone-800 rounded-xl p-4">
               <div className="font-['DM_Serif_Display'] text-2xl text-white">{s.v}</div>
