@@ -8,7 +8,6 @@ import CartDrawer from "../components/CartDrawer";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-// ── Stars ──────────────────────────────────────────────────────────────────
 const Stars = ({ rating, size = "sm" }) => {
   const full = Math.floor(rating);
   const half = rating % 1 >= 0.5;
@@ -26,7 +25,6 @@ const FEATURE_MAP = {
   Wearables: ["1-year warranty", "Water resistant", "Free shipping", "Returns within 15 days"],
 };
 
-// ── Low-level helpers (no component state needed) ─────────────────────────
 async function apiAddToCart(userId, productId, quantity) {
   const headers = await getAuthHeaders();
   const res = await fetch(`${API}/api/cart/${userId}/add`, {
@@ -44,7 +42,6 @@ async function apiGetCart(userId) {
   return res.json();
 }
 
-// Map raw cart doc → enriched array using the products list
 function enrichCart(cartDoc, products) {
   return (cartDoc.items || []).map(it => {
     const prod = products.find(p => Number(p.productId) === Number(it.productId));
@@ -53,14 +50,12 @@ function enrichCart(cartDoc, products) {
   });
 }
 
-// ── Main component ─────────────────────────────────────────────────────────
 export default function ProductPage() {
   const { productId } = useParams();
   const navigate = useNavigate();
 
-  // ── Product & page state ─────────────────────────────────────────────
   const [product, setProduct] = useState(null);
-  const [products, setProducts] = useState([]);   // full list — needed for cart enrichment
+  const [products, setProducts] = useState([]);
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -68,20 +63,17 @@ export default function ProductPage() {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [activeTab, setActiveTab] = useState("details");
 
-  // ── Action state ─────────────────────────────────────────────────────
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const [buyingNow, setBuyingNow] = useState(false);
 
-  // ── Cart drawer state ────────────────────────────────────────────────
   const [cartOpen, setCartOpen] = useState(false);
-  const [cart, setCart] = useState([]);   // enriched items for CartDrawer
+  const [cart, setCart] = useState([]);
 
   const imgRef = useRef(null);
   const stickyRef = useRef(null);
 
-  // ── Derived values ───────────────────────────────────────────────────
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0);
   const cartTotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
   const discount = product?.originalPrice
@@ -93,7 +85,6 @@ export default function ProductPage() {
   ];
   const busy = adding || buyingNow;
 
-  // ── Refresh cart helper (used after any mutation) ────────────────────
   const refreshCart = async (productsList = products) => {
     const user = auth.currentUser;
     if (!user || !productsList.length) return;
@@ -105,7 +96,6 @@ export default function ProductPage() {
     }
   };
 
-  // ── Fetch products + product + cart on mount / productId change ──────
   useEffect(() => {
     setVisible(false);
     setImgLoaded(false);
@@ -120,22 +110,16 @@ export default function ProductPage() {
         const res = await fetch(`${API}/api/products`);
         if (!res.ok) throw new Error("Failed to load products");
         const all = res.ok ? await res.json() : [];
-
-        // Normalise ids
         const normalised = all.map(p => ({ ...p, id: p.productId }));
         setProducts(normalised);
-
         const found = normalised.find(p => String(p.productId) === String(productId));
         if (!found) throw new Error("Product not found");
         setProduct(found);
-
         setRelated(
           normalised
             .filter(p => p.category === found.category && String(p.productId) !== String(productId))
             .slice(0, 4)
         );
-
-        // Load cart
         const user = auth.currentUser;
         if (user) {
           const cartDoc = await apiGetCart(user.uid);
@@ -154,7 +138,6 @@ export default function ProductPage() {
     if (product) document.title = `${product.name} — FitMart`;
   }, [product]);
 
-  // ── Add to Cart ──────────────────────────────────────────────────────
   const handleAddToCart = async () => {
     const user = auth.currentUser;
     if (!user) { navigate("/auth"); return; }
@@ -171,7 +154,6 @@ export default function ProductPage() {
     }
   };
 
-  // ── Buy Now — add first, then navigate ───────────────────────────────
   const handleBuyNow = async () => {
     const user = auth.currentUser;
     if (!user) { navigate("/auth"); return; }
@@ -185,7 +167,6 @@ export default function ProductPage() {
     }
   };
 
-  // ── CartDrawer callbacks ─────────────────────────────────────────────
   const removeFromCart = async (id) => {
     const user = auth.currentUser;
     if (!user) return;
@@ -222,10 +203,10 @@ export default function ProductPage() {
     }
   };
 
-  // ── Loading skeleton ─────────────────────────────────────────────────
   if (loading) return (
     <Shell cartCount={0} onCartOpen={() => setCartOpen(true)}>
-      <div className="max-w-7xl mx-auto px-5 lg:px-10 py-24 grid lg:grid-cols-2 gap-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-10 py-10 sm:py-24
+                      grid lg:grid-cols-2 gap-8 lg:gap-16">
         <div className="aspect-square bg-stone-100 rounded-2xl animate-pulse" />
         <div className="space-y-5 pt-4">
           <div className="h-3 w-24 bg-stone-100 rounded-full animate-pulse" />
@@ -243,11 +224,12 @@ export default function ProductPage() {
 
   if (error) return (
     <Shell cartCount={cartCount} onCartOpen={() => setCartOpen(true)}>
-      <div className="max-w-md mx-auto mt-32 text-center px-5">
+      <div className="max-w-md mx-auto mt-20 sm:mt-32 text-center px-5">
         <p className="text-4xl text-stone-200 mb-4">∅</p>
         <p className="text-stone-500 text-sm mb-6">{error}</p>
         <button onClick={() => navigate("/home")}
-          className="bg-stone-900 text-white text-sm px-8 py-3 rounded-full hover:bg-stone-700 transition-colors">
+          className="bg-stone-900 text-white text-sm px-8 py-3 rounded-full
+                     hover:bg-stone-700 transition-colors min-h-[44px]">
           Back to Store
         </button>
       </div>
@@ -281,24 +263,29 @@ export default function ProductPage() {
           .overlay.show { opacity:1; pointer-events:auto; }
         `}</style>
 
-        {/* ── Breadcrumb ─────────────────────────────────────────────────── */}
+        {/* ── Breadcrumb ── */}
         <div className={`pd-fade ${visible ? "in" : ""} border-b border-stone-100 bg-white`}>
-          <div className="max-w-7xl mx-auto px-5 lg:px-10 py-3.5 flex items-center gap-2 text-xs text-stone-400">
-            <button onClick={() => navigate("/")} className="hover:text-stone-700 transition-colors">Home</button>
-            <span>→</span>
-            <button onClick={() => navigate("/home")} className="hover:text-stone-700 transition-colors">Shop</button>
-            <span>→</span>
-            <button onClick={() => navigate("/home")} className="hover:text-stone-700 transition-colors">
+          <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-10 py-3 sm:py-3.5
+                          flex items-center gap-1.5 sm:gap-2 text-xs text-stone-400 overflow-x-auto
+                          whitespace-nowrap scrollbar-none">
+            <button onClick={() => navigate("/")}
+              className="hover:text-stone-700 transition-colors flex-shrink-0">Home</button>
+            <span className="flex-shrink-0">→</span>
+            <button onClick={() => navigate("/home")}
+              className="hover:text-stone-700 transition-colors flex-shrink-0">Shop</button>
+            <span className="flex-shrink-0">→</span>
+            <button onClick={() => navigate("/home")}
+              className="hover:text-stone-700 transition-colors flex-shrink-0">
               {product.category}
             </button>
-            <span>→</span>
-            <span className="text-stone-600 truncate max-w-48">{product.name}</span>
+            <span className="flex-shrink-0">→</span>
+            <span className="text-stone-600 truncate">{product.name}</span>
           </div>
         </div>
 
-        {/* ── Two-column main ────────────────────────────────────────────── */}
-        <div className="max-w-7xl mx-auto px-5 lg:px-10 py-12 lg:py-20">
-          <div className="grid lg:grid-cols-2 gap-12 xl:gap-20">
+        {/* ── Two-column main ── */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-10 py-8 sm:py-12 lg:py-20">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 xl:gap-20">
 
             {/* LEFT — image + feature pills */}
             <div className={`pd-fade pd-d1 ${visible ? "in" : ""}`}>
@@ -314,10 +301,11 @@ export default function ProductPage() {
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-7xl opacity-20">
-                    {product.category === "Nutrition" ? "🧴" : product.category === "Wearables" ? "⌚" : "🏋️"}
+                    {product.category === "Nutrition" ? "🧴"
+                      : product.category === "Wearables" ? "⌚" : "🏋️"}
                   </div>
                 )}
-                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                <div className="absolute top-3 sm:top-4 left-3 sm:left-4 flex flex-col gap-2">
                   {product.badge && (
                     <span className="text-[10px] tracking-widest uppercase bg-stone-900 text-white
                                      px-3 py-1.5 rounded-full shadow-lg">
@@ -333,10 +321,11 @@ export default function ProductPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mt-4">
+              {/* Feature pills — 2-col on all sizes */}
+              <div className="grid grid-cols-2 gap-2 sm:gap-3 mt-3 sm:mt-4">
                 {features.map((f, i) => (
-                  <div key={i} className="flex items-center gap-2.5 bg-stone-50 border border-stone-200
-                                          rounded-xl px-4 py-3">
+                  <div key={i} className="flex items-center gap-2 sm:gap-2.5 bg-stone-50
+                                          border border-stone-200 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3">
                     <span className="text-stone-400 text-sm flex-shrink-0">✓</span>
                     <span className="text-xs text-stone-600 leading-snug">{f}</span>
                   </div>
@@ -348,7 +337,7 @@ export default function ProductPage() {
             <div className="flex flex-col" ref={stickyRef}>
 
               {/* Brand + category */}
-              <div className={`pd-fade pd-d1 ${visible ? "in" : ""} flex items-center gap-3 mb-4`}>
+              <div className={`pd-fade pd-d1 ${visible ? "in" : ""} flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4`}>
                 <span className="text-[10px] tracking-[0.2em] uppercase text-stone-400 border
                                  border-stone-200 px-3 py-1.5 rounded-full">
                   {product.brand}
@@ -362,14 +351,15 @@ export default function ProductPage() {
               <h1
                 style={{ fontFamily: "'DM Serif Display', serif" }}
                 className={`pd-fade pd-d2 ${visible ? "in" : ""}
-                            text-3xl md:text-4xl lg:text-5xl text-stone-900 leading-[1.1]
-                            tracking-tight mb-4`}
+                            text-3xl sm:text-4xl lg:text-5xl text-stone-900 leading-[1.1]
+                            tracking-tight mb-3 sm:mb-4`}
               >
                 {product.name}
               </h1>
 
               {/* Rating */}
-              <div className={`pd-fade pd-d2 ${visible ? "in" : ""} flex items-center gap-3 mb-6`}>
+              <div className={`pd-fade pd-d2 ${visible ? "in" : ""}
+                               flex items-center gap-2 sm:gap-3 mb-5 sm:mb-6 flex-wrap`}>
                 <Stars rating={product.rating} size="lg" />
                 <span className="text-sm text-stone-500">{product.rating.toFixed(1)}</span>
                 <div className="w-px h-4 bg-stone-200" />
@@ -380,16 +370,17 @@ export default function ProductPage() {
 
               {/* Price card */}
               <div className={`pd-fade pd-d3 ${visible ? "in" : ""}
-                               bg-stone-50 border border-stone-200 rounded-2xl p-6 mb-6`}>
-                <div className="flex items-end gap-3 mb-1">
+                               bg-stone-50 border border-stone-200 rounded-2xl p-4 sm:p-6 mb-5 sm:mb-6`}>
+                <div className="flex items-end gap-3 mb-1 flex-wrap">
                   <span
                     style={{ fontFamily: "'DM Serif Display', serif" }}
-                    className="text-4xl text-stone-900 leading-none"
+                    className="text-3xl sm:text-4xl text-stone-900 leading-none"
                   >
                     {fmt(product.price)}
                   </span>
                   {product.originalPrice && product.originalPrice > product.price && (
-                    <span className="text-lg text-stone-400 line-through leading-none mb-0.5">
+                    <span className="text-base sm:text-lg text-stone-400 line-through
+                                     leading-none mb-0.5">
                       {fmt(product.originalPrice)}
                     </span>
                   )}
@@ -403,7 +394,9 @@ export default function ProductPage() {
                     ({discount}% off)
                   </p>
                 )}
-                <p className="text-[10px] text-stone-400 mt-2">Inclusive of all taxes · Free shipping</p>
+                <p className="text-[10px] text-stone-400 mt-2">
+                  Inclusive of all taxes · Free shipping
+                </p>
               </div>
 
               {/* Quantity selector */}
@@ -433,30 +426,34 @@ export default function ProductPage() {
                   </button>
                 </div>
                 {quantity >= 10 && (
-                  <p className="text-[10px] text-stone-400 mt-1.5">Maximum 10 units per order</p>
+                  <p className="text-[10px] text-stone-400 mt-1.5">
+                    Maximum 10 units per order
+                  </p>
                 )}
               </div>
 
-              {/* CTA buttons */}
-              <div className={`pd-fade pd-d5 ${visible ? "in" : ""} flex gap-3 mb-8`}>
-                {/* Add to Cart */}
+              {/* CTA buttons — stack on very small screens */}
+              <div className={`pd-fade pd-d5 ${visible ? "in" : ""}
+                               flex flex-col xs:flex-row gap-3 mb-6 sm:mb-8`}>
                 <button
                   onClick={handleAddToCart}
                   disabled={busy}
                   className={`flex-1 text-sm py-4 rounded-full font-medium transition-all
                               flex items-center justify-center gap-2 disabled:cursor-not-allowed
+                              min-h-[52px] active:scale-[0.98]
                               ${added
                       ? "bg-stone-700 text-white"
                       : adding
                         ? "bg-stone-900 text-white adding-pulse"
-                        : "bg-stone-900 text-white hover:bg-stone-700 active:scale-[0.98]"
+                        : "bg-stone-900 text-white hover:bg-stone-700"
                     }`}
                 >
                   {added ? (
                     <>✓ Added to Cart</>
                   ) : adding ? (
                     <>
-                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent
+                                       rounded-full animate-spin" />
                       Adding…
                     </>
                   ) : (
@@ -464,29 +461,31 @@ export default function ProductPage() {
                   )}
                 </button>
 
-                {/* Buy Now */}
                 <button
                   onClick={handleBuyNow}
                   disabled={busy}
                   className={`border border-stone-300 text-stone-700 text-sm px-6 py-4
                               rounded-full transition-all flex items-center justify-center gap-2
+                              min-h-[52px] active:scale-[0.98]
                               ${buyingNow
                       ? "opacity-70 cursor-not-allowed"
-                      : "hover:bg-stone-900 hover:text-white hover:border-stone-900 active:scale-[0.98]"
+                      : "hover:bg-stone-900 hover:text-white hover:border-stone-900"
                     }`}
                 >
                   {buyingNow ? (
                     <>
-                      <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                      <span className="hidden sm:inline">Processing…</span>
+                      <span className="w-4 h-4 border-2 border-current border-t-transparent
+                                       rounded-full animate-spin" />
+                      <span>Processing…</span>
                     </>
                   ) : "Buy Now"}
                 </button>
               </div>
 
-              {/* Trust strip */}
+              {/* Trust strip — wraps gracefully on small screens */}
               <div className={`pd-fade pd-d6 ${visible ? "in" : ""}
-                               flex items-center gap-5 pt-5 border-t border-stone-100`}>
+                               flex items-center gap-3 sm:gap-5 pt-4 sm:pt-5
+                               border-t border-stone-100 flex-wrap`}>
                 {[
                   { icon: "◎", text: "Authentic product" },
                   { icon: "⚡", text: "Fast delivery" },
@@ -502,44 +501,51 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* ── Tabs ───────────────────────────────────────────────────────── */}
+        {/* ── Tabs ── */}
         <div className="border-t border-stone-200 bg-white">
-          <div className="max-w-7xl mx-auto px-5 lg:px-10">
-            <div className="flex gap-8 border-b border-stone-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-10">
+            {/* Scrollable tab bar on mobile */}
+            <div className="flex gap-4 sm:gap-8 border-b border-stone-100 overflow-x-auto
+                            scrollbar-none -mx-4 sm:mx-0 px-4 sm:px-0">
               {[
-                { key: "details", label: "Product Details" },
-                { key: "specs", label: "Specifications" },
-                { key: "shipping", label: "Shipping & Returns" },
+                { key: "details", label: "Details" },
+                { key: "specs", label: "Specs" },
+                { key: "shipping", label: "Shipping" },
               ].map(tab => (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key)}
-                  className={`text-sm py-4 transition-colors ${activeTab === tab.key ? "tab-active" : "tab-inactive"}`}
+                  className={`text-sm py-4 whitespace-nowrap transition-colors flex-shrink-0
+                              ${activeTab === tab.key ? "tab-active" : "tab-inactive"}`}
                 >
                   {tab.label}
                 </button>
               ))}
             </div>
 
-            <div className="py-10 max-w-2xl">
+            <div className="py-8 sm:py-10 max-w-2xl">
               {activeTab === "details" && (
                 <div className="space-y-4">
-                  <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-3">About this product</p>
+                  <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-3">
+                    About this product
+                  </p>
                   <p className="text-sm text-stone-600 leading-relaxed">
                     {product.name} by {product.brand} is a premium {product.category?.toLowerCase()} product
                     trusted by fitness enthusiasts across Mumbai.
                     {product.badge ? ` Rated as "${product.badge}" by our community.` : ""}
                     {" "}Sourced directly from the manufacturer and verified for authenticity.
                   </p>
-                  <div className="grid grid-cols-2 gap-4 pt-4">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4 pt-4">
                     {[
                       { label: "Brand", value: product.brand },
                       { label: "Category", value: product.category },
                       { label: "Rating", value: `${product.rating} / 5` },
                       { label: "Reviews", value: product.reviews?.toLocaleString("en-IN") },
                     ].map(({ label, value }) => (
-                      <div key={label} className="bg-stone-50 rounded-xl px-4 py-3">
-                        <p className="text-[10px] tracking-[0.15em] uppercase text-stone-400 mb-1">{label}</p>
+                      <div key={label} className="bg-stone-50 rounded-xl px-3 sm:px-4 py-3">
+                        <p className="text-[10px] tracking-[0.15em] uppercase text-stone-400 mb-1">
+                          {label}
+                        </p>
                         <p className="text-sm text-stone-900 font-medium">{value}</p>
                       </div>
                     ))}
@@ -549,7 +555,9 @@ export default function ProductPage() {
 
               {activeTab === "specs" && (
                 <div>
-                  <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-5">Technical specifications</p>
+                  <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-5">
+                    Technical specifications
+                  </p>
                   {[
                     { label: "Product ID", value: `#${product.productId}` },
                     { label: "Brand", value: product.brand },
@@ -560,24 +568,29 @@ export default function ProductPage() {
                     { label: "Rating", value: `${product.rating} ★` },
                     { label: "Reviews", value: product.reviews?.toLocaleString("en-IN") },
                   ].map(({ label, value }) => (
-                    <div key={label} className="flex items-center justify-between py-3.5
-                                                border-b border-stone-100 last:border-0">
-                      <span className="text-xs text-stone-500 uppercase tracking-wide">{label}</span>
-                      <span className="text-sm text-stone-900 font-medium">{value}</span>
+                    <div key={label} className="flex items-center justify-between py-3
+                                                border-b border-stone-100 last:border-0 gap-4">
+                      <span className="text-xs text-stone-500 uppercase tracking-wide flex-shrink-0">
+                        {label}
+                      </span>
+                      <span className="text-sm text-stone-900 font-medium text-right">{value}</span>
                     </div>
                   ))}
                 </div>
               )}
 
               {activeTab === "shipping" && (
-                <div className="space-y-4">
-                  <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-3">Delivery & Returns</p>
+                <div className="space-y-3 sm:space-y-4">
+                  <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-3">
+                    Delivery & Returns
+                  </p>
                   {[
                     { icon: "⚡", title: "Fast Delivery", body: "Orders dispatched within 24 hours. Delivery within 2–5 business days across MMR." },
                     { icon: "✓", title: "Free Shipping", body: "Free shipping on all orders above ₹499. Standard charges of ₹49 apply below that threshold." },
                     { icon: "◎", title: "Easy Returns", body: `${product.category === "Wearables" ? "15" : "30"}-day hassle-free returns. Item must be unused and in original packaging.` },
                   ].map(({ icon, title, body }) => (
-                    <div key={title} className="flex gap-4 p-5 bg-stone-50 rounded-2xl border border-stone-200">
+                    <div key={title} className="flex gap-3 sm:gap-4 p-4 sm:p-5 bg-stone-50
+                                                rounded-2xl border border-stone-200">
                       <span className="text-stone-500 text-lg flex-shrink-0 mt-0.5">{icon}</span>
                       <div>
                         <p className="text-sm font-medium text-stone-900 mb-1">{title}</p>
@@ -591,20 +604,21 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* ── Related products ───────────────────────────────────────────── */}
+        {/* ── Related products ── */}
         {related.length > 0 && (
-          <div className="bg-stone-50 border-t border-stone-200 py-16">
-            <div className="max-w-7xl mx-auto px-5 lg:px-10">
+          <div className="bg-stone-50 border-t border-stone-200 py-12 sm:py-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-10">
               <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2">
                 More from {product.category}
               </p>
               <h2
                 style={{ fontFamily: "'DM Serif Display', serif" }}
-                className="text-3xl text-stone-900 mb-10"
+                className="text-2xl sm:text-3xl text-stone-900 mb-7 sm:mb-10"
               >
                 You may also like
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+              {/* 2-col on mobile → 4-col on md */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
                 {related.map(rel => {
                   const rd = rel.originalPrice
                     ? Math.round(((rel.originalPrice - rel.price) / rel.originalPrice) * 100)
@@ -613,16 +627,19 @@ export default function ProductPage() {
                     <div
                       key={rel.productId}
                       onClick={() => navigate(`/product/${rel.productId}`)}
-                      className="related-card bg-white border border-stone-200 rounded-2xl overflow-hidden
-                                 cursor-pointer hover:border-stone-300 hover:shadow-lg transition-all duration-300"
+                      className="related-card bg-white border border-stone-200 rounded-2xl
+                                 overflow-hidden cursor-pointer hover:border-stone-300
+                                 hover:shadow-lg transition-all duration-300"
                     >
                       <div className="relative bg-stone-100 aspect-square overflow-hidden">
                         {rel.image ? (
                           <img src={rel.image} alt={rel.name}
                             className="related-img w-full h-full object-cover" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-4xl opacity-20">
-                            {rel.category === "Nutrition" ? "🧴" : rel.category === "Wearables" ? "⌚" : "🏋️"}
+                          <div className="w-full h-full flex items-center justify-center
+                                          text-4xl opacity-20">
+                            {rel.category === "Nutrition" ? "🧴"
+                              : rel.category === "Wearables" ? "⌚" : "🏋️"}
                           </div>
                         )}
                         {rel.badge && (
@@ -638,12 +655,17 @@ export default function ProductPage() {
                           </span>
                         )}
                       </div>
-                      <div className="p-4">
-                        <p className="text-[10px] tracking-[0.12em] uppercase text-stone-400 mb-0.5">{rel.brand}</p>
-                        <p className="text-sm text-stone-900 font-medium leading-snug line-clamp-2 mb-2">{rel.name}</p>
+                      <div className="p-3 sm:p-4">
+                        <p className="text-[10px] tracking-[0.12em] uppercase text-stone-400 mb-0.5">
+                          {rel.brand}
+                        </p>
+                        <p className="text-sm text-stone-900 font-medium leading-snug
+                                      line-clamp-2 mb-2">
+                          {rel.name}
+                        </p>
                         <div className="flex items-center justify-between">
                           <span style={{ fontFamily: "'DM Serif Display', serif" }}
-                            className="text-lg text-stone-900">
+                            className="text-base sm:text-lg text-stone-900">
                             {fmt(rel.price)}
                           </span>
                           <Stars rating={rel.rating} />
@@ -658,7 +680,6 @@ export default function ProductPage() {
         )}
       </Shell>
 
-      {/* CartDrawer lives OUTSIDE Shell so it can use ProductPage state freely */}
       <CartDrawer
         isOpen={cartOpen}
         onClose={() => setCartOpen(false)}
@@ -672,28 +693,26 @@ export default function ProductPage() {
   );
 }
 
-// ── Shell — sticky nav with live cart badge ────────────────────────────────
-// Receives cartCount + onCartOpen as props (both live in ProductPage state)
 function Shell({ children, cartCount = 0, onCartOpen }) {
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-stone-50" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       <div className="bg-white border-b border-stone-200 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-5 lg:px-10 h-16 flex items-center justify-between">
-
+        <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-10 h-14 sm:h-16
+                        flex items-center justify-between">
           <span
             style={{ fontFamily: "'DM Serif Display', serif" }}
-            className="text-xl text-stone-900 tracking-tight cursor-pointer"
+            className="text-lg sm:text-xl text-stone-900 tracking-tight cursor-pointer"
             onClick={() => navigate("/home")}
           >
             FitMart
           </span>
 
-          <div className="flex items-center gap-3">
-            {/* Cart icon with live badge — opens CartDrawer */}
+          <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={onCartOpen}
-              className="relative p-2 text-stone-500 hover:text-stone-900 transition-colors"
+              className="relative p-2 text-stone-500 hover:text-stone-900 transition-colors
+                         min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label="Open cart"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor"
@@ -713,10 +732,12 @@ function Shell({ children, cartCount = 0, onCartOpen }) {
 
             <button
               onClick={() => navigate("/home")}
-              className="border border-stone-200 text-stone-600 text-xs px-5 py-2 rounded-full
-                         hover:bg-stone-900 hover:text-white hover:border-stone-900 transition-all"
+              className="border border-stone-200 text-stone-600 text-xs px-3 sm:px-5 py-2
+                         rounded-full hover:bg-stone-900 hover:text-white hover:border-stone-900
+                         transition-all min-h-[36px]"
             >
-              ← Back to Shop
+              <span className="hidden sm:inline">← Back to Shop</span>
+              <span className="sm:hidden">← Shop</span>
             </button>
           </div>
         </div>

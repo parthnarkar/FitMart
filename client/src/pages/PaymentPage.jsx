@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { auth } from "../auth/firebase";
 import { getAuthHeaders } from "../utils/getAuthHeaders";
-import Navbar from "../components/Navbar"; // Make sure to import Navbar
+import Navbar from "../components/Navbar";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID;
@@ -30,9 +30,8 @@ export default function PaymentPage() {
   const [paying, setPaying] = useState(false);
   const [bypassing, setBypassing] = useState(false);
   const [error, setError] = useState(null);
-  const [menuOpen, setMenuOpen] = useState(false); // Add this state for Navbar
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // Unpack state passed from Checkout (includes discount info)
   const {
     items = [],
     total = 0,
@@ -50,9 +49,7 @@ export default function PaymentPage() {
     window.scrollTo(0, 0);
   }, []);
 
-  // ── Shared post-payment cleanup ────────────────────────────────────────
   const finishOrder = async (userId, paymentId) => {
-    // Clear cart
     try {
       const headers = await getAuthHeaders();
       await fetch(`${API}/api/payment/clear-cart`, {
@@ -65,7 +62,6 @@ export default function PaymentPage() {
       console.error('clear-cart failed:', err);
     }
 
-    // Mark discount as used if it was applied
     if (discountApplied) {
       try {
         const headers = await getAuthHeaders();
@@ -77,7 +73,6 @@ export default function PaymentPage() {
         });
       } catch (err) {
         console.error("use-discount error:", err);
-        // non-fatal — order still completes
       }
     }
 
@@ -86,7 +81,6 @@ export default function PaymentPage() {
     });
   };
 
-  // ── Demo bypass ────────────────────────────────────────────────────────
   const handleDemoSuccess = async () => {
     const user = auth.currentUser;
     if (!user) { navigate("/auth"); return; }
@@ -108,7 +102,6 @@ export default function PaymentPage() {
     }
   };
 
-  // ── Real Razorpay flow ─────────────────────────────────────────────────
   const handlePay = async () => {
     if (!rzpReady) { setError("Payment SDK not loaded. Please refresh."); return; }
     const user = auth.currentUser;
@@ -140,7 +133,6 @@ export default function PaymentPage() {
         order_id: order.id,
         prefill: { name: user.displayName || "", email: user.email || "" },
         theme: { color: "#1c1917" },
-
         handler: async (response) => {
           try {
             const headers = await getAuthHeaders();
@@ -157,7 +149,6 @@ export default function PaymentPage() {
             setPaying(false);
           }
         },
-
         modal: {
           ondismiss: () => {
             setPaying(false);
@@ -185,36 +176,38 @@ export default function PaymentPage() {
     new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
 
   return (
-    // REPLACE this entire wrapper div with the new one containing Navbar
     <div className="min-h-screen bg-stone-50" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       <Navbar
         variant="home"
         menuOpen={menuOpen}
         setMenuOpen={setMenuOpen}
       />
-      {/* The rest of your content goes here */}
       <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap');`}</style>
 
-      <div className="max-w-xl mx-auto px-5 py-16">
-        <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-3">Checkout</p>
+      <div className="max-w-xl mx-auto px-4 sm:px-5 py-10 sm:py-16">
+        <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2 sm:mb-3">
+          Checkout
+        </p>
         <h1
           style={{ fontFamily: "'DM Serif Display', serif" }}
-          className="text-4xl text-stone-900 mb-10"
+          className="text-3xl sm:text-4xl text-stone-900 mb-7 sm:mb-10"
         >
           Payment
         </h1>
 
-        {/* Order summary */}
-        <div className="bg-white border border-stone-200 rounded-2xl p-7 mb-5
+        {/* Order summary card */}
+        <div className="bg-white border border-stone-200 rounded-2xl p-5 sm:p-7 mb-4 sm:mb-5
                         hover:border-stone-300 transition-all duration-300">
           <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-4">
             Order Summary
           </p>
+
           <div className="space-y-3 mb-5">
             {items.map(({ product, quantity }) => (
               <div key={product.productId} className="flex items-center gap-3">
                 <img
-                  src={product.image} alt={product.name}
+                  src={product.image}
+                  alt={product.name}
                   className="w-10 h-10 object-cover rounded-lg bg-stone-100 flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
@@ -247,7 +240,7 @@ export default function PaymentPage() {
               <span className="text-sm text-stone-500">Total payable</span>
               <span
                 style={{ fontFamily: "'DM Serif Display', serif" }}
-                className="text-3xl text-stone-900"
+                className="text-2xl sm:text-3xl text-stone-900"
               >
                 {fmt(total)}
               </span>
@@ -255,18 +248,21 @@ export default function PaymentPage() {
           </div>
         </div>
 
+        {/* Error banner */}
         {error && (
-          <div className="bg-red-50 border border-red-100 rounded-2xl px-5 py-4 mb-5">
-            <p className="text-red-600 text-sm">{error}</p>
+          <div className="bg-red-50 border border-red-100 rounded-2xl px-4 sm:px-5 py-4 mb-4 sm:mb-5">
+            <p className="text-red-600 text-sm leading-relaxed">{error}</p>
           </div>
         )}
 
+        {/* Pay button */}
         <button
           onClick={handlePay}
           disabled={busy || !rzpReady}
-          className="w-full bg-stone-900 text-white text-sm px-8 py-3.5 rounded-full
+          className="w-full bg-stone-900 text-white text-sm px-8 py-4 rounded-full
                      hover:bg-stone-700 transition-colors disabled:opacity-50
-                     disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                     disabled:cursor-not-allowed flex items-center justify-center gap-2
+                     min-h-[52px] active:scale-[0.98]"
         >
           {paying ? (
             <>
@@ -276,7 +272,7 @@ export default function PaymentPage() {
           ) : `Pay ${fmt(total)} →`}
         </button>
 
-        <p className="text-xs text-stone-400 text-center mt-4">
+        <p className="text-xs text-stone-400 text-center mt-3 sm:mt-4">
           100% secure · powered by Razorpay
         </p>
 
@@ -284,18 +280,19 @@ export default function PaymentPage() {
         <div className="mt-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="flex-1 h-px bg-stone-200" />
-            <span className="text-[10px] tracking-[0.15em] uppercase text-stone-400">
+            <span className="text-[10px] tracking-[0.15em] uppercase text-stone-400 whitespace-nowrap">
               Demo / Testing
             </span>
             <div className="flex-1 h-px bg-stone-200" />
           </div>
+
           <button
             onClick={handleDemoSuccess}
             disabled={busy}
-            className="w-full border border-stone-300 text-stone-600 text-sm px-8 py-3.5
+            className="w-full border border-stone-300 text-stone-600 text-sm px-8 py-4
                        rounded-full hover:bg-stone-900 hover:text-white hover:border-stone-900
                        transition-all disabled:opacity-50 disabled:cursor-not-allowed
-                       flex items-center justify-center gap-2"
+                       flex items-center justify-center gap-2 min-h-[52px] active:scale-[0.98]"
           >
             {bypassing ? (
               <>
@@ -304,15 +301,18 @@ export default function PaymentPage() {
               </>
             ) : "Simulate Successful Payment ✓"}
           </button>
+
           <p className="text-[10px] text-stone-400 text-center mt-2">
             Skips Razorpay · clears cart · goes to confirmation
           </p>
         </div>
 
+        {/* Back button */}
         <button
           onClick={() => navigate("/checkout")}
           className="w-full mt-4 border border-stone-200 text-stone-400 text-sm
-                     px-8 py-3 rounded-full hover:bg-stone-100 transition-colors"
+                     px-8 py-3.5 rounded-full hover:bg-stone-100 transition-colors
+                     min-h-[48px] active:scale-[0.98]"
         >
           ← Back to cart
         </button>

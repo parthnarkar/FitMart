@@ -63,7 +63,6 @@ export default function LandingPage() {
   const programsRef = useRef(null);
   const aboutRef = useRef(null);
 
-  // custom titles for landing page
   useEffect(() => {
     document.title = "FitMart - Fitness & Nutrition Store";
   }, []);
@@ -96,13 +95,12 @@ export default function LandingPage() {
         .slide-up { display:inline-block; transform:translateY(100%); transition:transform .8s cubic-bezier(.16,1,.3,1); }
         .slide-up.visible { transform:translateY(0); }
         .cat-card { transition:transform .35s ease,box-shadow .35s ease; }
-        .cat-card:hover { transform:translateY(-4px); box-shadow:0 20px 40px rgba(0,0,0,.1); }
+        @media(hover:hover){ .cat-card:hover { transform:translateY(-4px); box-shadow:0 20px 40px rgba(0,0,0,.1); } }
         .testimonial-enter { animation:tFadeIn .6s ease forwards; }
         @keyframes tFadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
       `}</style>
 
       {/* ── NAVBAR ──────────────────────────────────────────────────────── */}
-      {/* No links, no onSearchToggle, no onCartOpen — pure landing variant */}
       <Navbar
         variant="landing"
         navOpaque={navOpaque}
@@ -119,9 +117,10 @@ export default function LandingPage() {
             backgroundSize: "80px 80px",
           }}
         />
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-24 relative z-10">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-10 py-16 sm:py-24 relative z-10 w-full">
           <div className="max-w-4xl">
-            <div className={`fade-up ${visible ? "visible" : ""} delay-1 mb-6`}>
+            {/* Badge */}
+            <div className={`fade-up ${visible ? "visible" : ""} delay-1 mb-5 sm:mb-6`}>
               <span className="inline-flex items-center gap-2 text-xs tracking-[0.2em] uppercase
                                text-stone-500 border border-stone-200 px-3 py-1.5 rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-stone-400 animate-pulse" />
@@ -129,8 +128,9 @@ export default function LandingPage() {
               </span>
             </div>
 
-            <h1 className="font-['DM_Serif_Display'] text-5xl md:text-7xl lg:text-8xl text-stone-900
-                           leading-[1.05] mb-6 tracking-tight">
+            {/* Headline — fluid type scale */}
+            <h1 className="font-['DM_Serif_Display'] text-[2.6rem] sm:text-6xl md:text-7xl lg:text-8xl
+                           text-stone-900 leading-[1.05] mb-5 sm:mb-6 tracking-tight">
               <div className="hero-line">
                 <span className={`slide-up ${visible ? "visible" : ""} delay-1`}>
                   Everything fitness.
@@ -143,24 +143,27 @@ export default function LandingPage() {
               </div>
             </h1>
 
-            <p className={`fade-up ${visible ? "visible" : ""} delay-3 text-lg text-stone-500
-                           max-w-xl leading-relaxed mb-10`}>
+            {/* Subheading */}
+            <p className={`fade-up ${visible ? "visible" : ""} delay-3 text-base sm:text-lg text-stone-500
+                           max-w-xl leading-relaxed mb-8 sm:mb-10`}>
               Curated equipment, verified nutrition, and digital coaching — built for people
               who take their health seriously.
             </p>
 
-            <div className={`fade-up ${visible ? "visible" : ""} delay-4 flex flex-wrap gap-3`}>
+            {/* CTA buttons — stack on smallest screens */}
+            <div className={`fade-up ${visible ? "visible" : ""} delay-4
+                             flex flex-col sm:flex-row gap-3`}>
               <button
                 onClick={() => navigate(auth.currentUser ? "/home" : "/auth")}
                 className="bg-stone-900 text-white text-sm px-8 py-3.5 rounded-full
-                           hover:bg-stone-700 transition-colors"
+                           hover:bg-stone-700 transition-colors w-full sm:w-auto text-center"
               >
                 Start Shopping
               </button>
               <button
                 onClick={() => categoriesRef.current?.scrollIntoView({ behavior: "smooth" })}
                 className="text-sm text-stone-700 px-8 py-3.5 rounded-full border border-stone-300
-                           hover:bg-stone-100 transition-colors"
+                           hover:bg-stone-100 transition-colors w-full sm:w-auto text-center"
               >
                 Explore Categories
               </button>
@@ -168,12 +171,15 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Stats bar */}
+        {/* Stats bar — 2×2 on mobile, 4-col on md+ */}
         <div className="border-t border-stone-200 bg-white">
-          <div className="max-w-7xl mx-auto px-6 lg:px-10 py-8 grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-10 py-6 sm:py-8
+                          grid grid-cols-2 md:grid-cols-4 gap-5 sm:gap-6">
             {STATS.map((s, i) => (
               <div key={i} className="text-center md:text-left">
-                <div className="font-['DM_Serif_Display'] text-2xl md:text-3xl text-stone-900">{s.value}</div>
+                <div className="font-['DM_Serif_Display'] text-2xl md:text-3xl text-stone-900">
+                  {s.value}
+                </div>
                 <div className="text-xs text-stone-500 mt-0.5 tracking-wide uppercase">{s.label}</div>
               </div>
             ))}
@@ -182,34 +188,36 @@ export default function LandingPage() {
       </section>
 
       {/* ── CATEGORIES ──────────────────────────────────────────────────── */}
-      <section ref={categoriesRef} className="py-24 bg-white scroll-mt-20">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="mb-14">
+      <section ref={categoriesRef} className="py-16 sm:py-24 bg-white scroll-mt-20">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-10">
+          <div className="mb-10 sm:mb-14">
             <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-3">What We Offer</p>
-            <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-stone-900">
+            <h2 className="font-['DM_Serif_Display'] text-3xl sm:text-4xl md:text-5xl text-stone-900">
               Shop by category
             </h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-5">
+
+          {/* Cards — single col on mobile, 3-col on md+ */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
             {CATEGORIES.map((c, i) => (
               <div
                 key={i}
-                className={`cat-card rounded-2xl p-8 md:p-10 flex flex-col justify-between
-                            min-h-72 cursor-pointer ${c.bg}`}
+                className={`cat-card rounded-2xl p-6 sm:p-8 md:p-10 flex flex-col justify-between
+                            min-h-56 sm:min-h-64 md:min-h-72 cursor-pointer ${c.bg}`}
                 onClick={() => navigate("/home", { state: { category: c.filter } })}
               >
                 <div>
-                  <span className={`text-[10px] tracking-[0.2em] uppercase font-medium ${c.sub} mb-4 block`}>
+                  <span className={`text-[10px] tracking-[0.2em] uppercase font-medium ${c.sub} mb-3 sm:mb-4 block`}>
                     {c.tag}
                   </span>
-                  <h3 className={`font-['DM_Serif_Display'] text-2xl md:text-3xl ${c.text} leading-snug mb-3`}>
+                  <h3 className={`font-['DM_Serif_Display'] text-2xl md:text-3xl ${c.text} leading-snug mb-2 sm:mb-3`}>
                     {c.title}
                   </h3>
                   <p className={`text-sm leading-relaxed ${c.sub}`}>{c.desc}</p>
                 </div>
                 <button
-                  className={`mt-8 self-start text-xs border px-5 py-2.5 rounded-full
-                              transition-colors ${c.btn}`}
+                  className={`mt-6 sm:mt-8 self-start text-xs border px-5 py-2.5 rounded-full
+                              transition-colors ${c.btn} min-h-[40px]`}
                   onClick={e => { e.stopPropagation(); navigate("/home", { state: { category: c.filter } }); }}
                 >
                   Browse →
@@ -221,29 +229,32 @@ export default function LandingPage() {
       </section>
 
       {/* ── PROGRAMS ────────────────────────────────────────────────────── */}
-      <section ref={programsRef} className="py-24 bg-stone-50 scroll-mt-20">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="mb-14">
+      <section ref={programsRef} className="py-16 sm:py-24 bg-stone-50 scroll-mt-20">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-10">
+          <div className="mb-10 sm:mb-14">
             <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-3">Digital Coaching</p>
-            <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-stone-900">Our programs</h2>
+            <h2 className="font-['DM_Serif_Display'] text-3xl sm:text-4xl md:text-5xl text-stone-900">
+              Our programs
+            </h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
             {PROGRAMS.map((program, i) => (
               <div
                 key={i}
-                className="bg-white rounded-2xl p-8 border border-stone-200 hover:shadow-lg
-                           transition-all cursor-pointer"
+                className="bg-white rounded-2xl p-6 sm:p-8 border border-stone-200 hover:shadow-lg
+                           transition-all cursor-pointer active:scale-[0.99]"
                 onClick={() => navigate(auth.currentUser ? "/home" : "/auth")}
               >
                 <span className="text-[10px] tracking-[0.2em] uppercase text-stone-400 mb-3 block">
                   {program.level}
                 </span>
                 <h3 className="font-['DM_Serif_Display'] text-2xl text-stone-900 mb-2">{program.name}</h3>
-                <p className="text-sm text-stone-500 mb-4">{program.duration}</p>
-                <p className="text-sm text-stone-600 leading-relaxed mb-6">{program.desc}</p>
+                <p className="text-sm text-stone-500 mb-3 sm:mb-4">{program.duration}</p>
+                <p className="text-sm text-stone-600 leading-relaxed mb-5 sm:mb-6">{program.desc}</p>
                 <button className="text-xs border border-stone-300 text-stone-700 px-5 py-2.5
                                    rounded-full hover:bg-stone-900 hover:text-white hover:border-stone-900
-                                   transition-all">
+                                   transition-all min-h-[40px]">
                   Learn More →
                 </button>
               </div>
@@ -253,15 +264,17 @@ export default function LandingPage() {
       </section>
 
       {/* ── FEATURE STRIP ───────────────────────────────────────────────── */}
-      <section className="py-20 bg-stone-900 text-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="grid md:grid-cols-3 gap-12">
+      <section className="py-14 sm:py-20 bg-stone-900 text-white">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-10">
+          {/* Single col on mobile, 3-col on md+ with dividers */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12
+                          divide-y divide-stone-800 md:divide-y-0 md:divide-x md:divide-stone-800">
             {[
               { icon: "✓", title: "100% Authenticity", desc: "Every supplement sourced direct from manufacturer with QR batch verification." },
               { icon: "⚡︎", title: "Mumbai-Speed Delivery", desc: "24-hour fulfillment within MMR. Real-time tracking via WhatsApp and email." },
               { icon: "◎", title: "Fitness-as-a-Service", desc: "Buy a product, unlock a plan. Equipment and coaching aren't separate here." },
             ].map((f, i) => (
-              <div key={i} className="flex flex-col gap-3">
+              <div key={i} className={`flex flex-col gap-3 ${i > 0 ? "pt-8 md:pt-0 md:pl-12" : ""}`}>
                 <span className="text-stone-400 text-lg">{f.icon}</span>
                 <h3 className="font-['DM_Serif_Display'] text-xl">{f.title}</h3>
                 <p className="text-sm text-stone-400 leading-relaxed">{f.desc}</p>
@@ -272,26 +285,26 @@ export default function LandingPage() {
       </section>
 
       {/* ── ABOUT ───────────────────────────────────────────────────────── */}
-      <section ref={aboutRef} className="py-24 bg-white scroll-mt-20">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
+      <section ref={aboutRef} className="py-16 sm:py-24 bg-white scroll-mt-20">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-10">
           <div className="max-w-3xl mx-auto text-center">
             <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-3">About FitMart</p>
-            <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-stone-900 mb-8">
+            <h2 className="font-['DM_Serif_Display'] text-3xl sm:text-4xl md:text-5xl text-stone-900 mb-6 sm:mb-8">
               Built for Mumbai's fitness community
             </h2>
-            <p className="text-lg text-stone-600 leading-relaxed mb-12">
+            <p className="text-base sm:text-lg text-stone-600 leading-relaxed mb-8 sm:mb-12">
               We started FitMart because we believe fitness shouldn't be complicated.
               By bringing together equipment, nutrition, and coaching under one roof,
               we've created Mumbai's first integrated fitness ecosystem.
             </p>
-            <div className="grid grid-cols-2 gap-8 max-w-2xl mx-auto">
+            <div className="grid grid-cols-2 gap-6 sm:gap-8 max-w-xs sm:max-w-sm md:max-w-2xl mx-auto">
               <div className="text-center">
                 <div className="font-['DM_Serif_Display'] text-3xl text-stone-900">2024</div>
-                <p className="text-xs text-stone-500">Founded</p>
+                <p className="text-xs text-stone-500 mt-0.5">Founded</p>
               </div>
               <div className="text-center">
                 <div className="font-['DM_Serif_Display'] text-3xl text-stone-900">1000+</div>
-                <p className="text-xs text-stone-500">Happy Customers</p>
+                <p className="text-xs text-stone-500 mt-0.5">Happy Customers</p>
               </div>
             </div>
           </div>
@@ -299,25 +312,31 @@ export default function LandingPage() {
       </section>
 
       {/* ── TESTIMONIALS ────────────────────────────────────────────────── */}
-      <section className="py-24 bg-stone-50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
+      <section className="py-16 sm:py-24 bg-stone-50">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-10">
           <div className="max-w-2xl mx-auto text-center">
-            <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-10">From the Community</p>
+            <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-8 sm:mb-10">
+              From the Community
+            </p>
             <div key={activeTestimonial} className="testimonial-enter">
-              <blockquote className="font-['DM_Serif_Display'] text-2xl md:text-3xl text-stone-800
-                                     leading-relaxed mb-8">
+              <blockquote className="font-['DM_Serif_Display'] text-xl sm:text-2xl md:text-3xl
+                                     text-stone-800 leading-relaxed mb-6 sm:mb-8">
                 "{TESTIMONIALS[activeTestimonial].quote}"
               </blockquote>
               <p className="text-sm font-medium text-stone-900">{TESTIMONIALS[activeTestimonial].name}</p>
               <p className="text-xs text-stone-400 mt-1">{TESTIMONIALS[activeTestimonial].role}</p>
             </div>
-            <div className="flex justify-center gap-2 mt-10">
+
+            {/* Dot indicators — larger tap targets on mobile */}
+            <div className="flex justify-center items-center gap-2 mt-8 sm:mt-10">
               {TESTIMONIALS.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setActiveTestimonial(i)}
-                  className={`h-1.5 rounded-full transition-all ${i === activeTestimonial ? "bg-stone-900 w-5" : "bg-stone-200 w-1.5"
-                    }`}
+                  className={`h-1.5 rounded-full transition-all
+                    ${i === activeTestimonial ? "bg-stone-900 w-5" : "bg-stone-200 w-1.5"}`}
+                  style={{ minWidth: "6px", minHeight: "24px", display: "flex", alignItems: "center" }}
+                  aria-label={`Testimonial ${i + 1}`}
                 />
               ))}
             </div>
@@ -326,13 +345,17 @@ export default function LandingPage() {
       </section>
 
       {/* ── PLANS TEASER ────────────────────────────────────────────────── */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10">
-          <div className="text-center mb-14">
+      <section className="py-16 sm:py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-10">
+          <div className="text-center mb-10 sm:mb-14">
             <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-3">Membership Plans</p>
-            <h2 className="font-['DM_Serif_Display'] text-4xl md:text-5xl text-stone-900">Choose your level</h2>
+            <h2 className="font-['DM_Serif_Display'] text-3xl sm:text-4xl md:text-5xl text-stone-900">
+              Choose your level
+            </h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+
+          {/* Plans — stack on mobile, 3-col on md+ */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
             {[
               { name: "Freemium", price: 0, perks: ["Store access", "Public workout blogs", "Product reviews"], cta: "Start Free" },
               { name: "Pro", price: 499, perks: ["Personalized nutrition plans", "5% discount on all products", "Priority support"], cta: "Go Pro", highlight: true },
@@ -340,16 +363,19 @@ export default function LandingPage() {
             ].map((plan, i) => (
               <div
                 key={i}
-                className={`rounded-2xl p-8 flex flex-col gap-5 cursor-pointer transition-all hover:shadow-lg ${plan.highlight
-                  ? "bg-stone-900 text-white hover:bg-stone-800"
-                  : "bg-white border border-stone-200 hover:border-stone-300"
+                className={`rounded-2xl p-6 sm:p-8 flex flex-col gap-4 sm:gap-5 cursor-pointer
+                            transition-all hover:shadow-lg active:scale-[0.99]
+                            ${plan.highlight
+                    ? "bg-stone-900 text-white hover:bg-stone-800"
+                    : "bg-white border border-stone-200 hover:border-stone-300"
                   }`}
                 onClick={() => navigate(auth.currentUser ? "/home" : "/auth")}
               >
                 <div>
                   <p className="text-xs tracking-widest uppercase text-stone-400">{plan.name}</p>
                   <div className="flex items-baseline gap-1 mt-2">
-                    <span className={`font-['DM_Serif_Display'] text-4xl ${plan.highlight ? "text-white" : "text-stone-900"}`}>
+                    <span className={`font-['DM_Serif_Display'] text-4xl
+                                      ${plan.highlight ? "text-white" : "text-stone-900"}`}>
                       {fmt(plan.price)}
                     </span>
                     {plan.price !== 0 && (
@@ -357,18 +383,20 @@ export default function LandingPage() {
                     )}
                   </div>
                 </div>
-                <ul className="flex flex-col gap-2.5 flex-1">
+                <ul className="flex flex-col gap-2 sm:gap-2.5 flex-1">
                   {plan.perks.map((p, j) => (
-                    <li key={j} className={`text-sm flex items-start gap-2 ${plan.highlight ? "text-stone-300" : "text-stone-600"}`}>
-                      <span className="mt-0.5 text-stone-400">─</span>{p}
+                    <li key={j} className={`text-sm flex items-start gap-2
+                                            ${plan.highlight ? "text-stone-300" : "text-stone-600"}`}>
+                      <span className="mt-0.5 text-stone-400 flex-shrink-0">─</span>{p}
                     </li>
                   ))}
                 </ul>
                 <button
                   onClick={e => { e.stopPropagation(); navigate(auth.currentUser ? "/home" : "/auth"); }}
-                  className={`text-sm py-2.5 rounded-full transition-colors ${plan.highlight
-                    ? "bg-white text-stone-900 hover:bg-stone-100"
-                    : "border border-stone-300 text-stone-700 hover:bg-stone-50"
+                  className={`text-sm py-3 rounded-full transition-colors min-h-[44px]
+                              ${plan.highlight
+                      ? "bg-white text-stone-900 hover:bg-stone-100"
+                      : "border border-stone-300 text-stone-700 hover:bg-stone-50"
                     }`}
                 >
                   {plan.cta}
@@ -380,15 +408,19 @@ export default function LandingPage() {
       </section>
 
       {/* ── FINAL CTA ───────────────────────────────────────────────────── */}
-      <section className="py-32 bg-stone-900">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 text-center">
-          <p className="text-xs tracking-[0.2em] uppercase text-stone-500 mb-5">Get Started Today</p>
-          <h2 className="font-['DM_Serif_Display'] text-4xl md:text-6xl text-white max-w-2xl mx-auto leading-tight mb-8">
+      <section className="py-20 sm:py-32 bg-stone-900">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-10 text-center">
+          <p className="text-xs tracking-[0.2em] uppercase text-stone-500 mb-4 sm:mb-5">
+            Get Started Today
+          </p>
+          <h2 className="font-['DM_Serif_Display'] text-3xl sm:text-4xl md:text-6xl text-white
+                         max-w-2xl mx-auto leading-tight mb-7 sm:mb-8">
             Your fitness journey starts with one decision.
           </h2>
           <button
             onClick={() => navigate(auth.currentUser ? "/home" : "/auth")}
-            className="bg-white text-stone-900 text-sm px-10 py-4 rounded-full hover:bg-stone-100 transition-colors"
+            className="bg-white text-stone-900 text-sm px-8 sm:px-10 py-4 rounded-full
+                       hover:bg-stone-100 transition-colors min-h-[48px] w-full sm:w-auto"
           >
             Create your account →
           </button>
@@ -397,15 +429,16 @@ export default function LandingPage() {
 
       {/* ── FOOTER ──────────────────────────────────────────────────────── */}
       <footer className="bg-stone-900 border-t border-stone-800">
-        <div className="max-w-7xl mx-auto px-6 lg:px-10 py-10 flex flex-col md:flex-row
-                        justify-between items-center gap-4">
+        <div className="max-w-7xl mx-auto px-5 sm:px-6 lg:px-10 py-8 sm:py-10
+                        flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-5">
           <span className="font-['DM_Serif_Display'] text-white text-lg">FitMart</span>
-          <p className="text-xs text-stone-600">© 2026 FitMart. Built at VESIT, Mumbai.</p>
-          <div className="flex gap-6">
+          <p className="text-xs text-stone-600 text-center">© 2026 FitMart. Built at VESIT, Mumbai.</p>
+          <div className="flex gap-5 sm:gap-6">
             {["Privacy", "Terms", "Contact"].map(l => (
               <button
                 key={l}
-                className="text-xs text-stone-600 hover:text-stone-400 transition-colors"
+                className="text-xs text-stone-600 hover:text-stone-400 transition-colors
+                           min-h-[36px] px-1"
                 onClick={() => l === "Contact" && aboutRef.current?.scrollIntoView({ behavior: "smooth" })}
               >
                 {l}

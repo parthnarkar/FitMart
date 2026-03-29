@@ -24,21 +24,15 @@ const GoogleIcon = () => (
 
 export default function Authentication() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState("signin"); // "signin" | "signup" | "reset"
+  const [mode, setMode] = useState("signin");
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [visible, setVisible] = useState(false);
 
-  // custom title for login page 
-  useEffect(() => {
-    document.title = "Login - FitMart";
-  }, []);
-
-  useEffect(() => {
-    setTimeout(() => setVisible(true), 80);
-  }, []);
+  useEffect(() => { document.title = "Login - FitMart"; }, []);
+  useEffect(() => { setTimeout(() => setVisible(true), 80); }, []);
 
   const handleChange = (e) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
@@ -64,11 +58,7 @@ export default function Authentication() {
     setLoading(true);
     try {
       const cred = await signInWithEmailAndPassword(auth, form.email, form.password);
-      if (cred?.user?.uid === ADMIN_UID) {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/home");
-      }
+      navigate(cred?.user?.uid === ADMIN_UID ? "/admin/dashboard" : "/home");
     } catch (err) {
       setError(parseError(err.code));
     } finally {
@@ -78,25 +68,13 @@ export default function Authentication() {
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-    if (form.password !== form.confirm) {
-      setError("Passwords do not match.");
-      return;
-    }
-    if (form.password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
+    if (form.password !== form.confirm) { setError("Passwords do not match."); return; }
+    if (form.password.length < 6) { setError("Password must be at least 6 characters."); return; }
     setLoading(true);
     try {
       const cred = await createUserWithEmailAndPassword(auth, form.email, form.password);
-      if (form.name.trim()) {
-        await updateProfile(cred.user, { displayName: form.name.trim() });
-      }
-      if (cred?.user?.uid === ADMIN_UID) {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/home");
-      }
+      if (form.name.trim()) await updateProfile(cred.user, { displayName: form.name.trim() });
+      navigate(cred?.user?.uid === ADMIN_UID ? "/admin/dashboard" : "/home");
     } catch (err) {
       setError(parseError(err.code));
     } finally {
@@ -109,11 +87,7 @@ export default function Authentication() {
     try {
       const provider = new GoogleAuthProvider();
       const cred = await signInWithPopup(auth, provider);
-      if (cred?.user?.uid === ADMIN_UID) {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/home");
-      }
+      navigate(cred?.user?.uid === ADMIN_UID ? "/admin/dashboard" : "/home");
     } catch (err) {
       setError(parseError(err.code));
     } finally {
@@ -123,10 +97,7 @@ export default function Authentication() {
 
   const handleReset = async (e) => {
     e.preventDefault();
-    if (!form.email) {
-      setError("Please enter your email address.");
-      return;
-    }
+    if (!form.email) { setError("Please enter your email address."); return; }
     setLoading(true);
     try {
       await sendPasswordResetEmail(auth, form.email);
@@ -146,7 +117,7 @@ export default function Authentication() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 font-['DM_Sans',sans-serif] flex">
+    <div className="min-h-screen bg-stone-50 font-['DM_Sans',sans-serif] flex flex-col lg:flex-row">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
         .auth-panel { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
@@ -156,7 +127,7 @@ export default function Authentication() {
         .mode-tab { transition: color 0.2s ease, border-color 0.2s ease; }
       `}</style>
 
-      {/* Left Panel — Branding (hidden on mobile) */}
+      {/* ── Left branding panel — hidden on mobile, visible lg+ ── */}
       <div className="hidden lg:flex flex-col justify-between w-2/5 bg-stone-900 p-12">
         <button
           onClick={() => navigate("/")}
@@ -190,28 +161,42 @@ export default function Authentication() {
         </div>
       </div>
 
-      {/* Right Panel — Auth Form */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-        {/* Mobile logo */}
+      {/* ── Mobile top branding strip ── */}
+      <div className="lg:hidden bg-stone-900 px-5 py-6 flex items-center justify-between">
         <button
           onClick={() => navigate("/")}
-          className="lg:hidden font-['DM_Serif_Display'] text-2xl text-stone-900 mb-10"
+          className="font-['DM_Serif_Display'] text-xl text-white"
         >
           FitMart
         </button>
+        {/* Mini stats strip */}
+        <div className="flex items-center gap-4">
+          {[{ v: "50K+", l: "Members" }, { v: "4.9★", l: "Rating" }].map((s, i) => (
+            <div key={i} className="text-center">
+              <div className="font-['DM_Serif_Display'] text-base text-white leading-none">{s.v}</div>
+              <div className="text-[9px] text-stone-500 mt-0.5">{s.l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
 
+      {/* ── Right auth panel ── */}
+      <div className="flex-1 flex flex-col items-center justify-center
+                      px-5 sm:px-8 py-10 sm:py-12 min-h-0">
         <div className={`auth-panel ${visible ? "visible" : ""} w-full max-w-sm`}>
 
           {/* Mode Tabs */}
           {mode !== "reset" && (
-            <div className="flex border-b border-stone-200 mb-8">
+            <div className="flex border-b border-stone-200 mb-6 sm:mb-8">
               {["signin", "signup"].map((m) => (
                 <button
                   key={m}
                   onClick={() => switchMode(m)}
-                  className={`mode-tab flex-1 py-3 text-sm font-medium border-b-2 -mb-px transition-all ${mode === m
-                    ? "border-stone-900 text-stone-900"
-                    : "border-transparent text-stone-400 hover:text-stone-600"
+                  className={`mode-tab flex-1 py-3 text-sm font-medium border-b-2 -mb-px
+                              transition-all min-h-[44px]
+                              ${mode === m
+                      ? "border-stone-900 text-stone-900"
+                      : "border-transparent text-stone-400 hover:text-stone-600"
                     }`}
                 >
                   {m === "signin" ? "Sign In" : "Create Account"}
@@ -228,37 +213,28 @@ export default function Authentication() {
                   Email
                 </label>
                 <input
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  required
-                  placeholder="you@example.com"
-                  className="input-field w-full border border-stone-200 bg-white rounded-lg px-4 py-3 text-sm text-stone-900 placeholder-stone-300"
+                  type="email" name="email" value={form.email}
+                  onChange={handleChange} required placeholder="you@example.com"
+                  className="input-field w-full border border-stone-200 bg-white rounded-lg
+                             px-4 py-3 text-sm text-stone-900 placeholder-stone-300"
                 />
               </div>
 
               <div>
                 <div className="flex justify-between items-center mb-1.5">
-                  <label className="text-xs text-stone-500 tracking-wide uppercase">
-                    Password
-                  </label>
+                  <label className="text-xs text-stone-500 tracking-wide uppercase">Password</label>
                   <button
-                    type="button"
-                    onClick={() => switchMode("reset")}
-                    className="text-xs text-stone-400 hover:text-stone-600 transition-colors"
+                    type="button" onClick={() => switchMode("reset")}
+                    className="text-xs text-stone-400 hover:text-stone-600 transition-colors min-h-[32px] px-1"
                   >
                     Forgot password?
                   </button>
                 </div>
                 <input
-                  type="password"
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  required
-                  placeholder="••••••••"
-                  className="input-field w-full border border-stone-200 bg-white rounded-lg px-4 py-3 text-sm text-stone-900 placeholder-stone-300"
+                  type="password" name="password" value={form.password}
+                  onChange={handleChange} required placeholder="••••••••"
+                  className="input-field w-full border border-stone-200 bg-white rounded-lg
+                             px-4 py-3 text-sm text-stone-900 placeholder-stone-300"
                 />
               </div>
 
@@ -268,11 +244,9 @@ export default function Authentication() {
                 </p>
               )}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-stone-900 text-white text-sm py-3 rounded-lg hover:bg-stone-700 transition-colors disabled:opacity-50 mt-1"
-              >
+              <button type="submit" disabled={loading}
+                className="w-full bg-stone-900 text-white text-sm py-3 rounded-lg
+                           hover:bg-stone-700 transition-colors disabled:opacity-50 mt-1 min-h-[48px]">
                 {loading ? "Signing in…" : "Sign In"}
               </button>
 
@@ -282,12 +256,10 @@ export default function Authentication() {
                 <div className="flex-1 h-px bg-stone-200" />
               </div>
 
-              <button
-                type="button"
-                onClick={handleGoogle}
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-2.5 border border-stone-200 bg-white text-stone-700 text-sm py-3 rounded-lg hover:bg-stone-50 transition-colors disabled:opacity-50"
-              >
+              <button type="button" onClick={handleGoogle} disabled={loading}
+                className="w-full flex items-center justify-center gap-2.5 border border-stone-200
+                           bg-white text-stone-700 text-sm py-3 rounded-lg hover:bg-stone-50
+                           transition-colors disabled:opacity-50 min-h-[48px]">
                 <GoogleIcon />
                 Continue with Google
               </button>
@@ -302,42 +274,30 @@ export default function Authentication() {
                   Full Name
                 </label>
                 <input
-                  type="text"
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder="Arjun Mehta"
-                  className="input-field w-full border border-stone-200 bg-white rounded-lg px-4 py-3 text-sm text-stone-900 placeholder-stone-300"
+                  type="text" name="name" value={form.name}
+                  onChange={handleChange} placeholder="Arjun Mehta"
+                  className="input-field w-full border border-stone-200 bg-white rounded-lg
+                             px-4 py-3 text-sm text-stone-900 placeholder-stone-300"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-stone-500 mb-1.5 tracking-wide uppercase">
-                  Email
-                </label>
+                <label className="block text-xs text-stone-500 mb-1.5 tracking-wide uppercase">Email</label>
                 <input
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  required
-                  placeholder="you@example.com"
-                  className="input-field w-full border border-stone-200 bg-white rounded-lg px-4 py-3 text-sm text-stone-900 placeholder-stone-300"
+                  type="email" name="email" value={form.email}
+                  onChange={handleChange} required placeholder="you@example.com"
+                  className="input-field w-full border border-stone-200 bg-white rounded-lg
+                             px-4 py-3 text-sm text-stone-900 placeholder-stone-300"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-stone-500 mb-1.5 tracking-wide uppercase">
-                  Password
-                </label>
+                <label className="block text-xs text-stone-500 mb-1.5 tracking-wide uppercase">Password</label>
                 <input
-                  type="password"
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  required
-                  placeholder="Minimum 6 characters"
-                  className="input-field w-full border border-stone-200 bg-white rounded-lg px-4 py-3 text-sm text-stone-900 placeholder-stone-300"
+                  type="password" name="password" value={form.password}
+                  onChange={handleChange} required placeholder="Minimum 6 characters"
+                  className="input-field w-full border border-stone-200 bg-white rounded-lg
+                             px-4 py-3 text-sm text-stone-900 placeholder-stone-300"
                 />
               </div>
 
@@ -346,13 +306,10 @@ export default function Authentication() {
                   Confirm Password
                 </label>
                 <input
-                  type="password"
-                  name="confirm"
-                  value={form.confirm}
-                  onChange={handleChange}
-                  required
-                  placeholder="••••••••"
-                  className="input-field w-full border border-stone-200 bg-white rounded-lg px-4 py-3 text-sm text-stone-900 placeholder-stone-300"
+                  type="password" name="confirm" value={form.confirm}
+                  onChange={handleChange} required placeholder="••••••••"
+                  className="input-field w-full border border-stone-200 bg-white rounded-lg
+                             px-4 py-3 text-sm text-stone-900 placeholder-stone-300"
                 />
               </div>
 
@@ -362,11 +319,9 @@ export default function Authentication() {
                 </p>
               )}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-stone-900 text-white text-sm py-3 rounded-lg hover:bg-stone-700 transition-colors disabled:opacity-50 mt-1"
-              >
+              <button type="submit" disabled={loading}
+                className="w-full bg-stone-900 text-white text-sm py-3 rounded-lg
+                           hover:bg-stone-700 transition-colors disabled:opacity-50 mt-1 min-h-[48px]">
                 {loading ? "Creating account…" : "Create Account"}
               </button>
 
@@ -376,12 +331,10 @@ export default function Authentication() {
                 <div className="flex-1 h-px bg-stone-200" />
               </div>
 
-              <button
-                type="button"
-                onClick={handleGoogle}
-                disabled={loading}
-                className="w-full flex items-center justify-center gap-2.5 border border-stone-200 bg-white text-stone-700 text-sm py-3 rounded-lg hover:bg-stone-50 transition-colors disabled:opacity-50"
-              >
+              <button type="button" onClick={handleGoogle} disabled={loading}
+                className="w-full flex items-center justify-center gap-2.5 border border-stone-200
+                           bg-white text-stone-700 text-sm py-3 rounded-lg hover:bg-stone-50
+                           transition-colors disabled:opacity-50 min-h-[48px]">
                 <GoogleIcon />
                 Continue with Google
               </button>
@@ -399,7 +352,8 @@ export default function Authentication() {
             <div>
               <button
                 onClick={() => switchMode("signin")}
-                className="flex items-center gap-1.5 text-xs text-stone-400 hover:text-stone-600 transition-colors mb-6"
+                className="flex items-center gap-1.5 text-xs text-stone-400 hover:text-stone-600
+                           transition-colors mb-6 min-h-[36px]"
               >
                 ← Back to Sign In
               </button>
@@ -407,19 +361,19 @@ export default function Authentication() {
               <h3 className="font-['DM_Serif_Display'] text-2xl text-stone-900 mb-2">
                 Reset your password
               </h3>
-              <p className="text-sm text-stone-500 mb-7 leading-relaxed">
+              <p className="text-sm text-stone-500 mb-6 sm:mb-7 leading-relaxed">
                 Enter your email and we'll send you a reset link.
               </p>
 
               {resetSent ? (
-                <div className="bg-stone-100 border border-stone-200 rounded-xl px-5 py-4 text-center">
+                <div className="bg-stone-100 border border-stone-200 rounded-xl px-5 py-5 text-center">
                   <p className="text-sm text-stone-700 font-medium mb-1">Check your inbox</p>
                   <p className="text-xs text-stone-500">
                     Reset link sent to <span className="font-medium">{form.email}</span>
                   </p>
                   <button
                     onClick={() => switchMode("signin")}
-                    className="mt-4 text-xs text-stone-500 underline"
+                    className="mt-4 text-xs text-stone-500 underline min-h-[36px]"
                   >
                     Back to Sign In
                   </button>
@@ -431,13 +385,10 @@ export default function Authentication() {
                       Email
                     </label>
                     <input
-                      type="email"
-                      name="email"
-                      value={form.email}
-                      onChange={handleChange}
-                      required
-                      placeholder="you@example.com"
-                      className="input-field w-full border border-stone-200 bg-white rounded-lg px-4 py-3 text-sm text-stone-900 placeholder-stone-300"
+                      type="email" name="email" value={form.email}
+                      onChange={handleChange} required placeholder="you@example.com"
+                      className="input-field w-full border border-stone-200 bg-white rounded-lg
+                                 px-4 py-3 text-sm text-stone-900 placeholder-stone-300"
                     />
                   </div>
 
@@ -447,11 +398,9 @@ export default function Authentication() {
                     </p>
                   )}
 
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-stone-900 text-white text-sm py-3 rounded-lg hover:bg-stone-700 transition-colors disabled:opacity-50"
-                  >
+                  <button type="submit" disabled={loading}
+                    className="w-full bg-stone-900 text-white text-sm py-3 rounded-lg
+                               hover:bg-stone-700 transition-colors disabled:opacity-50 min-h-[48px]">
                     {loading ? "Sending…" : "Send Reset Link"}
                   </button>
                 </form>
