@@ -51,8 +51,12 @@ const Empty = () => (
 // ── Mobile customer card ──────────────────────────────────────────────────
 const CustomerMobileCard = ({ c, index, onClick }) => (
   <div
+    role="button"
+    tabIndex={0}
     onClick={onClick}
-    className="flex items-center gap-3 py-3.5 border-b border-stone-100 last:border-0
+    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } }}
+    onMouseDown={(e) => e.preventDefault()}
+    className="select-none flex items-center gap-3 py-3.5 border-b border-stone-100 last:border-0
                cursor-pointer active:bg-stone-50 transition-colors"
   >
     <span className="text-xs text-stone-300 w-5 flex-shrink-0 text-center">{index + 1}</span>
@@ -214,8 +218,12 @@ export default function AdminCustomers() {
 
                 {!loading && customers.map((c, index) => (
                   <tr key={c.userId}
+                    role="button"
+                    tabIndex={0}
                     onClick={() => navigate(`/admin/customers/${c.userId}`)}
-                    className="hover:bg-stone-50 transition-colors cursor-pointer group">
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); navigate(`/admin/customers/${c.userId}`); } }}
+                    onMouseDown={(e) => e.preventDefault()}
+                    className="select-none hover:bg-stone-50 transition-colors cursor-pointer group">
                     <td className="px-6 py-5 text-stone-300 text-xs">{index + 1}</td>
                     <td className="px-6 py-5">
                       {c.customerName && c.customerName !== "—" ? (
