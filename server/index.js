@@ -9,26 +9,32 @@ const port = process.env.PORT || 5000;
 const allowedOrigin = process.env.ALLOWED_ORIGIN || "http://localhost:5173";
 const allowedOrigins = allowedOrigin.split(",").map((s) => s.trim()).filter(Boolean);
 
-// Display all missing variables at server startup
-const REQUIRED_ENV_VARS = [
+// Display missing variables at server startup. Only require truly critical vars
+// to avoid failing entirely in environments where optional services (Razorpay)
+// are intentionally not configured (for example: demo deployments on Vercel).
+const CRITICAL_ENV_VARS = ["MONGO_URI"];
+const OPTIONAL_ENV_VARS = [
   "RAZORPAY_KEY_ID",
   "RAZORPAY_KEY_SECRET",
   "MONGO_DB",
-  "MONGO_URI",
   "PORT",
   "FIREBASE_PROJECT_ID",
   "FIREBASE_CLIENT_EMAIL",
   "FIREBASE_PRIVATE_KEY",
 ];
-const missingVars = [];
-REQUIRED_ENV_VARS.forEach((varName) => {
-  if (!process.env[varName]) {
-    missingVars.push(varName);
-  }
-})
-if (missingVars.length > 0) {
-  console.log(`⚠️ Missing environment variables: ${missingVars.join(", ")}`);
+
+const missingCritical = CRITICAL_ENV_VARS.filter((v) => !process.env[v]);
+const missingOptional = OPTIONAL_ENV_VARS.filter((v) => !process.env[v]);
+
+if (missingCritical.length > 0) {
+  console.error(`❌ Missing critical environment variables: ${missingCritical.join(", ")}`);
+  console.error("Server cannot start without these. Please set them in your environment.");
   process.exit(1);
+}
+
+if (missingOptional.length > 0) {
+  console.warn(`⚠️ Missing optional environment variables: ${missingOptional.join(", ")}`);
+  console.warn("Continuing startup; some optional functionality may be disabled.");
 }
 
 // ── Middleware ──────────────────────────────────────────────────────────────
