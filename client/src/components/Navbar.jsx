@@ -4,17 +4,6 @@ import { signOut } from "firebase/auth";
 import { auth } from "../auth/firebase";
 import { useAuth } from "../auth/useAuth";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Props
-//   variant        "landing" | "home"
-//   navOpaque      boolean — controls transparent→solid transition (landing only)
-//   onSearchToggle fn — show/hide search bar (home only)
-//   onCartOpen     fn — open cart drawer (home only)
-//   cartCount      number (home only)
-//   menuOpen       boolean (controlled externally)
-//   setMenuOpen    fn
-//   onSignOut      fn — custom sign-out handler (home only; landing handles it internally)
-// ─────────────────────────────────────────────────────────────────────────────
 export default function Navbar({
   variant = "landing",
   navOpaque = true,
@@ -26,13 +15,11 @@ export default function Navbar({
   onSignOut,
 }) {
   const navigate = useNavigate();
-
-  // Firebase auth state — synced here so BOTH pages know if user is logged in
   const { user, loading: authLoading } = useAuth();
 
   const handleSignOut = async () => {
     if (onSignOut) {
-      onSignOut();           // let HomePage handle its own cleanup
+      onSignOut();
     } else {
       await signOut(auth);
       navigate("/");
@@ -40,7 +27,6 @@ export default function Navbar({
     setMenuOpen?.(false);
   };
 
-  // ── Navbar appearance ──────────────────────────────────────────────────
   const isLanding = variant === "landing";
 
   const positionClass = isLanding
@@ -54,38 +40,42 @@ export default function Navbar({
     : "bg-white border-b border-stone-200";
 
   const logoColor = isLanding && !navOpaque ? "text-white" : "text-stone-900";
-  const iconColor = isLanding && !navOpaque
-    ? "text-white/80 hover:text-white"
-    : "text-stone-500 hover:text-stone-900";
+  const iconColor =
+    isLanding && !navOpaque
+      ? "text-white/80 hover:text-white"
+      : "text-stone-500 hover:text-stone-900";
 
   return (
     <nav className={`w-full ${positionClass} transition-all duration-300 ${bgClass}`}>
-      <div className="max-w-7xl mx-auto px-5 lg:px-10 h-16 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-10 h-14 sm:h-16
+                      flex items-center justify-between">
 
-        {/* ── Brand ──────────────────────────────────────────────── */}
-        <button
-          type="button"
-          onClick={() => {
-            if (isLanding) window.scrollTo({ top: 0, behavior: "smooth" });
-            else navigate("/home");
-          }}
-          className={`font-['DM_Serif_Display'] text-xl tracking-tight
-               transition-colors bg-transparent border-none p-0
-               cursor-pointer focus:outline-none focus:ring-2 focus:ring-stone-400
-               ${logoColor}`}
-          aria-label="Go to homepage"
-        >
-          FitMart
-        </button>
 
-        {/* ── Right side actions ──────────────────────────────────── */}
-        <div className="flex items-center gap-1.5">
+      {/* ── Brand ──────────────────────────────────────────────── */}
+<button
+  type="button"
+  onClick={() => {
+    if (isLanding) window.scrollTo({ top: 0, behavior: "smooth" });
+    else navigate("/home");
+  }}
+  className={`font-['DM_Serif_Display'] text-lg sm:text-xl tracking-tight
+              transition-colors bg-transparent border-none p-0
+              cursor-pointer focus:outline-none focus:ring-2 focus:ring-stone-400
+              ${logoColor}`}
+  aria-label="Go to homepage"
+>
+  YourBrand
+</button>
+
+        {/* ── Right side ── */}
+        <div className="flex items-center gap-0.5 sm:gap-1.5">
 
           {/* Search icon — home only */}
           {onSearchToggle && (
             <button
               onClick={onSearchToggle}
-              className={`p-2 transition-colors ${iconColor}`}
+              className={`p-2 transition-colors min-w-[40px] min-h-[40px] flex items-center
+                          justify-center rounded-full ${iconColor}`}
               aria-label="Search"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor"
@@ -100,7 +90,8 @@ export default function Navbar({
           {onCartOpen && (
             <button
               onClick={onCartOpen}
-              className={`relative p-2 transition-colors ${iconColor}`}
+              className={`relative p-2 transition-colors min-w-[40px] min-h-[40px]
+                          flex items-center justify-center rounded-full ${iconColor}`}
               aria-label="Cart"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor"
@@ -119,7 +110,7 @@ export default function Navbar({
             </button>
           )}
 
-          {/* ── Auth area — changes based on login state ────────── */}
+          {/* ── Auth area ── */}
           {!authLoading && (
             <>
               {user ? (
@@ -127,11 +118,13 @@ export default function Navbar({
                 <div className="relative">
                   <button
                     onClick={() => setMenuOpen?.((p) => !p)}
-                    className={`flex items-center gap-2 border rounded-full px-2.5 py-1.5
-                                hover:bg-stone-50 transition-colors ml-1
+                    className={`flex items-center gap-1.5 sm:gap-2 border rounded-full
+                                px-2 sm:px-2.5 py-1.5 hover:bg-stone-50 transition-colors ml-0.5
+                                min-h-[36px]
                                 ${isLanding && !navOpaque
                         ? "border-white/30 hover:bg-white/10"
-                        : "border-stone-200"}`}
+                        : "border-stone-200"
+                      }`}
                   >
                     {/* Avatar */}
                     <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0
@@ -147,14 +140,16 @@ export default function Navbar({
                         <span className={`text-[11px] font-medium
                                           ${isLanding && !navOpaque
                             ? "text-stone-700"
-                            : "text-stone-600"}`}>
+                            : "text-stone-600"
+                          }`}>
                           {(user.displayName?.[0] || user.email?.[0] || "U").toUpperCase()}
                         </span>
                       )}
                     </div>
-                    {/* Name — only on home, hidden on small screens */}
+                    {/* Name — hidden on mobile */}
                     {!isLanding && (
-                      <span className="hidden sm:block text-xs text-stone-700 max-w-[96px] truncate">
+                      <span className="hidden sm:block text-xs text-stone-700
+                                       max-w-[80px] sm:max-w-[96px] truncate">
                         {user.displayName || user.email?.split("@")[0]}
                       </span>
                     )}
@@ -163,14 +158,12 @@ export default function Navbar({
                   {/* Dropdown */}
                   {menuOpen && (
                     <>
-                      {/* Click-outside overlay */}
                       <div
                         className="fixed inset-0 z-40"
                         onClick={() => setMenuOpen?.(false)}
                       />
-                      <div className="absolute right-0 top-full mt-2 w-48 bg-white
-                                      border border-stone-200 rounded-xl shadow-lg
-                                      py-1 z-50">
+                      <div className="absolute right-0 top-full mt-2 w-44 sm:w-48 bg-white
+                                      border border-stone-200 rounded-xl shadow-lg py-1 z-50">
                         <div className="px-4 py-2.5 border-b border-stone-100">
                           <p className="text-xs font-medium text-stone-900 truncate">
                             {user.displayName || "Account"}
@@ -180,12 +173,15 @@ export default function Navbar({
                           </p>
                         </div>
 
-                        {/* Go to shop — only on landing */}
                         {isLanding && (
                           <button
-                            onClick={() => { navigate("/home"); setMenuOpen?.(false); }}
+                            onClick={() => {
+                              navigate("/home");
+                              setMenuOpen?.(false);
+                            }}
                             className="w-full text-left text-xs text-stone-700 font-medium
-                                       hover:bg-stone-50 px-4 py-2 transition-colors"
+                                       hover:bg-stone-50 px-4 py-2.5 transition-colors
+                                       min-h-[36px]"
                           >
                             Go to Shop →
                           </button>
@@ -194,8 +190,8 @@ export default function Navbar({
                         <div className="border-t border-stone-100 mt-1">
                           <button
                             onClick={handleSignOut}
-                            className="w-full text-left text-xs text-stone-500
-                                       hover:bg-stone-50 px-4 py-2 transition-colors"
+                            className="w-full text-left text-xs text-stone-500 hover:bg-stone-50
+                                       px-4 py-2.5 transition-colors min-h-[36px]"
                           >
                             Sign Out
                           </button>
@@ -206,23 +202,28 @@ export default function Navbar({
                 </div>
 
               ) : (
-                /* ── Logged OUT: Sign In + Get Started (landing) or Sign In (home) ── */
-                <div className="flex items-center gap-2 ml-1">
+                /* ── Logged OUT ── */
+                <div className="flex items-center gap-1.5 sm:gap-2 ml-0.5 sm:ml-1">
+                  {/* "Sign In" text link — hidden on mobile */}
                   <button
                     onClick={() => navigate(user ? "/home" : "/auth")}
-                    className={`hidden sm:block text-sm px-4 py-2 transition-colors
+                    className={`hidden sm:block text-sm px-3 sm:px-4 py-2 transition-colors
                                  ${isLanding && !navOpaque
                         ? "text-white/80 hover:text-white"
-                        : "text-stone-600 hover:text-stone-900"}`}
+                        : "text-stone-600 hover:text-stone-900"
+                      }`}
                   >
                     Sign In
                   </button>
+                  {/* Primary CTA */}
                   <button
                     onClick={() => navigate(user ? "/home" : "/auth")}
-                    className={`text-sm px-5 py-2 rounded-full transition-colors
+                    className={`text-xs sm:text-sm px-4 sm:px-5 py-2 rounded-full
+                                 transition-colors min-h-[36px]
                                  ${isLanding && !navOpaque
                         ? "bg-white text-stone-900 hover:bg-stone-100"
-                        : "bg-stone-900 text-white hover:bg-stone-700"}`}
+                        : "bg-stone-900 text-white hover:bg-stone-700"
+                      }`}
                   >
                     {isLanding ? "Get Started" : "Sign In"}
                   </button>
@@ -230,7 +231,6 @@ export default function Navbar({
               )}
             </>
           )}
-
         </div>
       </div>
     </nav>

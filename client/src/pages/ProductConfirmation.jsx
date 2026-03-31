@@ -12,12 +12,10 @@ export default function ProductConfirmation() {
 
   const { items = [], total = 0, paymentId = "" } = location.state || {};
 
-  // custom title for product confirm page 
   useEffect(() => {
     document.title = "FitMart";
   }, []);
 
-  // Order date — set once on mount
   const orderDate = useRef(
     new Date().toLocaleDateString("en-IN", {
       day: "numeric", month: "long", year: "numeric",
@@ -29,12 +27,10 @@ export default function ProductConfirmation() {
     })
   );
 
-  // Guard: if no items, go home
   useEffect(() => {
     if (!items.length) navigate("/");
   }, [items, navigate]);
 
-  // Trigger all fade-up animations together after mount
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 80);
     return () => clearTimeout(t);
@@ -44,7 +40,6 @@ export default function ProductConfirmation() {
     window.scrollTo(0, 0);
   }, []);
 
-  // ── PDF Invoice Generation (pure browser, no extra library needed) ───────
   const downloadInvoice = () => {
     setDownloading(true);
 
@@ -52,7 +47,6 @@ export default function ProductConfirmation() {
     const userName = user?.displayName || user?.email || "Valued Customer";
     const userEmail = user?.email || "";
 
-    // Build an HTML string that will be printed as PDF
     const invoiceHTML = `
 <!DOCTYPE html>
 <html>
@@ -69,8 +63,6 @@ export default function ProductConfirmation() {
       font-size: 14px;
       line-height: 1.6;
     }
-
-    /* ── Header ── */
     .header {
       display: flex;
       justify-content: space-between;
@@ -79,128 +71,65 @@ export default function ProductConfirmation() {
       border-bottom: 2px solid #1c1917;
       margin-bottom: 40px;
     }
-    .brand {
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
+    .brand { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
     .invoice-label {
-      font-size: 11px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: #78716c;
-      margin-top: 6px;
+      font-size: 11px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: #78716c; margin-top: 6px;
     }
     .meta { text-align: right; }
     .meta p { font-size: 12px; color: #78716c; }
     .meta .pid {
-      font-family: monospace;
-      font-size: 11px;
-      color: #44403c;
-      margin-top: 4px;
-      word-break: break-all;
+      font-family: monospace; font-size: 11px; color: #44403c;
+      margin-top: 4px; word-break: break-all;
     }
-
-    /* ── Billing ── */
     .billing {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 32px;
-      margin-bottom: 40px;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 32px; margin-bottom: 40px;
     }
     .billing-block h3 {
-      font-size: 10px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: #78716c;
-      margin-bottom: 8px;
+      font-size: 10px; letter-spacing: 0.18em;
+      text-transform: uppercase; color: #78716c; margin-bottom: 8px;
     }
     .billing-block p { font-size: 13px; color: #1c1917; }
-
-    /* ── Items table ── */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 32px;
-    }
-    thead tr {
-      background: #1c1917;
-      color: #fff;
-    }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 32px; }
+    thead tr { background: #1c1917; color: #fff; }
     thead th {
-      padding: 10px 14px;
-      text-align: left;
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      font-weight: 600;
+      padding: 10px 14px; text-align: left; font-size: 10px;
+      letter-spacing: 0.12em; text-transform: uppercase; font-weight: 600;
     }
     thead th:last-child { text-align: right; }
     tbody tr { border-bottom: 1px solid #e7e5e3; }
     tbody tr:last-child { border-bottom: none; }
-    tbody td {
-      padding: 14px;
-      font-size: 13px;
-      vertical-align: middle;
-    }
+    tbody td { padding: 14px; font-size: 13px; vertical-align: middle; }
     tbody td:last-child { text-align: right; font-weight: 500; }
     .product-brand {
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #78716c;
-      margin-bottom: 2px;
+      font-size: 10px; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #78716c; margin-bottom: 2px;
     }
     .product-name { font-size: 14px; color: #1c1917; }
     .unit-price { font-size: 11px; color: #a8a29e; margin-top: 2px; }
-
-    /* ── Totals ── */
     .totals {
-      margin-left: auto;
-      width: 280px;
-      border-top: 2px solid #1c1917;
-      padding-top: 20px;
+      margin-left: auto; width: 280px;
+      border-top: 2px solid #1c1917; padding-top: 20px;
     }
     .total-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 5px 0;
-      font-size: 13px;
-      color: #44403c;
+      display: flex; justify-content: space-between;
+      padding: 5px 0; font-size: 13px; color: #44403c;
     }
     .total-row.grand {
-      font-size: 16px;
-      font-weight: 700;
-      color: #1c1917;
-      padding-top: 12px;
-      margin-top: 8px;
-      border-top: 1px solid #e7e5e3;
+      font-size: 16px; font-weight: 700; color: #1c1917;
+      padding-top: 12px; margin-top: 8px; border-top: 1px solid #e7e5e3;
     }
-
-    /* ── Footer ── */
     .footer {
-      margin-top: 60px;
-      padding-top: 24px;
-      border-top: 1px solid #e7e5e3;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      margin-top: 60px; padding-top: 24px; border-top: 1px solid #e7e5e3;
+      display: flex; justify-content: space-between; align-items: center;
     }
     .footer p { font-size: 11px; color: #a8a29e; }
-    .thank-you {
-      font-size: 13px;
-      color: #1c1917;
-      font-weight: 500;
-    }
-
-    @media print {
-      body { padding: 24px; }
-    }
+    .thank-you { font-size: 13px; color: #1c1917; font-weight: 500; }
+    @media print { body { padding: 24px; } }
   </style>
 </head>
 <body>
-
-  <!-- Header -->
   <div class="header">
     <div>
       <div class="brand">FitMart</div>
@@ -211,8 +140,6 @@ export default function ProductConfirmation() {
       ${paymentId ? `<div class="pid">Payment ID: ${paymentId}</div>` : ""}
     </div>
   </div>
-
-  <!-- Billing -->
   <div class="billing">
     <div class="billing-block">
       <h3>Billed To</h3>
@@ -226,8 +153,6 @@ export default function ProductConfirmation() {
       <p>fitmart.in</p>
     </div>
   </div>
-
-  <!-- Items table -->
   <table>
     <thead>
       <tr>
@@ -250,49 +175,29 @@ export default function ProductConfirmation() {
       `).join("")}
     </tbody>
   </table>
-
-  <!-- Totals -->
   <div class="totals">
-    <div class="total-row">
-      <span>Subtotal</span>
-      <span>${fmt(total)}</span>
-    </div>
-    <div class="total-row">
-      <span>Shipping</span>
-      <span>Free</span>
-    </div>
-    <div class="total-row">
-      <span>Tax (GST)</span>
-      <span>Included</span>
-    </div>
-    <div class="total-row grand">
-      <span>Total Paid</span>
-      <span>${fmt(total)}</span>
-    </div>
+    <div class="total-row"><span>Subtotal</span><span>${fmt(total)}</span></div>
+    <div class="total-row"><span>Shipping</span><span>Free</span></div>
+    <div class="total-row"><span>Tax (GST)</span><span>Included</span></div>
+    <div class="total-row grand"><span>Total Paid</span><span>${fmt(total)}</span></div>
   </div>
-
-  <!-- Footer -->
   <div class="footer">
     <p>© 2026 FitMart · Mumbai · All rights reserved</p>
     <span class="thank-you">Thank you for your purchase ✓</span>
   </div>
-
 </body>
 </html>`;
 
-    // Open in a new tab and trigger print-to-PDF
     const win = window.open("", "_blank");
     win.document.write(invoiceHTML);
     win.document.close();
     win.focus();
-    // Small delay so styles render before print dialog opens
     setTimeout(() => {
       win.print();
       setDownloading(false);
     }, 400);
   };
 
-  // Don't render anything if no items (guard is navigating away)
   if (!items.length) return null;
 
   return (
@@ -311,21 +216,20 @@ export default function ProductConfirmation() {
         .delay-4 { transition-delay: 0.54s; }
       `}</style>
 
-      <div className="max-w-2xl mx-auto px-5 py-16">
+      <div className="max-w-2xl mx-auto px-4 sm:px-5 py-10 sm:py-16">
 
-        {/* ── Success header ──────────────────────────────────────── */}
-        <div className={`fade-up ${visible ? "visible" : ""} text-center mb-12`}>
-          {/* Animated checkmark circle */}
-          <div className="inline-flex items-center justify-center w-20 h-20
-                          bg-stone-900 rounded-full mb-6 shadow-lg">
-            <span className="text-white text-3xl">✓</span>
+        {/* ── Success header ── */}
+        <div className={`fade-up ${visible ? "visible" : ""} text-center mb-10 sm:mb-12`}>
+          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20
+                          bg-stone-900 rounded-full mb-5 sm:mb-6 shadow-lg">
+            <span className="text-white text-2xl sm:text-3xl">✓</span>
           </div>
           <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2">
             Order Confirmed
           </p>
           <h1
             style={{ fontFamily: "'DM Serif Display', serif" }}
-            className="text-4xl md:text-5xl text-stone-900 mb-3"
+            className="text-3xl sm:text-4xl md:text-5xl text-stone-900 mb-3 leading-tight"
           >
             Payment Successful
           </h1>
@@ -337,17 +241,17 @@ export default function ProductConfirmation() {
           </p>
           {paymentId && (
             <p className="text-[11px] text-stone-400 mt-2 font-mono bg-stone-100
-                          inline-block px-3 py-1 rounded-full">
+                          inline-block px-3 py-1 rounded-full break-all max-w-full">
               {paymentId}
             </p>
           )}
         </div>
 
-        {/* ── Purchased items card ────────────────────────────────── */}
+        {/* ── Purchased items card ── */}
         <div className={`fade-up delay-1 ${visible ? "visible" : ""}
                          bg-white border border-stone-200 rounded-2xl overflow-hidden mb-4`}>
-          {/* Card header */}
-          <div className="px-7 py-5 border-b border-stone-100 flex justify-between items-center">
+          <div className="px-4 sm:px-7 py-4 sm:py-5 border-b border-stone-100
+                          flex justify-between items-center">
             <p className="text-xs tracking-[0.2em] uppercase text-stone-400">
               Items Purchased
             </p>
@@ -356,15 +260,15 @@ export default function ProductConfirmation() {
             </p>
           </div>
 
-          {/* Item rows */}
           <div className="divide-y divide-stone-100">
             {items.map(({ product, quantity }) => (
               <div
                 key={product.productId}
-                className="flex items-center gap-5 px-7 py-5"
+                className="flex items-center gap-3 sm:gap-5 px-4 sm:px-7 py-4 sm:py-5"
               >
                 {/* Product image */}
-                <div className="w-16 h-16 rounded-xl bg-stone-100 flex-shrink-0 overflow-hidden">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-stone-100
+                                flex-shrink-0 overflow-hidden">
                   <img
                     src={product.image}
                     alt={product.name}
@@ -380,13 +284,13 @@ export default function ProductConfirmation() {
                   </p>
                   <p
                     style={{ fontFamily: "'DM Serif Display', serif" }}
-                    className="text-lg text-stone-900 leading-tight"
+                    className="text-base sm:text-lg text-stone-900 leading-tight truncate"
                   >
                     {product.name}
                   </p>
-                  <div className="flex items-center gap-3 mt-1">
+                  <div className="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
                     <span className="text-xs text-stone-400">Qty {quantity}</span>
-                    <span className="text-stone-200">·</span>
+                    <span className="text-stone-200 hidden sm:inline">·</span>
                     <span className="text-xs text-stone-400">
                       {fmt(product.price)} each
                     </span>
@@ -396,7 +300,7 @@ export default function ProductConfirmation() {
                 {/* Line total */}
                 <p
                   style={{ fontFamily: "'DM Serif Display', serif" }}
-                  className="text-xl text-stone-900 flex-shrink-0"
+                  className="text-lg sm:text-xl text-stone-900 flex-shrink-0"
                 >
                   {fmt(product.price * quantity)}
                 </p>
@@ -405,7 +309,7 @@ export default function ProductConfirmation() {
           </div>
 
           {/* Totals footer */}
-          <div className="bg-stone-50 border-t border-stone-200 px-7 py-5 space-y-2">
+          <div className="bg-stone-50 border-t border-stone-200 px-4 sm:px-7 py-4 sm:py-5 space-y-2">
             <div className="flex justify-between text-sm text-stone-500">
               <span>Subtotal</span>
               <span>{fmt(total)}</span>
@@ -419,7 +323,7 @@ export default function ProductConfirmation() {
               <span className="text-sm font-medium text-stone-700">Total Paid</span>
               <span
                 style={{ fontFamily: "'DM Serif Display', serif" }}
-                className="text-3xl text-stone-900"
+                className="text-2xl sm:text-3xl text-stone-900"
               >
                 {fmt(total)}
               </span>
@@ -427,14 +331,15 @@ export default function ProductConfirmation() {
           </div>
         </div>
 
-        {/* ── Download Invoice button ─────────────────────────────── */}
+        {/* ── Download Invoice button ── */}
         <div className={`fade-up delay-2 ${visible ? "visible" : ""} mb-4`}>
           <button
             onClick={downloadInvoice}
             disabled={downloading}
-            className="w-full border border-stone-900 text-stone-900 text-sm px-8 py-3.5
+            className="w-full border border-stone-900 text-stone-900 text-sm px-8 py-4
                        rounded-full hover:bg-stone-900 hover:text-white transition-all
-                       disabled:opacity-50 flex items-center justify-center gap-2"
+                       disabled:opacity-50 flex items-center justify-center gap-2
+                       min-h-[52px] active:scale-[0.98]"
           >
             {downloading ? (
               <>
@@ -444,7 +349,6 @@ export default function ProductConfirmation() {
               </>
             ) : (
               <>
-                {/* Download icon (inline SVG) */}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" strokeWidth="2" strokeLinecap="round"
                   strokeLinejoin="round">
@@ -461,23 +365,23 @@ export default function ProductConfirmation() {
           </p>
         </div>
 
-        {/* ── Action buttons ─────────────────────────────────────── */}
+        {/* ── Action buttons ── */}
         <div className={`fade-up delay-3 ${visible ? "visible" : ""} flex flex-col sm:flex-row gap-3`}>
           <button
             onClick={() => navigate("/home")}
-            className="flex-1 bg-stone-900 text-white text-sm px-8 py-3.5
-                       rounded-full hover:bg-stone-700 transition-colors text-center"
+            className="flex-1 bg-stone-900 text-white text-sm px-8 py-4
+                       rounded-full hover:bg-stone-700 transition-colors text-center
+                       min-h-[52px] active:scale-[0.98]"
           >
             Continue Shopping
           </button>
         </div>
 
-        {/* ── Footer note ────────────────────────────────────────── */}
+        {/* ── Footer note ── */}
         <p className={`fade-up delay-4 ${visible ? "visible" : ""}
-                       text-xs text-stone-400 text-center mt-8`}>
+                       text-xs text-stone-400 text-center mt-6 sm:mt-8 leading-relaxed px-4`}>
           A confirmation will be sent to your registered email address.
         </p>
-
       </div>
     </div>
   );

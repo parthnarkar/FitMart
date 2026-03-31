@@ -27,11 +27,44 @@ const PLANS = [
   { name: "Mobility & Recovery", duration: "8 Weeks", desc: "Flexibility-first programming, ideal for desk workers", tag: null, route: "/plans/mobility-recovery" },
 ];
 
-const Stars = ({ rating }) => (
-  <span className="text-stone-500 text-xs">
-    {"★".repeat(Math.round(rating))}{"☆".repeat(5 - Math.round(rating))}
-  </span>
-);
+const Stars = ({ rating = 0, size = "sm" }) => {
+  const full = Math.floor(rating || 0);
+  const half = (rating || 0) % 1 >= 0.5 ? 1 : 0;
+  const empty = 5 - full - half;
+  const starPath = "M12 .587l3.668 7.431L24 9.748l-6 5.847L19.335 24 12 19.897 4.665 24 6 15.595 0 9.748l8.332-1.73L12 .587z";
+  const sizeClass = size === "lg" ? "w-4 h-4" : "w-3 h-3";
+
+  return (
+    <span className={`inline-flex items-center gap-0.5 ${size === "lg" ? "text-base" : "text-xs"}`} aria-hidden>
+      {Array.from({ length: full }).map((_, i) => (
+        <svg key={`full-${i}`} className={`${sizeClass} text-stone-500`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d={starPath} fill="currentColor" />
+        </svg>
+      ))}
+
+      {half ? (() => {
+        const id = `half-${Math.random().toString(36).slice(2)}`;
+        return (
+          <svg key="half" className={`${sizeClass} text-stone-500`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <clipPath id={id}><rect x="0" y="0" width="12" height="24" /></clipPath>
+            </defs>
+            {/* faint empty star behind */}
+            <path d={starPath} fill="currentColor" className="text-stone-300" style={{ fill: 'currentColor', opacity: 0.28 }} />
+            {/* filled half */}
+            <path d={starPath} fill="currentColor" clipPath={`url(#${id})`} />
+          </svg>
+        );
+      })() : null}
+
+      {Array.from({ length: empty }).map((_, i) => (
+        <svg key={`empty-${i}`} className={`${sizeClass} text-stone-300`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d={starPath} fill="currentColor" style={{ opacity: 0.28 }} />
+        </svg>
+      ))}
+    </span>
+  );
+};
 
 function mapCart(cartDoc, products) {
   return cartDoc.items.map(it => {
@@ -41,7 +74,7 @@ function mapCart(cartDoc, products) {
   });
 }
 
-// ── ProductCard — image + name navigate to product page ──────────────────
+// ── ProductCard ───────────────────────────────────────────────────────────
 function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
   const navigate = useNavigate();
   const [added, setAdded] = useState(false);
@@ -62,9 +95,10 @@ function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
 
   return (
     <div className="group bg-white border border-stone-100 rounded-2xl overflow-hidden
-                    hover:border-stone-200 hover:shadow-lg transition-all duration-300">
+            hover:border-stone-200 hover:shadow-lg transition-all duration-300
+            flex flex-col h-full">
 
-      {/* ── Clickable image → product page ── */}
+      {/* Clickable image */}
       <div
         onClick={() => navigate(`/product/${productId}`)}
         className="relative bg-stone-100 aspect-square flex items-center justify-center
@@ -77,80 +111,92 @@ function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
             onError={e => { e.currentTarget.onerror = null; e.currentTarget.style.display = "none"; }}
           />
         ) : (
-          <div className="text-5xl opacity-20 select-none group-hover:scale-110 transition-transform duration-500">
+          <div className="text-4xl sm:text-5xl opacity-20 select-none group-hover:scale-110 transition-transform duration-500">
             {product.category === "Nutrition" ? "🧴" : product.category === "Wearables" ? "⌚" : "🏋️"}
           </div>
         )}
         {product.badge && (
-          <span className="absolute top-3 left-3 text-[10px] tracking-widest uppercase
-                           bg-stone-900 text-white px-2.5 py-1 rounded-full">
+          <span className="absolute top-2 left-2 sm:top-3 sm:left-3 text-[9px] sm:text-[10px]
+                           tracking-widest uppercase bg-stone-900 text-white px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full">
             {product.badge}
           </span>
         )}
         {discount && (
-          <span className="absolute top-3 right-3 text-[10px] font-medium text-stone-600
-                           bg-white px-2 py-1 rounded-full border border-stone-200">
+          <span className="absolute top-2 right-2 sm:top-3 sm:right-3 text-[9px] sm:text-[10px]
+                           font-medium text-stone-600 bg-white px-1.5 sm:px-2 py-0.5 sm:py-1
+                           rounded-full border border-stone-200">
             −{discount}%
           </span>
         )}
       </div>
 
-      <div className="p-5">
-        <p className="text-[10px] tracking-[0.15em] uppercase text-stone-400 mb-1">{product.brand}</p>
+      <div className="p-3 sm:p-5 flex flex-col flex-1">
+        <p className="text-[9px] sm:text-[10px] tracking-[0.15em] uppercase text-stone-400 mb-1">
+          {product.brand}
+        </p>
 
-        {/* ── Clickable name → product page ── */}
+        {/* Clickable name */}
         <h3
           onClick={() => navigate(`/product/${productId}`)}
-          className="text-sm font-medium text-stone-900 leading-snug mb-2 line-clamp-2
-                     cursor-pointer hover:text-stone-600 transition-colors"
+          onPointerDown={(e) => { if (e?.nativeEvent?.pointerType === 'touch') e.preventDefault(); }}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); navigate(`/product/${productId}`); } }}
+          role="button"
+          tabIndex={0}
+          className="text-xs sm:text-sm font-medium text-stone-900 leading-snug mb-1.5 sm:mb-2
+                     line-clamp-2 cursor-pointer hover:text-stone-600 transition-colors select-none sm:select-auto"
         >
           {product.name}
         </h3>
 
-        <div className="flex items-center gap-1.5 mb-3">
+        <div className="flex items-center gap-1 sm:gap-1.5 mb-2 sm:mb-3">
           <Stars rating={product.rating} />
-          <span className="text-[10px] text-stone-400">({product.reviews})</span>
+          <span className="text-[9px] sm:text-[10px] text-stone-400">({product.reviews})</span>
         </div>
 
-        <div className="flex items-end justify-between">
-          <div>
-            <span className="text-base font-semibold text-stone-900">{fmt(product.price)}</span>
-            {product.originalPrice && (
-              <span className="text-xs text-stone-400 line-through ml-2">{fmt(product.originalPrice)}</span>
-            )}
+        <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-1 mt-auto w-full">
+          <div className="min-w-0 pr-2 text-left sm:text-left w-full sm:w-auto">
+            <div className="text-sm sm:text-base font-semibold text-stone-900 truncate">{fmt(product.price)}</div>
+            <div className="text-[10px] sm:text-xs text-stone-400 line-through mt-0.5">
+              {product.originalPrice ? fmt(product.originalPrice) : <span className="invisible">&nbsp;</span>}
+            </div>
           </div>
 
-          {/* ── Qty controls or Add button ── */}
-          {quantity > 0 ? (
-            <div
-              className="flex items-center border border-stone-300 rounded-full overflow-hidden"
-              onClick={e => e.stopPropagation()}
-            >
-              <button
-                onClick={e => { e.stopPropagation(); updateQty(productId, -1); }}
-                className="w-8 h-8 flex items-center justify-center text-stone-600 hover:bg-stone-100 transition-colors"
+          <div className="flex items-center justify-center sm:justify-end shrink-0 w-full sm:w-auto">
+            {quantity > 0 ? (
+              <div
+                className="flex items-center border border-stone-300 rounded-full overflow-hidden"
+                onClick={e => e.stopPropagation()}
               >
-                <span className="text-lg leading-none">−</span>
-              </button>
-              <span className="w-8 text-xs text-stone-900 text-center font-medium">{quantity}</span>
+                <button
+                  onClick={e => { e.stopPropagation(); updateQty(productId, -1); }}
+                  className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center
+                             text-stone-600 hover:bg-stone-100 transition-colors"
+                >
+                  <span className="text-base sm:text-lg leading-none">−</span>
+                </button>
+                <span className="w-6 sm:w-8 text-xs text-stone-900 text-center font-medium">{quantity}</span>
+                <button
+                  onClick={e => { e.stopPropagation(); updateQty(productId, 1); }}
+                  className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center
+                             text-stone-600 hover:bg-stone-100 transition-colors"
+                >
+                  <span className="text-base sm:text-lg leading-none">+</span>
+                </button>
+              </div>
+            ) : (
               <button
-                onClick={e => { e.stopPropagation(); updateQty(productId, 1); }}
-                className="w-8 h-8 flex items-center justify-center text-stone-600 hover:bg-stone-100 transition-colors"
+                onClick={handleAdd}
+                className={`relative z-10 flex-shrink-0 w-full sm:w-auto mt-2 sm:mt-0 text-center text-[10px] sm:text-xs px-2.5 sm:px-4 py-1.5 sm:py-2
+                            rounded-full transition-all duration-200 whitespace-nowrap
+                            ${added
+                    ? "bg-stone-900 text-white"
+                    : "border border-stone-300 text-stone-700 hover:bg-stone-900 hover:text-white hover:border-stone-900"
+                  }`}
               >
-                <span className="text-lg leading-none">+</span>
+                {added ? "Added ✓" : "Add to Cart"}
               </button>
-            </div>
-          ) : (
-            <button
-              onClick={handleAdd}
-              className={`text-xs px-4 py-2 rounded-full transition-all duration-200 ${added
-                ? "bg-stone-900 text-white"
-                : "border border-stone-300 text-stone-700 hover:bg-stone-900 hover:text-white hover:border-stone-900"
-                }`}
-            >
-              {added ? "Added ✓" : "Add to cart"}
-            </button>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -220,12 +266,7 @@ export default function HomePage() {
   }, [user, products]);
 
   useEffect(() => {
-    // Use instant scrolling to ensure it happens immediately
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: 'instant' // or 'auto' for instant scroll
-    });
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, []);
 
   const handleSignOut = async () => {
@@ -291,31 +332,34 @@ export default function HomePage() {
 
   const renderProductGrid = () => {
     if (loading) return (
-      <div className="text-center py-16 text-stone-400">
+      <div className="text-center py-12 text-stone-400">
         <div className="inline-block animate-spin rounded-full h-8 w-8 border-4
                         border-stone-300 border-t-stone-900 mb-4" />
         <p className="text-sm">Loading products...</p>
       </div>
     );
     if (backendError) return (
-      <div className="text-center py-16 text-stone-400">
+      <div className="text-center py-12 text-stone-400">
         <p className="text-3xl mb-2">🔌</p>
-        <p className="text-sm mb-2">Cannot connect to the server</p>
+        <p className="text-sm mb-1">Cannot connect to the server</p>
         <p className="text-xs">Make sure the backend is running on port 5000</p>
         <button onClick={() => window.location.reload()}
-          className="mt-4 text-xs bg-stone-900 text-white px-4 py-2 rounded-full hover:bg-stone-700 transition-colors">
+          className="mt-4 text-xs bg-stone-900 text-white px-4 py-2 rounded-full
+                     hover:bg-stone-700 transition-colors">
           Retry Connection
         </button>
       </div>
     );
     if (!filtered.length) return (
-      <div className="text-center py-16 text-stone-400">
+      <div className="text-center py-12 text-stone-400">
         <p className="text-3xl mb-2">∅</p>
         <p className="text-sm">No products match your search.</p>
       </div>
     );
     return (
-      <div className={`fade-in d3 ${visible ? "show" : ""} grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5`}>
+      // 2-col on mobile, 3-col on md, 4-col on lg
+      <div className={`fade-in d3 ${visible ? "show" : ""}
+                       grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5`}>
         {filtered.map(p => (
           <ProductCard key={p.id} product={p} onAdd={addToCart} cartItems={cart} updateQty={updateQty} />
         ))}
@@ -350,8 +394,9 @@ export default function HomePage() {
         onSignOut={handleSignOut}
       />
 
+      {/* Search bar */}
       <div className={`search-expand ${searchOpen ? "open" : ""} border-t border-stone-100`}>
-        <div className="max-w-7xl mx-auto px-5 lg:px-10 py-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-10 py-3">
           <input
             autoFocus={searchOpen} type="text"
             placeholder="Search products, brands…"
@@ -361,22 +406,26 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* Hero banner */}
       <section className="bg-stone-900 text-white">
-        <div className="max-w-7xl mx-auto px-5 lg:px-10 py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-10 py-10 sm:py-14">
           <div className={`fade-in d1 ${visible ? "show" : ""}`}>
-            <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-3">
+            <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2 sm:mb-3">
               Welcome back, {firstName}
             </p>
-            <h1 className="font-['DM_Serif_Display'] text-3xl md:text-5xl text-white leading-tight max-w-xl mb-5">
+            <h1 className="font-['DM_Serif_Display'] text-2xl sm:text-3xl md:text-5xl text-white
+                           leading-tight max-w-xl mb-4 sm:mb-5">
               Build something <em className="not-italic text-stone-400">stronger</em> today.
             </h1>
-            <div className="flex flex-wrap gap-3">
-              <button className="text-sm bg-white text-stone-900 px-6 py-2.5 rounded-full hover:bg-stone-100 transition-colors">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
+              <button className="text-sm bg-white text-stone-900 px-5 sm:px-6 py-2.5 rounded-full
+                                 hover:bg-stone-100 transition-colors">
                 Shop Now
               </button>
               <button
                 onClick={() => document.getElementById("plans")?.scrollIntoView({ behavior: "smooth" })}
-                className="text-sm border border-stone-700 text-stone-300 px-6 py-2.5 rounded-full hover:bg-stone-800 transition-colors"
+                className="text-sm border border-stone-700 text-stone-300 px-5 sm:px-6 py-2.5
+                           rounded-full hover:bg-stone-800 transition-colors"
               >
                 View Plans
               </button>
@@ -385,22 +434,31 @@ export default function HomePage() {
         </div>
       </section>
 
-      <div className="max-w-7xl mx-auto px-5 lg:px-10 py-10 space-y-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-10 py-8 sm:py-10 space-y-12 sm:space-y-16">
 
+        {/* ── Products section ── */}
         <section>
-          <div className={`fade-in d1 ${visible ? "show" : ""} flex items-center justify-between mb-6`}>
-            <h2 className="font-['DM_Serif_Display'] text-2xl md:text-3xl text-stone-900">Featured Products</h2>
+          <div className={`fade-in d1 ${visible ? "show" : ""}
+                           flex items-center justify-between mb-4 sm:mb-6`}>
+            <h2 className="font-['DM_Serif_Display'] text-xl sm:text-2xl md:text-3xl text-stone-900">
+              Featured Products
+            </h2>
             {!backendError && !loading && (
               <span className="text-xs text-stone-400">{filtered.length} items</span>
             )}
           </div>
+
+          {/* Category pills — horizontal scroll on mobile */}
           {!backendError && !loading && (
-            <div className={`fade-in d2 ${visible ? "show" : ""} flex gap-2 flex-wrap mb-8`}>
+            <div className={`fade-in d2 ${visible ? "show" : ""}
+                             flex gap-2 mb-5 sm:mb-8 overflow-x-auto pb-1
+                             scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap`}>
               {CATEGORIES.map(c => (
                 <button key={c.value} onClick={() => setActiveCategory(c.value)}
-                  className={`text-xs px-4 py-2 rounded-full transition-all ${activeCategory === c.value
-                    ? "bg-stone-900 text-white"
-                    : "bg-white border border-stone-200 text-stone-600 hover:bg-stone-50"
+                  className={`text-xs px-4 py-2 rounded-full transition-all whitespace-nowrap flex-shrink-0
+                              ${activeCategory === c.value
+                      ? "bg-stone-900 text-white"
+                      : "bg-white border border-stone-200 text-stone-600 hover:bg-stone-50"
                     }`}
                 >
                   {c.name}
@@ -411,17 +469,23 @@ export default function HomePage() {
           {renderProductGrid()}
         </section>
 
+        {/* ── Plans section ── */}
         <section id="plans">
-          <div className="mb-8">
+          <div className="mb-6 sm:mb-8">
             <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2">Digital Coaching</p>
-            <h2 className="font-['DM_Serif_Display'] text-2xl md:text-3xl text-stone-900">Fitness plans</h2>
+            <h2 className="font-['DM_Serif_Display'] text-xl sm:text-2xl md:text-3xl text-stone-900">
+              Fitness plans
+            </h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-5">
+          {/* Stack on mobile, 3-col on md+ */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
             {PLANS.map((plan, i) => (
               <div key={i}
-                className="bg-white border border-stone-200 rounded-2xl p-7 flex flex-col gap-4
+                className="bg-white border border-stone-200 rounded-2xl p-5 sm:p-7 flex flex-col gap-3 sm:gap-4
                            hover:border-stone-300 hover:shadow-lg transition-all duration-300">
-                {plan.tag && <span className="text-[9px] tracking-[0.2em] uppercase text-stone-400">{plan.tag}</span>}
+                {plan.tag && (
+                  <span className="text-[9px] tracking-[0.2em] uppercase text-stone-400">{plan.tag}</span>
+                )}
                 <div>
                   <h3 className="font-['DM_Serif_Display'] text-xl text-stone-900">{plan.name}</h3>
                   <p className="text-xs mt-0.5 text-stone-400">{plan.duration}</p>
@@ -429,7 +493,8 @@ export default function HomePage() {
                 <p className="text-sm leading-relaxed flex-1 text-stone-500">{plan.desc}</p>
                 <button onClick={() => navigate(plan.route)}
                   className="text-xs py-2.5 rounded-full transition-all mt-1 border border-stone-300
-                             text-stone-700 hover:bg-stone-900 hover:text-white hover:border-stone-900">
+                             text-stone-700 hover:bg-stone-900 hover:text-white hover:border-stone-900
+                             min-h-[40px]">
                   View Plan →
                 </button>
               </div>
@@ -437,41 +502,48 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ── Loyalty banner ── */}
         <section>
-          <div className="bg-stone-100 rounded-2xl p-8 md:p-10 flex flex-col md:flex-row
-                          md:items-center justify-between gap-6">
+          <div className="bg-stone-100 rounded-2xl p-6 sm:p-8 md:p-10
+                          flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
             <div>
               <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2">Loyalty Program</p>
-              <h3 className="font-['DM_Serif_Display'] text-2xl md:text-3xl text-stone-900 mb-2">Earn FitRewards</h3>
+              <h3 className="font-['DM_Serif_Display'] text-xl sm:text-2xl md:text-3xl text-stone-900 mb-2">
+                Earn FitRewards
+              </h3>
               <p className="text-sm text-stone-500 max-w-md leading-relaxed">
                 Points for every purchase and every fitness milestone. Redeem against equipment, supplements, or coaching.
               </p>
             </div>
-            <button className="shrink-0 bg-stone-900 text-white text-sm px-7 py-3 rounded-full
-                               hover:bg-stone-700 transition-colors self-start md:self-auto">
+            <button className="shrink-0 bg-stone-900 text-white text-sm px-6 sm:px-7 py-3 rounded-full
+                               hover:bg-stone-700 transition-colors self-start md:self-auto w-full sm:w-auto
+                               text-center">
               Learn More
             </button>
           </div>
         </section>
 
-        {/* BMI & Calorie Calculator */}
+        {/* ── BMI Calculator ── */}
         <section>
           <BMICalculator />
         </section>
 
-        {/* Upgrade */}
-        <section className="pb-8">
-          <div className="mb-8">
+        {/* ── Membership upgrade ── */}
+        <section className="pb-6 sm:pb-8">
+          <div className="mb-6 sm:mb-8">
             <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2">Membership</p>
-            <h2 className="font-['DM_Serif_Display'] text-2xl md:text-3xl text-stone-900">Upgrade your experience</h2>
+            <h2 className="font-['DM_Serif_Display'] text-xl sm:text-2xl md:text-3xl text-stone-900">
+              Upgrade your experience
+            </h2>
           </div>
-          <div className="grid md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
             {[
               { tier: "Pro", price: "₹499/mo", desc: "Personalized nutrition plans + 5% flat discount on everything.", cta: "Upgrade to Pro" },
               { tier: "Elite", price: "₹1,499/mo", desc: "1-on-1 coaching, early access to limited equipment drops, biometric sync.", cta: "Upgrade to Elite" },
             ].map((p, i) => (
-              <div key={i} className="bg-white border border-stone-200 rounded-2xl p-7 flex
-                                      flex-col md:flex-row md:items-center justify-between gap-5">
+              <div key={i}
+                className="bg-white border border-stone-200 rounded-2xl p-5 sm:p-7
+                           flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-5">
                 <div>
                   <div className="flex items-baseline gap-2 mb-1.5">
                     <span className="font-['DM_Serif_Display'] text-2xl text-stone-900">{p.tier}</span>
@@ -481,7 +553,7 @@ export default function HomePage() {
                 </div>
                 <button className="shrink-0 text-xs border border-stone-300 text-stone-700 px-5 py-2.5
                                    rounded-full hover:bg-stone-900 hover:text-white hover:border-stone-900
-                                   transition-all self-start">
+                                   transition-all self-start min-h-[40px]">
                   {p.cta}
                 </button>
               </div>
@@ -490,14 +562,18 @@ export default function HomePage() {
         </section>
       </div>
 
+      {/* Footer */}
       <footer className="border-t border-stone-200 bg-white">
-        <div className="max-w-7xl mx-auto px-5 lg:px-10 py-8 flex flex-col md:flex-row
-                        justify-between items-center gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-10 py-7 sm:py-8
+                        flex flex-col md:flex-row justify-between items-center gap-3 sm:gap-4">
           <span className="font-['DM_Serif_Display'] text-lg text-stone-900">FitMart</span>
-          <p className="text-xs text-stone-400">© 2026 FitMart. Built at VESIT, Mumbai.</p>
-          <div className="flex gap-5">
+          <p className="text-xs text-stone-400 text-center">© 2026 FitMart. Built at VESIT, Mumbai.</p>
+          <div className="flex gap-4 sm:gap-5">
             {["Privacy", "Terms", "Support"].map(l => (
-              <button key={l} className="text-xs text-stone-400 hover:text-stone-600 transition-colors">{l}</button>
+              <button key={l}
+                className="text-xs text-stone-400 hover:text-stone-600 transition-colors min-h-[36px] px-1">
+                {l}
+              </button>
             ))}
           </div>
         </div>

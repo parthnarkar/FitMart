@@ -167,8 +167,9 @@ router.post("/demo-success", async (req, res) => {
     for (const it of cart.items) {
       const p = await Product.findOne({ productId: Number(it.productId) });
       if (!p) return res.status(400).json({ error: `Product ${it.productId} not found` });
+      const reserved = Number(p.reserved || 0);
       if (p.stock !== null) {
-        const available = p.stock - p.reserved;
+        const available = Number(p.stock) - reserved;
         if (available < it.quantity) {
           return res.status(400).json({ error: `Insufficient stock for ${p.name}. Available: ${available}` });
         }
@@ -179,19 +180,26 @@ router.post("/demo-success", async (req, res) => {
 
     const order = await Order.create({ userId, items: populated, total, paymentId: fakePaymentId, status: "paid" });
 
-    // Deduct stock and reserved for each item
+    // Deduct stock and reserved for each item safely (avoid negative reserved)
     for (const it of cart.items) {
       const p = await Product.findOne({ productId: Number(it.productId) });
-      if (p && p.stock !== null) {
-        await Product.findOneAndUpdate(
-          { productId: p.productId },
-          { $inc: { stock: -it.quantity, reserved: -it.quantity } }
-        );
+      if (!p) continue;
+      const currentReserved = Number(p.reserved || 0);
+      const newReserved = Math.max(0, currentReserved - it.quantity);
+      const update = {};
+      if (p.stock !== null) {
+        update.stock = Number(p.stock) - it.quantity;
       }
+      update.reserved = newReserved;
+
+      await Product.findOneAndUpdate(
+        { productId: p.productId },
+        { $set: update }
+      );
     }
 
     // Clear cart (purchasing finalizes reservation)
-    await Cart.findOneAndUpdate({ userId }, { items: [] });
+    await Cart.findOneAndUpdate({ userId }, { $set: { items: [] } });
 
     res.json({ success: true, paymentId: fakePaymentId, order });
   } catch (err) {

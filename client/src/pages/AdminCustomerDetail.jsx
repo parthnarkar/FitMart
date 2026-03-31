@@ -31,7 +31,7 @@ const CustomerAvatar = ({ name, photoURL, size = "16" }) => (
         onError={e => { e.currentTarget.style.display = "none"; }}
       />
     ) : (
-      <span className="text-2xl font-medium text-stone-500">
+      <span className="text-xl md:text-2xl font-medium text-stone-500">
         {(name?.[0] || "?").toUpperCase()}
       </span>
     )}
@@ -41,12 +41,78 @@ const CustomerAvatar = ({ name, photoURL, size = "16" }) => (
 const SkeletonRow = () => (
   <tr className="border-b border-stone-100">
     {[40, 10, 15, 20, 15].map((w, i) => (
-      <td key={i} className="px-6 py-5">
+      <td key={i} className="px-4 md:px-6 py-4 md:py-5">
         <div className="h-3 bg-stone-100 rounded-full animate-pulse"
           style={{ width: `${w}%`, margin: i > 0 ? "0 auto" : "0" }} />
       </td>
     ))}
   </tr>
+);
+
+// ── Mobile order card ──────────────────────────────────────────────────────
+const MobileOrderCard = ({ order, expanded, onToggle }) => (
+  <div className="border border-stone-100 rounded-xl overflow-hidden mb-3">
+    {/* Card header — tappable */}
+    <button
+      onClick={() => onToggle(order._id)}
+      className="w-full text-left px-4 py-4 bg-white active:bg-stone-50
+                 flex items-start justify-between gap-3"
+    >
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-mono text-stone-400 truncate mb-1.5">
+          {order._id}
+        </p>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
+                            ${STATUS_STYLES[order.status]}`}>
+            {order.status}
+          </span>
+          <span className="text-xs text-stone-400">{order.items.length} item{order.items.length !== 1 ? "s" : ""}</span>
+        </div>
+      </div>
+
+      <div className="text-right flex-shrink-0">
+        <p style={{ fontFamily: "'DM Serif Display', serif" }}
+          className="text-lg text-stone-900 leading-none mb-1">
+          {fmt(order.total)}
+        </p>
+        <p className="text-[10px] text-stone-400 whitespace-nowrap">
+          {new Date(order.createdAt).toLocaleDateString("en-IN", {
+            day: "2-digit", month: "short", year: "numeric",
+          })}
+        </p>
+      </div>
+
+      <span className="text-stone-300 text-sm flex-shrink-0 mt-0.5">
+        {expanded ? "▾" : "▸"}
+      </span>
+    </button>
+
+    {/* Expanded items */}
+    {expanded && (
+      <div className="border-t border-stone-100 bg-stone-50 divide-y divide-stone-100">
+        {order.items.map((item, idx) => (
+          <div key={`${order._id}-${idx}`}
+            className="px-4 py-3 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs text-stone-500 truncate">
+                Product #{item.productId}
+              </p>
+              <p className="text-[10px] text-stone-400 mt-0.5">
+                ₹{item.price} each
+              </p>
+            </div>
+            <div className="text-right flex-shrink-0">
+              <p className="text-xs text-stone-400">×{item.quantity}</p>
+              <p className="text-xs font-medium text-stone-600 mt-0.5">
+                {fmt(item.price * item.quantity)}
+              </p>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
 );
 
 export default function AdminCustomerDetail() {
@@ -87,70 +153,80 @@ export default function AdminCustomerDetail() {
 
       <AdminNavbar menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
 
-      <div className="max-w-6xl mx-auto px-5 lg:px-10 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-8 md:py-12">
 
         {/* Error */}
         {error && (
-          <div className="bg-red-50 border border-red-100 rounded-2xl px-6 py-5 mb-8">
+          <div className="bg-red-50 border border-red-100 rounded-2xl px-4 md:px-6 py-4 md:py-5 mb-6 md:mb-8">
             <p className="text-sm text-red-600">⚠ {error}</p>
           </div>
         )}
 
         {/* ── Profile header ─────────────────────────────────────────────── */}
-        <div className="mb-10">
-          <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-5">
+        <div className="mb-8 md:mb-10">
+          <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-4 md:mb-5">
             Customer Profile
           </p>
 
           {loading ? (
-            // Skeleton header
-            <div className="flex items-center gap-5">
-              <div className="w-16 h-16 rounded-full bg-stone-100 animate-pulse flex-shrink-0" />
-              <div className="space-y-2">
-                <div className="h-7 w-48 bg-stone-100 rounded-full animate-pulse" />
-                <div className="h-3 w-32 bg-stone-100 rounded-full animate-pulse" />
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 md:w-16 md:h-16 rounded-full bg-stone-100 animate-pulse flex-shrink-0" />
+              <div className="space-y-2 flex-1 min-w-0">
+                <div className="h-6 md:h-7 w-40 md:w-48 bg-stone-100 rounded-full animate-pulse" />
+                <div className="h-3 w-28 md:w-32 bg-stone-100 rounded-full animate-pulse" />
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-5 flex-wrap">
-              {/* Large avatar */}
-              <CustomerAvatar
-                name={customerName}
-                photoURL={customerPhoto}
-                size="16"
-              />
+            <div className="flex items-center gap-4 md:gap-5">
+              {/* Avatar — slightly smaller on mobile */}
+              <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden flex-shrink-0
+                              bg-stone-200 flex items-center justify-center">
+                {customerPhoto ? (
+                  <img
+                    src={customerPhoto}
+                    alt={customerName || "avatar"}
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                    onError={e => { e.currentTarget.style.display = "none"; }}
+                  />
+                ) : (
+                  <span className="text-xl md:text-2xl font-medium text-stone-500">
+                    {(customerName?.[0] || "?").toUpperCase()}
+                  </span>
+                )}
+              </div>
 
-              <div className="min-w-0">
-                {/* Name or UID fallback */}
-                <div className="flex items-center gap-3 flex-wrap mb-1">
+              <div className="min-w-0 flex-1">
+                {/* Name + segment badge */}
+                <div className="flex items-start md:items-center gap-2 md:gap-3 flex-wrap mb-1">
                   <h1
                     style={{ fontFamily: "'DM Serif Display', serif" }}
-                    className="text-3xl md:text-4xl text-stone-900"
+                    className="text-2xl sm:text-3xl md:text-4xl text-stone-900 leading-tight break-words"
                   >
                     {customerName && customerName !== "—" ? customerName : userId}
                   </h1>
                   {segment && (
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium capitalize flex-shrink-0
                                       ${SEGMENT_STYLES[segment]}`}>
                       {segment}
                     </span>
                   )}
                 </div>
 
-                {/* Email */}
+                {/* Email — truncate on small screens */}
                 {customerEmail && customerEmail !== "—" && (
-                  <p className="text-sm text-stone-500">{customerEmail}</p>
+                  <p className="text-sm text-stone-500 truncate">{customerEmail}</p>
                 )}
 
-                {/* UID — always shown as a small reference */}
-                <p className="text-[10px] text-stone-300 font-mono mt-1">{userId}</p>
+                {/* UID */}
+                <p className="text-[10px] text-stone-300 font-mono mt-1 truncate">{userId}</p>
               </div>
             </div>
           )}
         </div>
 
-        {/* KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 md:gap-5 mb-10">
+        {/* KPI Cards — 2 cols on mobile, 4 on sm+ */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-5 mb-8 md:mb-10">
           {[
             { label: "Total Orders", value: loading ? null : orderCount, icon: "◎" },
             { label: "Total Spend", value: loading ? null : fmt(totalSpend), icon: "₹" },
@@ -170,19 +246,22 @@ export default function AdminCustomerDetail() {
             },
           ].map(({ label, value, icon }) => (
             <div key={label}
-              className="bg-white border border-stone-200 rounded-2xl p-7
+              className="bg-white border border-stone-200 rounded-2xl p-4 md:p-7
                             hover:border-stone-300 hover:shadow-lg transition-all duration-300">
-              <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-5">{label}</p>
-              <div className="flex items-end justify-between">
+              <p className="text-[10px] md:text-xs tracking-[0.15em] md:tracking-[0.2em]
+                            uppercase text-stone-400 mb-3 md:mb-5 leading-tight">
+                {label}
+              </p>
+              <div className="flex items-end justify-between gap-1">
                 {loading ? (
-                  <div className="h-9 w-20 bg-stone-100 rounded-xl animate-pulse" />
+                  <div className="h-7 md:h-9 w-16 md:w-20 bg-stone-100 rounded-xl animate-pulse" />
                 ) : (
                   <p style={{ fontFamily: "'DM Serif Display', serif" }}
-                    className="text-3xl md:text-4xl text-stone-900 leading-none">
+                    className="text-2xl md:text-3xl lg:text-4xl text-stone-900 leading-none break-words min-w-0">
                     {value}
                   </p>
                 )}
-                <span className="text-xl text-stone-200 mb-0.5">{icon}</span>
+                <span className="text-base md:text-xl text-stone-200 mb-0.5 flex-shrink-0">{icon}</span>
               </div>
             </div>
           ))}
@@ -191,11 +270,16 @@ export default function AdminCustomerDetail() {
         {/* Order History */}
         <div className="bg-white border border-stone-200 rounded-2xl overflow-hidden
                         hover:border-stone-300 transition-all duration-300">
-          <div className="px-7 py-5 border-b border-stone-100 flex justify-between items-center">
+
+          {/* Section header */}
+          <div className="px-4 md:px-7 py-4 md:py-5 border-b border-stone-100
+                          flex justify-between items-center">
             <div>
-              <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-0.5">History</p>
+              <p className="text-[10px] md:text-xs tracking-[0.2em] uppercase text-stone-400 mb-0.5">
+                History
+              </p>
               <h2 style={{ fontFamily: "'DM Serif Display', serif" }}
-                className="text-xl text-stone-900">
+                className="text-lg md:text-xl text-stone-900">
                 Order History
               </h2>
             </div>
@@ -204,7 +288,33 @@ export default function AdminCustomerDetail() {
             )}
           </div>
 
-          <div className="overflow-x-auto">
+          {/* ── Mobile card view (< md) ─────────────────────────────────── */}
+          <div className="md:hidden px-4 py-4">
+            {loading && (
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="border border-stone-100 rounded-xl p-4 space-y-2">
+                    <div className="h-3 w-3/4 bg-stone-100 rounded-full animate-pulse" />
+                    <div className="h-3 w-1/2 bg-stone-100 rounded-full animate-pulse" />
+                  </div>
+                ))}
+              </div>
+            )}
+            {!loading && orders?.map(order => (
+              <MobileOrderCard
+                key={order._id}
+                order={order}
+                expanded={!!expanded[order._id]}
+                onToggle={toggleOrder}
+              />
+            ))}
+            {!loading && !orders?.length && (
+              <p className="text-sm text-stone-400 text-center py-8">No orders found.</p>
+            )}
+          </div>
+
+          {/* ── Desktop table view (md+) ───────────────────────────────── */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-stone-100">
@@ -224,7 +334,6 @@ export default function AdminCustomerDetail() {
 
                 {!loading && orders?.map(order => (
                   <>
-                    {/* Order row — click to expand */}
                     <tr
                       key={order._id}
                       onClick={() => toggleOrder(order._id)}
@@ -261,7 +370,6 @@ export default function AdminCustomerDetail() {
                       </td>
                     </tr>
 
-                    {/* Product breakdown row — shown when expanded */}
                     {expanded[order._id] && order.items.map((item, idx) => (
                       <tr key={`${order._id}-${idx}`}
                         className="bg-stone-50 border-t border-stone-100">
@@ -282,11 +390,19 @@ export default function AdminCustomerDetail() {
                     ))}
                   </>
                 ))}
+
+                {!loading && !orders?.length && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-12 text-center text-sm text-stone-400">
+                      No orders found.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
-        </div>
 
+        </div>
       </div>
     </div>
   );
