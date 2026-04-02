@@ -12,7 +12,7 @@ import WelcomeBanner from "../components/WelcomeBanner";
 import { useWelcomeDiscount } from "../auth/useWelcomeDiscount";
 import BMICalculator from "../components/BMICalculator";
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API = import.meta.env.VITE_API_URL;
 
 const CATEGORIES = [
   { name: "All", value: "all" },
