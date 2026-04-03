@@ -1,4 +1,5 @@
 // src/components/Navbar.jsx
+import PropTypes from 'prop-types';
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../auth/firebase";
@@ -28,17 +29,14 @@ export default function Navbar({
   };
 
   const isLanding = variant === "landing";
-
   const positionClass = isLanding
     ? "fixed top-0 left-0 right-0 z-50"
     : "sticky top-0 z-40";
-
   const bgClass = isLanding
     ? navOpaque
       ? "bg-white/95 backdrop-blur-sm border-b border-stone-200 shadow-sm"
       : "bg-transparent"
     : "bg-white border-b border-stone-200";
-
   const logoColor = isLanding && !navOpaque ? "text-white" : "text-stone-900";
   const iconColor =
     isLanding && !navOpaque
@@ -49,7 +47,6 @@ export default function Navbar({
     <nav className={`w-full ${positionClass} transition-all duration-300 ${bgClass}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-5 lg:px-10 h-14 sm:h-16
                       flex items-center justify-between">
-
         {/* ── Brand ── */}
         <span
           className={`font-['DM_Serif_Display'] text-lg sm:text-xl tracking-tight
@@ -64,7 +61,6 @@ export default function Navbar({
 
         {/* ── Right side ── */}
         <div className="flex items-center gap-0.5 sm:gap-1.5">
-
           {/* Search icon — home only */}
           {onSearchToggle && (
             <button
@@ -141,6 +137,7 @@ export default function Navbar({
                         </span>
                       )}
                     </div>
+
                     {/* Name — hidden on mobile */}
                     {!isLanding && (
                       <span className="hidden sm:block text-xs text-stone-700
@@ -167,7 +164,6 @@ export default function Navbar({
                             {user.email}
                           </p>
                         </div>
-
                         {isLanding && (
                           <button
                             onClick={() => {
@@ -181,7 +177,6 @@ export default function Navbar({
                             Go to Shop →
                           </button>
                         )}
-
                         <div className="border-t border-stone-100 mt-1">
                           <button
                             onClick={handleSignOut}
@@ -195,7 +190,6 @@ export default function Navbar({
                     </>
                   )}
                 </div>
-
               ) : (
                 /* ── Logged OUT ── */
                 <div className="flex items-center gap-1.5 sm:gap-2 ml-0.5 sm:ml-1">
@@ -210,6 +204,7 @@ export default function Navbar({
                   >
                     Sign In
                   </button>
+
                   {/* Primary CTA */}
                   <button
                     onClick={() => navigate(user ? "/home" : "/auth")}
@@ -231,3 +226,14 @@ export default function Navbar({
     </nav>
   );
 }
+
+Navbar.propTypes = {
+  variant: PropTypes.oneOf(["landing", "home"]),
+  navOpaque: PropTypes.bool,
+  onSearchToggle: PropTypes.func,
+  cartCount: PropTypes.number,
+  onCartOpen: PropTypes.func,
+  menuOpen: PropTypes.bool,
+  setMenuOpen: PropTypes.func,
+  onSignOut: PropTypes.func,
+};
