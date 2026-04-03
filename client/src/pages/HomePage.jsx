@@ -11,6 +11,7 @@ import FitnessChatBot from "../components/FitnessChatBot";
 import WelcomeBanner from "../components/WelcomeBanner";
 import { useWelcomeDiscount } from "../auth/useWelcomeDiscount";
 import BMICalculator from "../components/BMICalculator";
+import { normalizeProduct } from "../utils/normalizeProduct";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -224,12 +225,16 @@ export default function HomePage() {
 
   useEffect(() => {
     setTimeout(() => setVisible(true), 80);
-    const unsub = auth.onAuthStateChanged(u => {
-      setUser(u);
-      if (!u) navigate("/auth");
-    });
-    return () => unsub();
-  }, [navigate]);
+     setUser({
+    uid: "demo-user",
+    displayName: "Bhumi"
+  });
+
+}, []);
+  
+
+
+  
 
   useEffect(() => {
     (async () => {
@@ -239,7 +244,7 @@ export default function HomePage() {
         const res = await fetch(`${API}/api/products`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        setProducts(data.map(p => ({ ...p, id: p.productId || p.id })));
+        setProducts(data.map(normalizeProduct));
       } catch (err) {
         console.error("Error loading products:", err);
         setBackendError(true);
@@ -322,7 +327,10 @@ export default function HomePage() {
   const cartCount = cart.reduce((sum, i) => sum + i.qty, 0);
   const firstName = user?.displayName?.split(" ")[0] || "there";
 
-  const filtered = products.filter(p => {
+  const normalizedProducts = products.map(p => normalizeProduct(p));
+
+
+  const filtered = normalizedProducts.filter(p => {
     const matchCat = activeCategory === "all" || p.category === activeCategory;
     const matchSearch = !searchQuery
       || p.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -361,7 +369,7 @@ export default function HomePage() {
       <div className={`fade-in d3 ${visible ? "show" : ""}
                        grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5`}>
         {filtered.map(p => (
-          <ProductCard key={p.id} product={p} onAdd={addToCart} cartItems={cart} updateQty={updateQty} />
+          <ProductCard key={p.productId || p.id} product={p} onAdd={addToCart} cartItems={cart} updateQty={updateQty} />
         ))}
       </div>
     );
