@@ -1,4 +1,5 @@
 // src/pages/Checkout.jsx
+import { normalizeProduct } from "../utils/normalizeProduct";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../auth/firebase";
@@ -39,7 +40,8 @@ export default function Checkout() {
         if (!prodRes.ok) throw new Error("Failed to fetch products");
 
         const cart = await cartRes.json();
-        const products = await prodRes.json();
+        const rawProducts = await prodRes.json();
+const products = rawProducts.map(normalizeProduct);
 
         if (discountRes.ok) {
           const d = await discountRes.json();
