@@ -52,11 +52,19 @@ export default function Navbar({
 
         {/* ── Brand ── */}
         <span
+          role="button"
+          tabIndex="0"
           className={`font-['DM_Serif_Display'] text-lg sm:text-xl tracking-tight
-                       cursor-pointer transition-colors ${logoColor}`}
+               cursor-pointer transition-colors ${logoColor}`}
           onClick={() => {
             if (isLanding) window.scrollTo({ top: 0, behavior: "smooth" });
             else navigate("/home");
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              if (isLanding) window.scrollTo({ top: 0, behavior: "smooth" });
+              else navigate("/home");
+            }
           }}
         >
           FitMart
@@ -112,7 +120,10 @@ export default function Navbar({
                 /* ── Logged IN: avatar + dropdown ── */
                 <div className="relative">
                   <button
-                    onClick={() => setMenuOpen?.((p) => !p)}
+                     onClick={() => setMenuOpen(!menuOpen)}
+                     aria-expanded={menuOpen}
+                     aria-controls="mobile-menu"
+                     aria-label="Toggle menu"
                     className={`flex items-center gap-1.5 sm:gap-2 border rounded-full
                                 px-2 sm:px-2.5 py-1.5 hover:bg-stone-50 transition-colors ml-0.5
                                 min-h-[36px]
@@ -157,7 +168,7 @@ export default function Navbar({
                         className="fixed inset-0 z-40"
                         onClick={() => setMenuOpen?.(false)}
                       />
-                      <div className="absolute right-0 top-full mt-2 w-44 sm:w-48 bg-white
+                      <div div id="mobile-menu" className="absolute right-0 top-full mt-2 w-44 sm:w-48 bg-white
                                       border border-stone-200 rounded-xl shadow-lg py-1 z-50">
                         <div className="px-4 py-2.5 border-b border-stone-100">
                           <p className="text-xs font-medium text-stone-900 truncate">
