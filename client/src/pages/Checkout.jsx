@@ -6,8 +6,11 @@ import { onAuthStateChanged } from "firebase/auth";
 import { fmt } from "../utils/formatters";
 import { getAuthHeaders } from "../utils/getAuthHeaders";
 import Navbar from "../components/Navbar";
+import { normalizeProduct } from "../utils/normalizeProduct";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+import { normalizeProduct } from "../utils/normalizeProduct";
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -39,7 +42,10 @@ export default function Checkout() {
         if (!prodRes.ok) throw new Error("Failed to fetch products");
 
         const cart = await cartRes.json();
-        const products = await prodRes.json();
+
+        //  NORMALIZATION ADDED HERE
+        const productsData = await prodRes.json();
+        const products = productsData.map(normalizeProduct);
 
         if (discountRes.ok) {
           const d = await discountRes.json();
