@@ -1,4 +1,5 @@
 // src/pages/HomePage.jsx
+import { normalizeProduct } from "../utils/productAdapter";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
@@ -238,8 +239,8 @@ export default function HomePage() {
       try {
         const res = await fetch(`${API}/api/products`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        setProducts(data.map(p => ({ ...p, id: p.productId || p.id })));
+        const normalizedProducts = data.map(normalizeProduct);
+        setProducts(normalizedProducts);
       } catch (err) {
         console.error("Error loading products:", err);
         setBackendError(true);
