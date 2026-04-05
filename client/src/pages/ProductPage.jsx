@@ -1,6 +1,7 @@
 // src/pages/ProductPage.jsx
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import PropTypes from "prop-types";
 import { auth } from "../auth/firebase";
 import { getAuthHeaders } from "../utils/getAuthHeaders";
 import { fmt } from "../utils/formatters";
@@ -43,6 +44,11 @@ const Stars = ({ rating = 0, size = "sm" }) => {
       ))}
     </span>
   );
+};
+
+Stars.propTypes = {
+  rating: PropTypes.number,
+  size: PropTypes.oneOf(["sm", "lg"]),
 };
 
 const FEATURE_MAP = {
@@ -772,3 +778,8 @@ function Shell({ children, cartCount = 0, onCartOpen }) {
     </div>
   );
 }
+Shell.propTypes = {
+  children: PropTypes.node.isRequired,
+  cartCount: PropTypes.number,
+  onCartOpen: PropTypes.func,
+};

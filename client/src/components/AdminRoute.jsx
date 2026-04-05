@@ -1,5 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
+import PropTypes from "prop-types";
 import { useAuth } from "../auth/useAuth";
 
 const ADMIN_UID = import.meta.env.VITE_ADMIN_UID || "n5LtrXIGVSVjNktRn1PgDXZbHgq1";
@@ -12,3 +13,7 @@ export default function AdminRoute({ children }) {
   if (user.uid !== ADMIN_UID) return <Navigate to="/home" replace />;
   return children;
 }
+
+AdminRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+};
