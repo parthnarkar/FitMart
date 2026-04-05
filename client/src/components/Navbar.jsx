@@ -39,11 +39,8 @@ export default function Navbar({
       : "bg-transparent"
     : "bg-white border-b border-stone-200";
 
-  const logoColor = isLanding && !navOpaque ? "text-white" : "text-stone-900";
-  const iconColor =
-    isLanding && !navOpaque
-      ? "text-white/80 hover:text-white"
-      : "text-stone-500 hover:text-stone-900";
+  const logoColor = "text-stone-900";
+  const iconColor = "text-stone-500 hover:text-stone-900";
 
   return (
     <nav className={`w-full ${positionClass} transition-all duration-300 ${bgClass}`}>

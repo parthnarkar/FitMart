@@ -547,9 +547,9 @@ function NavbarWithGithub({ navOpaque, menuOpen, setMenuOpen }) {
   }, []);
 
   const isOpaque = navOpaque || scrollY > 60;
-  const textColor = isOpaque ? "text-stone-900" : "text-white";
-  const mutedColor = isOpaque ? "text-stone-500" : "text-white/70";
-  const borderColor = isOpaque ? "border-stone-200" : "border-white/20";
+  const textColor = "text-stone-900";
+  const mutedColor = "text-stone-500";
+  const borderColor = "border-stone-200";
   const bgClass = isOpaque
     ? "bg-white/95 backdrop-blur-sm border-b border-stone-200 shadow-sm"
     : "bg-transparent";
@@ -576,17 +576,12 @@ function NavbarWithGithub({ navOpaque, menuOpen, setMenuOpen }) {
             target="_blank"
             rel="noopener noreferrer"
             className={`hidden sm:flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full
-                          border transition-all min-h-[34px]
-                          ${isOpaque
-                ? "border-stone-200 text-stone-600 hover:bg-stone-900 hover:text-white hover:border-stone-900"
-                : "border-white/30 text-white/80 hover:bg-white/10"
-              }`}
+                          border transition-all min-h-[34px] border-stone-200 text-stone-600 hover:bg-stone-900 hover:text-white hover:border-stone-900`}
           >
             <GithubIcon className="w-3.5 h-3.5" />
             <StarIcon className="w-3 h-3" />
             <span>Star</span>
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium
-                                ${isOpaque ? "bg-stone-100 text-stone-700" : "bg-white/10 text-white/70"}`}>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-stone-100 text-stone-700`}>
               16
             </span>
           </a>
@@ -595,11 +590,7 @@ function NavbarWithGithub({ navOpaque, menuOpen, setMenuOpen }) {
           <button
             onClick={() => navigate(auth.currentUser ? "/home" : "/auth")}
             className={`text-xs sm:text-sm px-4 sm:px-5 py-2 rounded-full transition-colors
-                           min-h-[36px] active:scale-[0.97]
-                           ${isOpaque
-                ? "bg-stone-900 text-white hover:bg-stone-700"
-                : "bg-white text-stone-900 hover:bg-stone-100"
-              }`}
+                           min-h-[36px] active:scale-[0.97] bg-stone-900 text-white hover:bg-stone-700`}
           >
             Get Started
           </button>
