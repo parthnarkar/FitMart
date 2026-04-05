@@ -3,6 +3,7 @@ const router = express.Router();
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 const verifyFirebaseToken = require('../middleware/verifyFirebaseToken');
+const { body, validationResult } = require('express-validator');
 
 // Helper: adjust product reserved count
 async function adjustReserved(productId, delta) {
@@ -22,6 +23,11 @@ function checkOwnership(req, res) {
   return true;
 }
 
+const validateCartInput = [
+  body('productId').isNumeric().withMessage('productId must be a number'),
+  body('quantity').isInt({ min: 1 }).withMessage('quantity must be a positive integer'),
+];
+
 /**
  * @route   GET /api/cart/:userId
  * @desc    Get or create a cart for the given user
@@ -38,7 +44,7 @@ router.get('/:userId', verifyFirebaseToken, async (req, res) => {
     }
     res.json(cart);
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Something went wrong' });
   }
 });
 
@@ -47,17 +53,19 @@ router.get('/:userId', verifyFirebaseToken, async (req, res) => {
  * @desc    Add an item to the user's cart and reserve stock; body: { productId, quantity }
  * @access  Private
  */
-router.post('/:userId/add', verifyFirebaseToken, async (req, res) => {
+router.post('/:userId/add', verifyFirebaseToken, validateCartInput, async (req, res) => {
   if (!checkOwnership(req, res)) return;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
 
   try {
     const { userId } = req.params;
     const { productId, quantity } = req.body;
-    if (productId == null || quantity == null) return res.status(400).json({ error: 'productId and quantity required' });
 
     const qty = Number(quantity);
-    if (Number.isNaN(qty) || qty <= 0) return res.status(400).json({ error: 'quantity must be a positive number' });
-
     const product = await Product.findOne({ productId: Number(productId) });
     if (!product) return res.status(404).json({ error: 'Product not found' });
 
@@ -79,8 +87,7 @@ router.post('/:userId/add', verifyFirebaseToken, async (req, res) => {
     const fresh = await Cart.findOne({ userId });
     res.json(fresh);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Something went wrong' });
   }
 });
 
@@ -89,17 +96,19 @@ router.post('/:userId/add', verifyFirebaseToken, async (req, res) => {
  * @desc    Remove an item (or reduce its quantity) from the user's cart and release reserved stock; body: { productId, quantity }
  * @access  Private
  */
-router.post('/:userId/remove', verifyFirebaseToken, async (req, res) => {
+router.post('/:userId/remove', verifyFirebaseToken, validateCartInput, async (req, res) => {
   if (!checkOwnership(req, res)) return;
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
 
   try {
     const { userId } = req.params;
     const { productId, quantity } = req.body;
-    if (productId == null || quantity == null) return res.status(400).json({ error: 'productId and quantity required' });
 
     const qty = Number(quantity);
-    if (Number.isNaN(qty) || qty <= 0) return res.status(400).json({ error: 'quantity must be a positive number' });
-
     const cart = await Cart.findOne({ userId });
     if (!cart) return res.status(404).json({ error: 'Cart not found' });
 
@@ -115,8 +124,7 @@ router.post('/:userId/remove', verifyFirebaseToken, async (req, res) => {
     const fresh = await Cart.findOne({ userId });
     res.json(fresh);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Something went wrong' });
   }
 });
 
@@ -141,8 +149,7 @@ router.delete('/:userId', verifyFirebaseToken, async (req, res) => {
     await cart.save();
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Something went wrong' });
   }
 });
 

@@ -68,7 +68,10 @@ app.use(
 );
 
 app.use(helmet());
-app.use(express.json());
+const mongoSanitize = require('express-mongo-sanitize');
+
+app.use(express.json({ limit: '10kb' }));  // blocks huge payloads
+app.use(mongoSanitize());                  // strips $ and . from all inputs
 // Disable automatic ETag generation to avoid conditional 304 responses
 app.disable('etag');
 
