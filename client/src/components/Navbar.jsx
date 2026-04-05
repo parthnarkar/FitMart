@@ -224,7 +224,7 @@ export default function Navbar({
                         tabIndex={-1}
                         className="w-full text-left text-xs text-stone-500 hover:bg-stone-50 px-4 py-2.5 transition-colors min-h-[36px]"
                       >
-                        Sign Ou
+                        Sign Out
                       </button>
                     </div>
                   </div>
