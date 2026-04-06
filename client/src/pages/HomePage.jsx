@@ -1,3 +1,4 @@
+import { normalizeProduct } from "../utils/normalizeProduct";
 // src/pages/HomePage.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
