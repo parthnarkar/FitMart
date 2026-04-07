@@ -11,6 +11,7 @@ import FitnessChatBot from "../components/FitnessChatBot";
 import WelcomeBanner from "../components/WelcomeBanner";
 import { useWelcomeDiscount } from "../auth/useWelcomeDiscount";
 import BMICalculator from "../components/BMICalculator";
+import { normalizeProduct } from "../utils/normalizeProduct";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -68,9 +69,14 @@ const Stars = ({ rating = 0, size = "sm" }) => {
 
 function mapCart(cartDoc, products) {
   return cartDoc.items.map(it => {
-    const prod = products.find(p => Number(p.productId) === Number(it.productId));
-    if (!prod) return { id: it.productId, qty: it.quantity, name: "Unknown", price: 0 };
-    return { ...prod, id: prod.id || prod.productId, qty: it.quantity };
+    const prod = products.find(p => Number(p.id) === Number(it.productId));
+    if (!prod)
+      return { id: it.productId, qty: it.quantity, name: "Unknown", price: 0 };
+
+    return {
+      ...prod,
+      qty: it.quantity,
+    };
   });
 }
 
@@ -78,9 +84,9 @@ function mapCart(cartDoc, products) {
 function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
   const navigate = useNavigate();
   const [added, setAdded] = useState(false);
-  const cartItem = cartItems.find(item => item.id === (product.productId || product.id));
+  const cartItem = cartItems.find(item => item.id === (product.id));
   const quantity = cartItem?.qty || 0;
-  const productId = product.productId || product.id;
+  const productId = product.id;
 
   const handleAdd = (e) => {
     e.stopPropagation();
@@ -239,7 +245,7 @@ export default function HomePage() {
         const res = await fetch(`${API}/api/products`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        setProducts(data.map(p => ({ ...p, id: p.productId || p.id })));
+        setProducts(data.map(normalizeProduct));
       } catch (err) {
         console.error("Error loading products:", err);
         setBackendError(true);
@@ -280,7 +286,7 @@ export default function HomePage() {
       const headers = await getAuthHeaders();
       const res = await fetch(`${API}/api/cart/${user.uid}/add`, {
         method: "POST", headers, credentials: "include",
-        body: JSON.stringify({ productId: product.productId || product.id, quantity: 1 }),
+        body: JSON.stringify({ productId: product.id, quantity: 1 }),
       });
       if (!res.ok) throw new Error("Failed to add to cart");
       const cartDoc = await res.json();
