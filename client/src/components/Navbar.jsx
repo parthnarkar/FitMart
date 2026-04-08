@@ -1,4 +1,5 @@
 // src/components/Navbar.jsx
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../auth/firebase";
@@ -16,6 +17,16 @@ export default function Navbar({
 }) {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && menuOpen) {
+        setMenuOpen?.(false);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [menuOpen, setMenuOpen]);
 
   const handleSignOut = async () => {
     if (onSignOut) {
@@ -52,8 +63,18 @@ export default function Navbar({
 
         {/* ── Brand ── */}
         <span
+          role="button"
+          tabIndex={0}
+          aria-label="Home"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              if (isLanding) window.scrollTo({ top: 0, behavior: "smooth" });
+              else navigate("/home");
+            }
+          }}
           className={`font-['DM_Serif_Display'] text-lg sm:text-xl tracking-tight
-                       cursor-pointer transition-colors ${logoColor}`}
+                       cursor-pointer transition-colors focus:outline-none focus:ring-2 focus:ring-stone-400 focus:ring-offset-2 rounded px-1 ${logoColor}`}
           onClick={() => {
             if (isLanding) window.scrollTo({ top: 0, behavior: "smooth" });
             else navigate("/home");
@@ -112,6 +133,11 @@ export default function Navbar({
                 /* ── Logged IN: avatar + dropdown ── */
                 <div className="relative">
                   <button
+                    id="user-menu-button"
+                    aria-expanded={menuOpen}
+                    aria-haspopup="true"
+                    aria-controls="user-menu"
+                    aria-label="User menu"
                     onClick={() => setMenuOpen?.((p) => !p)}
                     className={`flex items-center gap-1.5 sm:gap-2 border rounded-full
                                 px-2 sm:px-2.5 py-1.5 hover:bg-stone-50 transition-colors ml-0.5
@@ -156,8 +182,14 @@ export default function Navbar({
                       <div
                         className="fixed inset-0 z-40"
                         onClick={() => setMenuOpen?.(false)}
+                        aria-hidden="true"
                       />
-                      <div className="absolute right-0 top-full mt-2 w-44 sm:w-48 bg-white
+                      <div 
+                        id="user-menu"
+                        role="menu"
+                        aria-orientation="vertical"
+                        aria-labelledby="user-menu-button"
+                        className="absolute right-0 top-full mt-2 w-44 sm:w-48 bg-white
                                       border border-stone-200 rounded-xl shadow-lg py-1 z-50">
                         <div className="px-4 py-2.5 border-b border-stone-100">
                           <p className="text-xs font-medium text-stone-900 truncate">
@@ -170,6 +202,7 @@ export default function Navbar({
 
                         {isLanding && (
                           <button
+                            role="menuitem"
                             onClick={() => {
                               navigate("/home");
                               setMenuOpen?.(false);
@@ -184,6 +217,7 @@ export default function Navbar({
 
                         <div className="border-t border-stone-100 mt-1">
                           <button
+                            role="menuitem"
                             onClick={handleSignOut}
                             className="w-full text-left text-xs text-stone-500 hover:bg-stone-50
                                        px-4 py-2.5 transition-colors min-h-[36px]"
