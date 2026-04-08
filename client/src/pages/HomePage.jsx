@@ -11,6 +11,7 @@ import FitnessChatBot from "../components/FitnessChatBot";
 import WelcomeBanner from "../components/WelcomeBanner";
 import { useWelcomeDiscount } from "../auth/useWelcomeDiscount";
 import BMICalculator from "../components/BMICalculator";
+import { normalizeProduct } from "../utils/normalizeProduct";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -239,7 +240,8 @@ export default function HomePage() {
         const res = await fetch(`${API}/api/products`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        setProducts(data.map(p => ({ ...p, id: p.productId || p.id })));
+        const normalizedProducts = data?.map(normalizeProduct) || [];
+        setProducts(normalizedProducts);
       } catch (err) {
         console.error("Error loading products:", err);
         setBackendError(true);
