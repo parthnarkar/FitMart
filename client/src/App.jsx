@@ -19,67 +19,78 @@ import AdminCustomers from "./pages/AdminCustomers";
 import AdminCustomerDetail from "./pages/AdminCustomerDetail";
 import NonAdminRoute from "./components/NonAdminRoute";
 
-export default function App() {
+// export default function App() {
+//   return (
+//     <BrowserRouter>
+//       <Routes>
+//         // Public routes (redirect admin users to admin dashboard)
+//         <Route path="/" element={<NonAdminRoute><LandingPage /></NonAdminRoute>} />
+//         <Route path="/auth" element={<Authentication />} />
+//         <Route path="/home" element={<NonAdminRoute><HomePage /></NonAdminRoute>} />
+//         <Route path="/product/:productId" element={<NonAdminRoute><ProductPage /></NonAdminRoute>} />
+//         <Route path="/checkout" element={<NonAdminRoute><Checkout /></NonAdminRoute>} />
+//         <Route path="/payment" element={<NonAdminRoute><Payment /></NonAdminRoute>} />
+//         <Route path="/payment-confirmation" element={<NonAdminRoute><ProductConfirmation /></NonAdminRoute>} />
+//         <Route path="/plans/weight-loss" element={<WeightLossPlans />} />
+//         <Route path="/plans/muscle-building" element={<MuscleBuildingPlans />} />
+//         <Route path="/plans/mobility-recovery" element={<MobilityRecoveryPlans />} />
+
+//         {/* Admin routes (guarded) */}
+//         <Route
+//           path="/admin/dashboard"
+//           element={
+//             <AdminRoute>
+//               <AdminDashboard />
+//             </AdminRoute>
+//           }
+//         />
+//         <Route
+//           path="/admin/reports"
+//           element={
+//             <AdminRoute>
+//               <AdminReports />
+//             </AdminRoute>
+//           }
+//         />
+//         <Route
+//           path="/admin/customers"
+//           element={
+//             <AdminRoute>
+//               <AdminCustomers />
+//             </AdminRoute>
+//           }
+//         />
+//         <Route
+//           path="/admin/customers/:userId"
+//           element={
+//             <AdminRoute>
+//               <AdminCustomerDetail />
+//             </AdminRoute>
+//           }
+//         />
+//         <Route
+//           path="/admin/inventory"
+//           element={
+//             <AdminRoute>
+//               <AdminInventory />
+//             </AdminRoute>
+//           }
+//         />
+
+//         // Redirect unknown routes to NotFound
+//         <Route path="*" element={<NotFound />} />
+//       </Routes>
+//     </BrowserRouter>
+//   );
+// }
+function App() {
+  console.log("App is rendering");
+
   return (
-    <BrowserRouter>
-      <Routes>
-        // Public routes (redirect admin users to admin dashboard)
-        <Route path="/" element={<NonAdminRoute><LandingPage /></NonAdminRoute>} />
-        <Route path="/auth" element={<Authentication />} />
-        <Route path="/home" element={<NonAdminRoute><HomePage /></NonAdminRoute>} />
-        <Route path="/product/:productId" element={<NonAdminRoute><ProductPage /></NonAdminRoute>} />
-        <Route path="/checkout" element={<NonAdminRoute><Checkout /></NonAdminRoute>} />
-        <Route path="/payment" element={<NonAdminRoute><Payment /></NonAdminRoute>} />
-        <Route path="/payment-confirmation" element={<NonAdminRoute><ProductConfirmation /></NonAdminRoute>} />
-        <Route path="/plans/weight-loss" element={<WeightLossPlans />} />
-        <Route path="/plans/muscle-building" element={<MuscleBuildingPlans />} />
-        <Route path="/plans/mobility-recovery" element={<MobilityRecoveryPlans />} />
-
-        {/* Admin routes (guarded) */}
-        <Route
-          path="/admin/dashboard"
-          element={
-            <AdminRoute>
-              <AdminDashboard />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/reports"
-          element={
-            <AdminRoute>
-              <AdminReports />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/customers"
-          element={
-            <AdminRoute>
-              <AdminCustomers />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/customers/:userId"
-          element={
-            <AdminRoute>
-              <AdminCustomerDetail />
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/inventory"
-          element={
-            <AdminRoute>
-              <AdminInventory />
-            </AdminRoute>
-          }
-        />
-
-        // Redirect unknown routes to NotFound
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </BrowserRouter>
+    <>
+      <h1>Check Render</h1>
+    </>
   );
 }
+
+export default App;
