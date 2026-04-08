@@ -1,5 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
+import PropTypes from "prop-types";
 import { useAuth } from "../auth/useAuth";
 
 const ADMIN_UID = import.meta.env.VITE_ADMIN_UID || "n5LtrXIGVSVjNktRn1PgDXZbHgq1";
@@ -12,3 +13,7 @@ export default function NonAdminRoute({ children }) {
   if (user && user.uid === ADMIN_UID) return <Navigate to="/admin/dashboard" replace />;
   return children;
 }
+
+NonAdminRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+};

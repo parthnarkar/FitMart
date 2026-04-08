@@ -1,6 +1,7 @@
 // src/pages/Checkout.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import PropTypes from "prop-types";
 import { auth } from "../auth/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { fmt } from "../utils/formatters";
@@ -261,6 +262,12 @@ function PageShell({ children, menuOpen, setMenuOpen }) {
   );
 }
 
+PageShell.propTypes = {
+  children: PropTypes.node.isRequired,
+  menuOpen: PropTypes.bool,
+  setMenuOpen: PropTypes.func,
+};
+
 function Spinner() {
   return (
     <div className="flex items-center justify-center h-64">
@@ -278,6 +285,10 @@ function ErrorMsg({ msg }) {
   );
 }
 
+ErrorMsg.propTypes = {
+  msg: PropTypes.string.isRequired,
+};
+
 function EmptyCart({ navigate }) {
   return (
     <div className="flex flex-col items-center justify-center h-64 text-center gap-4 px-4">
@@ -293,3 +304,7 @@ function EmptyCart({ navigate }) {
     </div>
   );
 }
+
+EmptyCart.propTypes = {
+  navigate: PropTypes.func.isRequired,
+};

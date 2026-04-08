@@ -1,6 +1,7 @@
 // src/components/AdminNavbar.jsx
 import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
+import PropTypes from "prop-types";
 import { auth } from "../auth/firebase";
 import { useAuth } from "../auth/useAuth";
 
@@ -142,3 +143,9 @@ export default function AdminNavbar({ range, setRange, menuOpen, setMenuOpen }) 
     </div>
   );
 }
+AdminNavbar.propTypes = {
+  range: PropTypes.string,
+  setRange: PropTypes.func,
+  menuOpen: PropTypes.bool,
+  setMenuOpen: PropTypes.func,
+};
