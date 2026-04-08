@@ -1,6 +1,30 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
+const { body, param, validationResult } = require('express-validator');
+
+const validateProduct = [
+  body('productId').isNumeric().withMessage('productId must be a number'),
+  body('name').isString().notEmpty().withMessage('name is required'),
+  body('price').isFloat({ min: 0 }).withMessage('price must be a non-negative number'),
+  body('stock').optional().isInt({ min: 0 }).withMessage('stock must be a non-negative integer'),
+];
+
+const validateProductUpdate = [
+  body('name').optional().isString().notEmpty().withMessage('name must be a non-empty string'),
+  body('price').optional().isFloat({ min: 0 }).withMessage('price must be a non-negative number'),
+  body('stock').optional().isInt({ min: 0 }).withMessage('stock must be a non-negative integer'),
+];
+
+const validateIdParam = [
+  param('id').isNumeric().withMessage('id must be a number'),
+];
+
+const checkValidation = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  next();
+};
 
 /**
  * @route   GET /api/products
@@ -21,12 +45,10 @@ router.get('/', async (req, res) => {
  * @desc    Returns all products where available stock (stock - reserved) is below threshold of 5
  * @access  Public
  */
-// GET /api/products/low-stock - get products with low stock
 const LOW_STOCK_THRESHOLD = 5;
 
 router.get('/low-stock', async (req, res) => {
   try {
-    // only check products where stock is not null
     const products = await Product.find({ stock: { $ne: null } });
     const lowStock = products.filter(p => (p.stock - p.reserved) < LOW_STOCK_THRESHOLD);
     res.json(lowStock);
@@ -40,8 +62,7 @@ router.get('/low-stock', async (req, res) => {
  * @desc    Returns a single product by its productId
  * @access  Public
  */
-// GET /api/products/:id - get product by productId
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateIdParam, checkValidation, async (req, res) => {
   try {
     const product = await Product.findOne({ productId: Number(req.params.id) });
     if (!product) return res.status(404).json({ error: 'Product not found' });
@@ -56,7 +77,7 @@ router.get('/:id', async (req, res) => {
  * @desc    Creates a new product; body: full product object including unique productId
  * @access  Public
  */
-router.post('/', async (req, res) => {
+router.post('/', validateProduct, checkValidation, async (req, res) => {
   try {
     const body = req.body;
     const existing = await Product.findOne({ productId: body.productId });
@@ -74,7 +95,7 @@ router.post('/', async (req, res) => {
  * @desc    Updates an existing product by productId; body: fields to update
  * @access  Public
  */
-router.put('/:id', async (req, res) => {
+router.put('/:id', validateIdParam, validateProductUpdate, checkValidation, async (req, res) => {
   try {
     const updated = await Product.findOneAndUpdate({ productId: Number(req.params.id) }, req.body, { new: true });
     if (!updated) return res.status(404).json({ error: 'Product not found' });
@@ -89,7 +110,7 @@ router.put('/:id', async (req, res) => {
  * @desc    Deletes a product by its productId
  * @access  Public
  */
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', validateIdParam, checkValidation, async (req, res) => {
   try {
     const deleted = await Product.findOneAndDelete({ productId: Number(req.params.id) });
     if (!deleted) return res.status(404).json({ error: 'Product not found' });

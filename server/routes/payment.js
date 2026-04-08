@@ -1,10 +1,9 @@
-// server/routes/payment.js
-
 const axios = require("axios");
 const express = require("express");
 const Razorpay = require("razorpay");
 const crypto = require("crypto");
 const router = express.Router();
+const { body, validationResult } = require("express-validator");
 
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
@@ -33,16 +32,34 @@ async function releaseAndClearCart(userId) {
   await cart.save();
 }
 
+const validateCreateOrder = [
+  body("amount").isFloat({ gt: 0 }).withMessage("amount must be a positive number"),
+  body("userId").isString().notEmpty().withMessage("userId is required"),
+  body("currency").optional().isString().isLength({ min: 3, max: 3 }).withMessage("currency must be a 3-letter code"),
+];
+
+const validateVerifyPayment = [
+  body("razorpay_order_id").isString().notEmpty().withMessage("razorpay_order_id is required"),
+  body("razorpay_payment_id").isString().notEmpty().withMessage("razorpay_payment_id is required"),
+  body("razorpay_signature").isString().notEmpty().withMessage("razorpay_signature is required"),
+  body("userId").isString().notEmpty().withMessage("userId is required"),
+];
+
+const validateUserId = [
+  body("userId").isString().notEmpty().withMessage("userId is required"),
+];
+
 /**
  * @route   POST /create-order
  * @desc    Creates a Razorpay payment order; body: { amount (₹), currency, userId }
  * @access  Private
  */
-router.post("/create-order", verifyFirebaseToken, async (req, res) => {
+router.post("/create-order", verifyFirebaseToken, validateCreateOrder, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
   try {
     const { amount, currency = "INR", userId } = req.body;
-    if (!amount || !userId)
-      return res.status(400).json({ error: "amount and userId are required" });
 
     // receipt must be ≤ 40 chars
     const shortId = userId.slice(-8);
@@ -58,7 +75,7 @@ router.post("/create-order", verifyFirebaseToken, async (req, res) => {
     res.json(order);
   } catch (err) {
     console.error("Razorpay create-order error:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Something went wrong" });
   }
 });
 
@@ -69,12 +86,12 @@ router.post("/create-order", verifyFirebaseToken, async (req, res) => {
  *          body: { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId }
  * @access  Private
  */
-router.post("/verify-payment", verifyFirebaseToken, async (req, res) => {
+router.post("/verify-payment", verifyFirebaseToken, validateVerifyPayment, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId } = req.body;
-
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature)
-      return res.status(400).json({ error: "Missing required payment fields" });
 
     const expected = crypto
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
@@ -109,7 +126,7 @@ router.post("/verify-payment", verifyFirebaseToken, async (req, res) => {
 
   } catch (err) {
     console.error("verify-payment error:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Something went wrong" });
   }
 });
 
@@ -119,16 +136,17 @@ router.post("/verify-payment", verifyFirebaseToken, async (req, res) => {
  *          body: { userId }
  * @access  Private
  */
-router.post("/clear-cart", verifyFirebaseToken, async (req, res) => {
+router.post("/clear-cart", verifyFirebaseToken, validateUserId, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
   try {
     const { userId } = req.body;
-    if (!userId) return res.status(400).json({ error: "userId is required" });
-
     await releaseAndClearCart(userId);
     res.json({ success: true });
   } catch (err) {
     console.error("clear-cart error:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Something went wrong" });
   }
 });
 
@@ -145,10 +163,12 @@ router.post("/clear-cart", verifyFirebaseToken, async (req, res) => {
  *          and returns success without creating an order
  * @access  Public (TESTING ONLY) - No authentication required
  */
-router.post("/demo-success", async (req, res) => {
+router.post("/demo-success", validateUserId, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
   try {
     const { userId } = req.body;
-    if (!userId) return res.status(400).json({ error: "userId is required" });
 
     // Generate a fake payment ID that looks like a real Razorpay one
     const fakePaymentId = `pay_DEMO_${Date.now()}`;
@@ -204,7 +224,7 @@ router.post("/demo-success", async (req, res) => {
     res.json({ success: true, paymentId: fakePaymentId, order });
   } catch (err) {
     console.error("demo-success error:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Something went wrong" });
   }
 });
 

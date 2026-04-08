@@ -4,6 +4,14 @@ const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 const verifyFirebaseToken = require('../middleware/verifyFirebaseToken');
+const { body, validationResult } = require('express-validator');
+
+const validateOrderInput = [
+  body('userId').isString().notEmpty().withMessage('userId must be a non-empty string'),
+  body('items').optional().isArray().withMessage('items must be an array'),
+  body('items.*.productId').optional().isNumeric().withMessage('productId must be a number'),
+  body('items.*.quantity').optional().isInt({ min: 1 }).withMessage('quantity must be a positive integer'),
+];
 
 /**
  * @route   POST /api/orders
@@ -12,12 +20,14 @@ const verifyFirebaseToken = require('../middleware/verifyFirebaseToken');
  *          body: { userId, items?: [{ productId, quantity }] }
  * @access  Private
  */
-router.post('/', verifyFirebaseToken, async (req, res) => {
+router.post('/', verifyFirebaseToken, validateOrderInput, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const { userId, items } = req.body;
 
-  if (!userId) return res.status(400).json({ error: 'userId required' });
-
-  // ownership check — token uid must match the userId in the body
   if (req.user.uid !== userId) {
     return res.status(403).json({ error: 'Forbidden — you can only create orders for yourself' });
   }
@@ -35,14 +45,12 @@ router.post('/', verifyFirebaseToken, async (req, res) => {
     let total = 0;
     for (const it of orderItems) {
       const p = await Product.findOne({ productId: Number(it.productId) });
-      if (!p) return res.status(400).json({ error: `Product ${it.productId} not found` });
+      if (!p) return res.status(400).json({ error: 'Product not found' });
       // Oversell guard - skip check if stock is null (unlimited)
       if (p.stock !== null) {
         const available = p.stock - p.reserved;
         if (available < it.quantity) {
-          return res.status(400).json({
-            error: `Insufficient stock for ${p.name}. Available: ${available}`
-          });
+          return res.status(400).json({ error: 'Insufficient stock for one or more products' });
         }
       }
       populated.push({ productId: p.productId, quantity: it.quantity, price: p.price });
@@ -67,7 +75,7 @@ router.post('/', verifyFirebaseToken, async (req, res) => {
     res.status(201).json(order);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Something went wrong' });
   }
 });
 
@@ -86,7 +94,7 @@ router.get('/:userId', verifyFirebaseToken, async (req, res) => {
     const orders = await Order.find({ userId }).sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Something went wrong' });
   }
 });
 
