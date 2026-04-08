@@ -103,6 +103,13 @@ export default function AdminCustomers() {
       .catch(() => { setError("Failed to load customers"); setLoading(false); });
   }, []);
 
+  // Derived metrics for visualizations
+  const segmentCounts = customers.reduce((acc, c) => {
+    acc[c.segment] = (acc[c.segment] || 0) + 1;
+    return acc;
+  }, {});
+  const topBySpend = [...customers].sort((a, b) => b.totalSpend - a.totalSpend).slice(0, 5);
+
   return (
     <div className="min-h-screen bg-stone-50" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`
@@ -154,6 +161,59 @@ export default function AdminCustomers() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Insights — simple visuals */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 sm:mb-10">
+          <div className="bg-white border border-stone-200 rounded-2xl p-5 sm:p-7 hover:border-stone-300 hover:shadow-lg transition-all duration-300">
+            <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-4">Insights</p>
+            <h3 style={{ fontFamily: "'DM Serif Display', serif" }} className="text-lg text-stone-900 mb-4">Segment distribution</h3>
+            <div className="space-y-3">
+              {['high-value', 'returning', 'new'].map(seg => {
+                const count = segmentCounts[seg] || 0;
+                const pct = customers.length ? Math.round((count / customers.length) * 100) : 0;
+                return (
+                  <div key={seg} className="flex items-center gap-3">
+                    <div className={`w-3 h-3 rounded-full ${seg === 'high-value' ? 'bg-stone-900' : seg === 'returning' ? 'bg-stone-100 border border-stone-300' : 'bg-stone-100'}`} />
+                    <div className="flex-1">
+                      <div className="flex justify-between mb-1">
+                        <span className="text-xs text-stone-600 capitalize">{seg.replace('-', ' ')}</span>
+                        <span className="text-xs text-stone-400">{count} ({pct}%)</span>
+                      </div>
+                      <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
+                        <div style={{ width: `${pct}%` }} className="h-2 bg-stone-900" />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="bg-white border border-stone-200 rounded-2xl p-5 sm:p-7 hover:border-stone-300 hover:shadow-lg transition-all duration-300">
+            <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-4">Top customers</p>
+            <h3 style={{ fontFamily: "'DM Serif Display', serif" }} className="text-lg text-stone-900 mb-4">Top spenders</h3>
+            <div className="space-y-3">
+              {topBySpend.length === 0 && <p className="text-xs text-stone-400">No data yet</p>}
+              {topBySpend.map((c, i) => {
+                const pct = customers.length ? Math.round((c.totalSpend / (topBySpend[0]?.totalSpend || 1)) * 100) : 0;
+                return (
+                  <div key={c.userId} className="flex items-center gap-3">
+                    <span className="text-xs text-stone-300 w-5">#{i + 1}</span>
+                    <div className="flex-1">
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm text-stone-700 truncate">{c.customerName && c.customerName !== '—' ? c.customerName : c.userId}</span>
+                        <span className="text-xs text-stone-400">{fmt(c.totalSpend)}</span>
+                      </div>
+                      <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
+                        <div style={{ width: `${pct}%` }} className="h-2 bg-stone-900" />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         {/* Customer list card */}
