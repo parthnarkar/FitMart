@@ -6,6 +6,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { fmt } from "../utils/formatters";
 import { getAuthHeaders } from "../utils/getAuthHeaders";
 import Navbar from "../components/Navbar";
+import { normalizeProduct } from "../utils/normalizeProduct";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -39,7 +40,8 @@ export default function Checkout() {
         if (!prodRes.ok) throw new Error("Failed to fetch products");
 
         const cart = await cartRes.json();
-        const products = await prodRes.json();
+        const rawProducts = await prodRes.json();
+        const products = rawProducts.map(normalizeProduct);
 
         if (discountRes.ok) {
           const d = await discountRes.json();
