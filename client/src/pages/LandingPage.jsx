@@ -199,7 +199,7 @@ export default function LandingPage() {
             <div className={`fade-up ${visible ? "visible" : ""} delay-4
                              flex flex-col sm:flex-row gap-3`}>
               <button
-                onClick={() => navigate(auth.currentUser ? "/home" : "/auth")}
+                onClick={() => navigate( "/home")}
                 className="bg-stone-900 text-white text-sm px-8 py-3.5 rounded-full
                            hover:bg-stone-700 transition-colors w-full sm:w-auto text-center
                            min-h-[48px] active:scale-[0.98]"
@@ -455,7 +455,7 @@ export default function LandingPage() {
                     ? "bg-stone-900 text-white hover:bg-stone-800"
                     : "bg-white border border-stone-200 hover:border-stone-300"
                   }`}
-                onClick={() => navigate(auth.currentUser ? "/home" : "/auth")}
+                onClick={() => navigate( "/home")}
               >
                 <div>
                   <p className="text-xs tracking-widest uppercase text-stone-400">{plan.name}</p>
@@ -593,7 +593,7 @@ function NavbarWithGithub({ navOpaque, menuOpen, setMenuOpen }) {
 
           {/* Get Started */}
           <button
-            onClick={() => navigate(auth.currentUser ? "/home" : "/auth")}
+            onClick={() => navigate( "/home")}
             className={`text-xs sm:text-sm px-4 sm:px-5 py-2 rounded-full transition-colors
                            min-h-[36px] active:scale-[0.97]
                            ${isOpaque
