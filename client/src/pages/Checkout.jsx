@@ -6,6 +6,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { fmt } from "../utils/formatters";
 import { getAuthHeaders } from "../utils/getAuthHeaders";
 import Navbar from "../components/Navbar";
+import { normalizeProduct } from "../utils/normalizeProduct"; 
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -39,7 +40,8 @@ export default function Checkout() {
         if (!prodRes.ok) throw new Error("Failed to fetch products");
 
         const cart = await cartRes.json();
-        const products = await prodRes.json();
+        const rawProducts = await prodRes.json();
+        const products = rawProducts.map(normalizeProduct);
 
         if (discountRes.ok) {
           const d = await discountRes.json();
@@ -49,7 +51,7 @@ export default function Checkout() {
 
         if (!cart.items?.length) { setItems([]); setLoading(false); return; }
 
-        const productMap = Object.fromEntries(products.map(p => [p.productId, p]));
+        const productMap = Object.fromEntries(products.map(p => [p.id, p]));
         const enriched = cart.items
           .map(item => ({ ...item, product: productMap[item.productId] }))
           .filter(item => item.product);
@@ -174,7 +176,7 @@ export default function Checkout() {
           <div className="lg:col-span-2 space-y-3 sm:space-y-4 order-last lg:order-first">
             {items.map(({ product, quantity }) => (
               <div
-                key={product.productId}
+                key={product.id}
                 className="bg-white border border-stone-200 rounded-2xl p-4 sm:p-6
                            flex gap-3 sm:gap-5 hover:border-stone-300 hover:shadow-lg
                            transition-all duration-300"
