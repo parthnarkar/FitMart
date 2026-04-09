@@ -50,7 +50,7 @@ const SkeletonRow = () => (
 );
 
 // ── Mobile order card ──────────────────────────────────────────────────────
-const MobileOrderCard = ({ order, expanded, onToggle }) => (
+const MobileOrderCard = ({ order, expanded, onToggle, onDownload, productMap }) => (
   <div className="border border-stone-100 rounded-xl overflow-hidden mb-3">
     {/* Card header — tappable */}
     <button
@@ -91,25 +91,33 @@ const MobileOrderCard = ({ order, expanded, onToggle }) => (
     {/* Expanded items */}
     {expanded && (
       <div className="border-t border-stone-100 bg-stone-50 divide-y divide-stone-100">
-        {order.items.map((item, idx) => (
-          <div key={`${order._id}-${idx}`}
-            className="px-4 py-3 flex items-center justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-xs text-stone-500 truncate">
-                Product #{item.productId}
-              </p>
-              <p className="text-[10px] text-stone-400 mt-0.5">
-                ₹{item.price} each
-              </p>
+        {order.items.map((item, idx) => {
+          const prod = productMap?.[item.productId] || {};
+          const name = prod.name || `Product #${item.productId}`;
+          const brand = prod.brand || "";
+          return (
+            <div key={`${order._id}-${idx}`} className="px-4 py-3 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs text-stone-500 truncate">{name}</p>
+                {brand && <p className="text-[10px] text-stone-400 mt-0.5">{brand}</p>}
+                <p className="text-[10px] text-stone-400 mt-0.5">₹{item.price} each</p>
+              </div>
+              <div className="text-right flex-shrink-0">
+                <p className="text-xs text-stone-400">×{item.quantity}</p>
+                <p className="text-xs font-medium text-stone-600 mt-0.5">{fmt(item.price * item.quantity)}</p>
+              </div>
             </div>
-            <div className="text-right flex-shrink-0">
-              <p className="text-xs text-stone-400">×{item.quantity}</p>
-              <p className="text-xs font-medium text-stone-600 mt-0.5">
-                {fmt(item.price * item.quantity)}
-              </p>
-            </div>
-          </div>
-        ))}
+          );
+        })}
+
+        <div className="px-4 py-3">
+          <button
+            onClick={(e) => { e.stopPropagation(); onDownload(order); }}
+            className="text-xs border border-stone-300 text-stone-700 px-4 py-2 rounded-full hover:bg-stone-100 transition-colors"
+          >
+            Download Invoice
+          </button>
+        </div>
       </div>
     )}
   </div>
@@ -124,6 +132,7 @@ export default function AdminCustomerDetail() {
   const [error, setError] = useState(null);
   const [expanded, setExpanded] = useState({});
   const [menuOpen, setMenuOpen] = useState(false);
+  const [productMap, setProductMap] = useState({});
 
   const toggleOrder = (id) =>
     setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
@@ -138,6 +147,69 @@ export default function AdminCustomerDetail() {
       })
       .catch(() => { setError("Customer not found"); setLoading(false); });
   }, [userId]);
+
+  // Fetch product details for all products referenced in orders (watch `data` to avoid TDZ)
+  useEffect(() => {
+    const ordersList = data?.orders;
+    if (!ordersList || ordersList.length === 0) return;
+    const ids = [...new Set(ordersList.flatMap(o => o.items.map(i => i.productId)).filter(Boolean))];
+    if (ids.length === 0) return;
+    const map = {};
+    Promise.all(ids.map(id =>
+      fetch(`${API_BASE}/products/${id}`).then(r => r.ok ? r.json() : null)
+        .then(p => { if (p) map[id] = p; })
+        .catch(() => { })
+    )).then(() => setProductMap(map));
+  }, [data]);
+
+  // Generate and open a simple invoice HTML for a given order
+  const downloadInvoice = (order) => {
+    try {
+      const customer = { name: customerName || userId, email: customerEmail || "" };
+      const itemsHtml = order.items.map(({ productId, quantity, price }) => {
+        const prod = productMap[productId] || {};
+        const name = prod.name || `Product #${productId}`;
+        const brand = prod.brand || "";
+        return `
+          <tr>
+            <td>
+              <div class="product-brand">${brand}</div>
+              <div class="product-name">${name}</div>
+              <div class="unit-price">${fmt(price)} / unit</div>
+            </td>
+            <td style="text-align:center">${quantity}</td>
+            <td style="text-align:right">${fmt(price * quantity)}</td>
+          </tr>`;
+      }).join("");
+
+      const invoiceHTML = `<!doctype html><html><head><meta charset="utf-8"><title>Invoice ${order._id}</title>
+      <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Segoe UI,Arial,sans-serif;padding:32px;color:#1c1917}
+      .brand{font-weight:700;font-size:24px}.product-brand{font-size:10px;color:#78716c;text-transform:uppercase}
+      .product-name{font-size:14px}.unit-price{font-size:11px;color:#a8a29e}
+      table{width:100%;border-collapse:collapse;margin-top:20px}thead tr{background:#1c1917;color:#fff}thead th{padding:8px;text-align:left;font-size:10px}
+      tbody td{padding:12px;border-bottom:1px solid #e7e5e3}
+      .totals{margin-top:20px;width:280px;margin-left:auto}
+      .total-row{display:flex;justify-content:space-between;padding:6px 0}
+      </style></head><body>
+      <div class="brand">FitMart</div>
+      <div style="margin-top:8px;color:#78716c;font-size:12px">Tax Invoice · ${new Date(order.createdAt).toLocaleString()}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px">
+        <div><h4 style="font-size:10px;color:#78716c;text-transform:uppercase">Billed To</h4><div style="margin-top:6px">${customer.name}</div>${customer.email ? `<div style="margin-top:4px">${customer.email}</div>` : ''}</div>
+        <div><h4 style="font-size:10px;color:#78716c;text-transform:uppercase">Sold By</h4><div style="margin-top:6px">FitMart India Pvt. Ltd.</div><div>Mumbai</div></div>
+      </div>
+      <table><thead><tr><th>Item</th><th style="text-align:center">Qty</th><th style="text-align:right">Amount</th></tr></thead><tbody>${itemsHtml}</tbody></table>
+      <div class="totals"><div class="total-row"><span>Subtotal</span><span>${fmt(order.total)}</span></div><div class="total-row grand" style="font-weight:700;margin-top:8px;border-top:1px solid #e7e5e3;padding-top:8px"><span>Total Paid</span><span>${fmt(order.total)}</span></div></div>
+      </body></html>`;
+
+      const win = window.open("", "_blank");
+      win.document.write(invoiceHTML);
+      win.document.close();
+      win.focus();
+    } catch (e) {
+      console.error('Invoice error', e);
+      alert('Failed to generate invoice');
+    }
+  };
 
   const {
     customerName, customerEmail, customerPhoto,
@@ -306,6 +378,8 @@ export default function AdminCustomerDetail() {
                 order={order}
                 expanded={!!expanded[order._id]}
                 onToggle={toggleOrder}
+                onDownload={downloadInvoice}
+                productMap={productMap}
               />
             ))}
             {!loading && !orders?.length && (
@@ -318,7 +392,7 @@ export default function AdminCustomerDetail() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-stone-100">
-                  {["Order ID", "Items", "Status", "Total", "Date"].map((h, i) => (
+                  {["Order ID", "Items", "Status", "Total", "Date", "Actions"].map((h, i) => (
                     <th key={h}
                       className={`px-6 py-4 text-xs tracking-[0.15em] uppercase
                                     text-stone-400 font-normal
@@ -368,32 +442,35 @@ export default function AdminCustomerDetail() {
                           day: "2-digit", month: "short", year: "numeric",
                         })}
                       </td>
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); downloadInvoice(order); }}
+                          className="text-xs border border-stone-300 text-stone-700 px-3 py-1 rounded-full hover:bg-stone-100 transition-colors"
+                        >
+                          Download
+                        </button>
+                      </td>
                     </tr>
 
-                    {expanded[order._id] && order.items.map((item, idx) => (
-                      <tr key={`${order._id}-${idx}`}
-                        className="bg-stone-50 border-t border-stone-100">
-                        <td className="pl-14 pr-6 py-2.5 text-stone-500 text-xs">
-                          └ Product #{item.productId}
-                        </td>
-                        <td className="px-6 py-2.5 text-center text-stone-400 text-xs">
-                          ×{item.quantity}
-                        </td>
-                        <td className="px-6 py-2.5" />
-                        <td className="px-6 py-2.5 text-right text-stone-500 text-xs">
-                          {fmt(item.price * item.quantity)}
-                        </td>
-                        <td className="px-6 py-2.5 text-center text-stone-300 text-xs">
-                          ₹{item.price} each
-                        </td>
-                      </tr>
-                    ))}
+                    {expanded[order._id] && order.items.map((item, idx) => {
+                      const prod = productMap?.[item.productId] || {};
+                      const name = prod.name || `Product #${item.productId}`;
+                      return (
+                        <tr key={`${order._id}-${idx}`} className="bg-stone-50 border-t border-stone-100">
+                          <td className="pl-14 pr-6 py-2.5 text-stone-500 text-xs">└ {name}</td>
+                          <td className="px-6 py-2.5 text-center text-stone-400 text-xs">×{item.quantity}</td>
+                          <td className="px-6 py-2.5" />
+                          <td className="px-6 py-2.5 text-right text-stone-500 text-xs">{fmt(item.price * item.quantity)}</td>
+                          <td className="px-6 py-2.5 text-center text-stone-300 text-xs">₹{item.price} each</td>
+                        </tr>
+                      );
+                    })}
                   </>
                 ))}
 
                 {!loading && !orders?.length && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-sm text-stone-400">
+                    <td colSpan={6} className="px-6 py-12 text-center text-sm text-stone-400">
                       No orders found.
                     </td>
                   </tr>

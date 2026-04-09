@@ -20,17 +20,22 @@ async function resolveFirebaseUser(uid) {
   }
 }
 
-// ── Helper: get the start date based on the time range filter ─────────────
+// ── Helper: get the start date based on the time range filter
+// 'today'  -> start of today
+// 'week'   -> last 7 days (including today)
+// 'month'  -> last 30 days (including today)
 const getStartDate = (range) => {
   const now = new Date();
   if (range === 'today') {
     return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  } else if (range === 'week') {
-    const diff = now.getDate() - now.getDay();
-    return new Date(now.getFullYear(), now.getMonth(), diff);
-  } else {
-    return new Date(now.getFullYear(), now.getMonth(), 1);
   }
+
+  // For 'week' and 'month' return a start date N days before today (inclusive)
+  const daysBack = range === 'week' ? 6 : 29; // 6 -> previous 6 days + today = 7 days; 29 -> 30 days
+  const d = new Date(now);
+  d.setDate(now.getDate() - daysBack);
+  d.setHours(0, 0, 0, 0);
+  return d;
 };
 
 // GET /api/dashboard?range=today|week|month
