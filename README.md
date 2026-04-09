@@ -8,7 +8,7 @@
 
 # FitMart
 
-### *Your All-in-One Fitness & Nutrition E-Commerce Platform*
+### _Your All-in-One Fitness & Nutrition E-Commerce Platform_
 
 > A full-stack MERN e-commerce application combining premium fitness gear, nutrition products, and seamless payments — built for learning, collaboration, and real-world use.
 
@@ -96,29 +96,29 @@ Whether you're a beginner learning full-stack development or an experienced deve
 
 ### Customer-Facing
 
-| Feature | Description |
-|---|---|
-| 🛍️ Product Catalog | Browse products with images, pricing, badges & category filters |
-| 🔍 Search | Real-time product search by name and brand |
-| 🛒 Smart Cart | Cart with quantity controls and real-time stock reservation |
-| 📦 Order Management | Orders with price snapshotting at time of purchase |
-| 💳 Razorpay Payments | Secure order creation & HMAC payment verification |
-| 🔐 Firebase Auth | Email/password and Google Sign-In |
-| 🎁 Welcome Discount | 10% off automatically applied for first-time buyers |
-| 🤖 Fitness Chatbot | AI-powered assistant for workout and nutrition queries |
-| 🧮 BMI Calculator | Body metrics tool with TDEE calculation and product recommendations |
-| 🏋️ Fitness Plans | Weight Loss, Muscle Building, and Mobility & Recovery plans |
-| 📱 PWA Ready | Progressive Web App support for mobile installation |
+| Feature              | Description                                                         |
+| -------------------- | ------------------------------------------------------------------- |
+| 🛍️ Product Catalog   | Browse products with images, pricing, badges & category filters     |
+| 🔍 Search            | Real-time product search by name and brand                          |
+| 🛒 Smart Cart        | Cart with quantity controls and real-time stock reservation         |
+| 📦 Order Management  | Orders with price snapshotting at time of purchase                  |
+| 💳 Razorpay Payments | Secure order creation & HMAC payment verification                   |
+| 🔐 Firebase Auth     | Email/password and Google Sign-In                                   |
+| 🎁 Welcome Discount  | 10% off automatically applied for first-time buyers                 |
+| 🤖 Fitness Chatbot   | AI-powered assistant for workout and nutrition queries              |
+| 🧮 BMI Calculator    | Body metrics tool with TDEE calculation and product recommendations |
+| 🏋️ Fitness Plans     | Weight Loss, Muscle Building, and Mobility & Recovery plans         |
+| 📱 PWA Ready         | Progressive Web App support for mobile installation                 |
 
 ### Admin-Facing
 
-| Feature | Description |
-|---|---|
-| 📊 Dashboard | Revenue KPIs, charts, top products, and recent orders |
-| 📦 Inventory | Real-time stock levels, low-stock alerts, and product filtering |
-| 👥 Customers | Customer directory with segments (new / returning / high-value) |
-| 🔍 Customer Detail | Full order history and spend analytics per customer |
-| 📈 Reports | Sales reports with daily, weekly, and monthly breakdowns |
+| Feature            | Description                                                     |
+| ------------------ | --------------------------------------------------------------- |
+| 📊 Dashboard       | Revenue KPIs, charts, top products, and recent orders           |
+| 📦 Inventory       | Real-time stock levels, low-stock alerts, and product filtering |
+| 👥 Customers       | Customer directory with segments (new / returning / high-value) |
+| 🔍 Customer Detail | Full order history and spend analytics per customer             |
+| 📈 Reports         | Sales reports with daily, weekly, and monthly breakdowns        |
 
 ---
 
@@ -126,30 +126,30 @@ Whether you're a beginner learning full-stack development or an experienced deve
 
 ### Frontend
 
-| Technology | Purpose |
-|---|---|
-| **React v19** + **Vite** | UI framework with fast HMR dev experience |
-| **Tailwind CSS v4** | Utility-first styling |
-| **React Router v7** | Client-side routing |
-| **Firebase (client)** | Authentication |
-| **Recharts** | Admin dashboard charts (AreaChart, BarChart) |
+| Technology               | Purpose                                      |
+| ------------------------ | -------------------------------------------- |
+| **React v19** + **Vite** | UI framework with fast HMR dev experience    |
+| **Tailwind CSS v4**      | Utility-first styling                        |
+| **React Router v7**      | Client-side routing                          |
+| **Firebase (client)**    | Authentication                               |
+| **Recharts**             | Admin dashboard charts (AreaChart, BarChart) |
 
 ### Backend
 
-| Technology | Purpose |
-|---|---|
-| **Node.js** + **Express** | REST API server |
-| **Mongoose** | MongoDB ODM |
-| **Firebase Admin SDK** | Server-side auth token verification |
-| **Razorpay SDK** | Payment order creation and HMAC verification |
+| Technology                | Purpose                                      |
+| ------------------------- | -------------------------------------------- |
+| **Node.js** + **Express** | REST API server                              |
+| **Mongoose**              | MongoDB ODM                                  |
+| **Firebase Admin SDK**    | Server-side auth token verification          |
+| **Razorpay SDK**          | Payment order creation and HMAC verification |
 
 ### Database & Services
 
-| Service | Usage |
-|---|---|
-| **MongoDB** (Atlas or local) | Primary database |
-| **Firebase** | Authentication provider |
-| **Razorpay** | Payment processing |
+| Service                      | Usage                   |
+| ---------------------------- | ----------------------- |
+| **MongoDB** (Atlas or local) | Primary database        |
+| **Firebase**                 | Authentication provider |
+| **Razorpay**                 | Payment processing      |
 
 ---
 
@@ -231,29 +231,29 @@ FitMart/
 
 ### Public / Customer Routes
 
-| Route | Page | Description |
-|---|---|---|
-| `/` | `LandingPage` | Marketing homepage with hero, categories, plans, testimonials |
-| `/auth` | `Authentication` | Sign In, Sign Up, and Password Reset |
-| `/home` | `HomePage` | Product catalog with search, cart, BMI calculator, plans |
-| `/product/:productId` | `ProductPage` | Individual product detail page |
-| `/checkout` | `Checkout` | Order review with discount summary |
-| `/payment` | `PaymentPage` | Razorpay payment flow + demo bypass |
-| `/payment-confirmation` | `ProductConfirmation` | Post-payment success screen |
-| `/plans/weight-loss` | `WeightLossPlans` | Weight loss program listing |
-| `/plans/muscle-building` | `MuscleBuildingPlans` | Muscle building program listing |
-| `/plans/mobility-recovery` | `MobilityRecoveryPlans` | Mobility & recovery program listing |
-| `*` | `NotFound` | 404 fallback |
+| Route                      | Page                    | Description                                                   |
+| -------------------------- | ----------------------- | ------------------------------------------------------------- |
+| `/`                        | `LandingPage`           | Marketing homepage with hero, categories, plans, testimonials |
+| `/auth`                    | `Authentication`        | Sign In, Sign Up, and Password Reset                          |
+| `/home`                    | `HomePage`              | Product catalog with search, cart, BMI calculator, plans      |
+| `/product/:productId`      | `ProductPage`           | Individual product detail page                                |
+| `/checkout`                | `Checkout`              | Order review with discount summary                            |
+| `/payment`                 | `PaymentPage`           | Razorpay payment flow + demo bypass                           |
+| `/payment-confirmation`    | `ProductConfirmation`   | Post-payment success screen                                   |
+| `/plans/weight-loss`       | `WeightLossPlans`       | Weight loss program listing                                   |
+| `/plans/muscle-building`   | `MuscleBuildingPlans`   | Muscle building program listing                               |
+| `/plans/mobility-recovery` | `MobilityRecoveryPlans` | Mobility & recovery program listing                           |
+| `*`                        | `NotFound`              | 404 fallback                                                  |
 
 ### Admin Routes (guarded — admin UID only)
 
-| Route | Page | Description |
-|---|---|---|
-| `/admin/dashboard` | `AdminDashboard` | KPIs, revenue chart, top products, recent orders |
-| `/admin/inventory` | `AdminInventory` | Stock levels with low-stock alerts |
-| `/admin/customers` | `AdminCustomers` | All customers with segment tagging |
-| `/admin/customers/:userId` | `AdminCustomerDetail` | Customer profile + full order history |
-| `/admin/reports` | `AdminReports` | Sales reports (daily / weekly / monthly) |
+| Route                      | Page                  | Description                                      |
+| -------------------------- | --------------------- | ------------------------------------------------ |
+| `/admin/dashboard`         | `AdminDashboard`      | KPIs, revenue chart, top products, recent orders |
+| `/admin/inventory`         | `AdminInventory`      | Stock levels with low-stock alerts               |
+| `/admin/customers`         | `AdminCustomers`      | All customers with segment tagging               |
+| `/admin/customers/:userId` | `AdminCustomerDetail` | Customer profile + full order history            |
+| `/admin/reports`           | `AdminReports`        | Sales reports (daily / weekly / monthly)         |
 
 > **Route Guards:** `AdminRoute` redirects non-admins to `/home`. `NonAdminRoute` redirects the admin account to `/admin/dashboard`.
 
@@ -262,24 +262,31 @@ FitMart/
 ## 🧩 Components
 
 ### `Navbar`
+
 Dual-variant navigation bar (`landing` / `home`). Landing variant is transparent and becomes opaque on scroll. Home variant is sticky with search, cart icon (with badge), and user avatar dropdown.
 
 ### `CartDrawer`
+
 Slide-in panel from the right showing cart items with quantity controls, remove buttons, subtotal, and a checkout CTA. Closes on `Escape` key or overlay click. Locks body scroll when open.
 
 ### `FitnessChatBot`
+
 Floating chat widget (FAB in bottom-right corner) backed by the `/api/chat` endpoint. Supports markdown-style bold text rendering, typing indicator, and auto-scroll. Full-screen on mobile.
 
 ### `BMICalculator`
+
 Form-based calculator that computes BMI and TDEE from user inputs (weight, height, age, gender, activity level). Displays results with a product category recommendation that links to the store.
 
 ### `WelcomeBanner`
+
 Top-of-page animated banner shown to first-time users. Displays the 10% welcome discount and dismisses via a POST to `/api/user/dismiss-banner`.
 
 ### `AdminNavbar`
+
 Admin-specific sticky navbar with range selector buttons (Today / Week / Month), brand link, and user avatar dropdown with sign out.
 
 ### `AdminRoute` / `NonAdminRoute`
+
 React Router route guards using `useAuth` and `VITE_ADMIN_UID` to protect admin and customer routes respectively.
 
 ---
@@ -357,16 +364,23 @@ npm run dev
 ```env
 MONGO_URI=<your_mongodb_connection_string>
 MONGO_DB=<your_database_name>           # optional
+NODE_ENV=development                    # optional
 PORT=5000
 ALLOWED_ORIGIN=http://localhost:5173    # allowed frontend origin for CORS
 RAZORPAY_KEY_ID=<your_razorpay_key_id>
 RAZORPAY_KEY_SECRET=<your_razorpay_key_secret>
+GEMINI_API_KEY=<your_gemini_api_key>    # optional (needed for /api/chat)
 
-# Firebase Admin SDK (required for auth middleware)
+# Firebase Admin SDK (required for auth middleware) - Option A
 FIREBASE_PROJECT_ID=<your_firebase_project_id>
 FIREBASE_CLIENT_EMAIL=<your_firebase_client_email>
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+
+# Option B (alternative to Option A)
+GOOGLE_APPLICATION_CREDENTIALS=<absolute_path_to_service_account_json>
 ```
+
+> **Firebase is required** for authenticated routes. Configure **either** Option A (`FIREBASE_*`) **or** Option B (`GOOGLE_APPLICATION_CREDENTIALS`) before starting the server.
 
 #### Getting Firebase Admin Credentials
 
@@ -442,64 +456,64 @@ cd server && npm start
 
 ### 🛍️ Products
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/products` | List all products (sorted by `productId`) |
-| `GET` | `/api/products/:id` | Get product by `productId` |
-| `POST` | `/api/products` | Create a new product |
-| `PUT` | `/api/products/:id` | Update product by `productId` |
-| `DELETE` | `/api/products/:id` | Delete product by `productId` |
+| Method   | Endpoint            | Description                               |
+| -------- | ------------------- | ----------------------------------------- |
+| `GET`    | `/api/products`     | List all products (sorted by `productId`) |
+| `GET`    | `/api/products/:id` | Get product by `productId`                |
+| `POST`   | `/api/products`     | Create a new product                      |
+| `PUT`    | `/api/products/:id` | Update product by `productId`             |
+| `DELETE` | `/api/products/:id` | Delete product by `productId`             |
 
 ### 🛒 Cart
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/cart/:userId` | Get or create a user's cart |
-| `POST` | `/api/cart/:userId/add` | Add item — body: `{ productId, quantity }` |
-| `POST` | `/api/cart/:userId/remove` | Remove item — body: `{ productId, quantity }` |
-| `DELETE` | `/api/cart/:userId` | Clear cart and release reserved stock |
+| Method   | Endpoint                   | Description                                   |
+| -------- | -------------------------- | --------------------------------------------- |
+| `GET`    | `/api/cart/:userId`        | Get or create a user's cart                   |
+| `POST`   | `/api/cart/:userId/add`    | Add item — body: `{ productId, quantity }`    |
+| `POST`   | `/api/cart/:userId/remove` | Remove item — body: `{ productId, quantity }` |
+| `DELETE` | `/api/cart/:userId`        | Clear cart and release reserved stock         |
 
 ### 📦 Orders
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/orders` | Create order — body: `{ userId, items? }` |
-| `GET` | `/api/orders/:userId` | List all orders for a user |
+| Method | Endpoint              | Description                               |
+| ------ | --------------------- | ----------------------------------------- |
+| `POST` | `/api/orders`         | Create order — body: `{ userId, items? }` |
+| `GET`  | `/api/orders/:userId` | List all orders for a user                |
 
 ### 💳 Payments
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/payment/create-order` | Create a Razorpay order |
-| `POST` | `/api/payment/verify-payment` | Verify HMAC signature |
-| `POST` | `/api/payment/clear-cart` | Release stock & clear cart — body: `{ userId }` |
-| `POST` | `/api/payment/demo-success` | Simulate successful payment (testing only) |
+| Method | Endpoint                      | Description                                     |
+| ------ | ----------------------------- | ----------------------------------------------- |
+| `POST` | `/api/payment/create-order`   | Create a Razorpay order                         |
+| `POST` | `/api/payment/verify-payment` | Verify HMAC signature                           |
+| `POST` | `/api/payment/clear-cart`     | Release stock & clear cart — body: `{ userId }` |
+| `POST` | `/api/payment/demo-success`   | Simulate successful payment (testing only)      |
 
 > **Security:** Payment verification uses HMAC-SHA256 on `razorpay_order_id|razorpay_payment_id` with `RAZORPAY_KEY_SECRET`. Never expose this key to the client.
 
 ### 🤖 Chat
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
+| Method | Endpoint    | Description                                                |
+| ------ | ----------- | ---------------------------------------------------------- |
 | `POST` | `/api/chat` | Send a message — body: `{ message }` — returns `{ reply }` |
 
 ### 👤 User
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/user/login` | Register login + check welcome discount eligibility |
-| `GET` | `/api/user/discount-status/:userId` | Get discount eligibility and percent |
-| `POST` | `/api/user/use-discount` | Mark welcome discount as used |
-| `POST` | `/api/user/dismiss-banner` | Dismiss the welcome banner |
+| Method | Endpoint                            | Description                                         |
+| ------ | ----------------------------------- | --------------------------------------------------- |
+| `POST` | `/api/user/login`                   | Register login + check welcome discount eligibility |
+| `GET`  | `/api/user/discount-status/:userId` | Get discount eligibility and percent                |
+| `POST` | `/api/user/use-discount`            | Mark welcome discount as used                       |
+| `POST` | `/api/user/dismiss-banner`          | Dismiss the welcome banner                          |
 
 ### 📊 Admin
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/dashboard?range=today\|week\|month` | Dashboard KPIs, charts, recent orders |
-| `GET` | `/api/reports/sales?range=daily\|weekly\|monthly` | Sales summary + revenue by date + product performance |
-| `GET` | `/api/customers` | All customers with order counts, spend, and segment |
-| `GET` | `/api/customers/:userId` | Single customer profile + order history |
+| Method | Endpoint                                          | Description                                           |
+| ------ | ------------------------------------------------- | ----------------------------------------------------- |
+| `GET`  | `/api/dashboard?range=today\|week\|month`         | Dashboard KPIs, charts, recent orders                 |
+| `GET`  | `/api/reports/sales?range=daily\|weekly\|monthly` | Sales summary + revenue by date + product performance |
+| `GET`  | `/api/customers`                                  | All customers with order counts, spend, and segment   |
+| `GET`  | `/api/customers/:userId`                          | Single customer profile + order history               |
 
 ---
 
@@ -564,13 +578,13 @@ FitMart uses a **luxury refined minimalism** design language — clean, editoria
 
 ### Color Palette (`stone-*` only)
 
-| Role | Tailwind Class | Usage |
-|---|---|---|
-| Primary / Dark BG | `stone-900` | Buttons, navbars, dark sections |
-| Borders | `stone-200` | Card borders, dividers |
-| Subtle BG | `stone-100` | Page backgrounds, hover states |
-| Main BG | `stone-50` | Default page background |
-| Cards | `white` | Cards, inputs, modals |
+| Role              | Tailwind Class | Usage                           |
+| ----------------- | -------------- | ------------------------------- |
+| Primary / Dark BG | `stone-900`    | Buttons, navbars, dark sections |
+| Borders           | `stone-200`    | Card borders, dividers          |
+| Subtle BG         | `stone-100`    | Page backgrounds, hover states  |
+| Main BG           | `stone-50`     | Default page background         |
+| Cards             | `white`        | Cards, inputs, modals           |
 
 > ⚠️ **No other color families** (no blue, green, purple). All accent colors use `stone-*`.
 
@@ -600,6 +614,7 @@ The admin panel is accessible only to the account whose Firebase UID matches `VI
 ### Admin Features
 
 **Dashboard (`/admin/dashboard`)**
+
 - KPI cards: Total Revenue, Total Orders, Customers, Low Stock count
 - Revenue over time (Area chart)
 - Top 5 selling products (horizontal Bar chart)
@@ -608,22 +623,26 @@ The admin panel is accessible only to the account whose Firebase UID matches `VI
 - Quick navigation cards to Inventory, Customers, Reports
 
 **Inventory (`/admin/inventory`)**
+
 - Real-time stock levels for all products
 - Status badges: In Stock / Low Stock / Unlimited
 - Filter pills by stock status
 - Stock, Reserved, and Available columns
 
 **Customers (`/admin/customers`)**
+
 - All customers sorted by spend
 - Segment badges: `new` / `returning` / `high-value`
 - Click through to individual customer profiles
 
 **Customer Detail (`/admin/customers/:userId`)**
+
 - Customer avatar, name, email, Firebase UID
 - KPI cards: Order Count, Total Spend, First Order, Last Order
 - Expandable order history with line-item breakdown
 
 **Reports (`/admin/reports`)**
+
 - Summary KPIs: Total Revenue, Total Orders, Avg Order Value
 - Revenue by date table
 - Product performance ranking
@@ -647,6 +666,7 @@ The admin panel is accessible only to the account whose Firebase UID matches `VI
 We love contributions! FitMart is an open-source, community-driven project and contributions of all kinds are welcome — from fixing typos to building new features.
 
 Please read **[CONTRIBUTING.md](CONTRIBUTING.md)** for a full guide on:
+
 - Setting up your development environment
 - Picking and working on issues
 - Submitting a Pull Request
