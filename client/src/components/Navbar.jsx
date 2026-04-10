@@ -1,5 +1,5 @@
 // src/components/Navbar.jsx
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../auth/firebase";
 import { useAuth } from "../auth/useAuth";
@@ -15,7 +15,10 @@ export default function Navbar({
   onSignOut,
 }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, loading: authLoading } = useAuth();
+
+  const isProfileRoute = location?.pathname === "/profile";
 
   const handleSignOut = async () => {
     if (onSignOut) {
@@ -168,40 +171,66 @@ export default function Navbar({
                           </p>
                         </div>
 
-                        {isLanding && (
-                          <button
-                            onClick={() => {
-                              navigate("/home");
-                              setMenuOpen?.(false);
-                            }}
-                            className="w-full text-left text-xs text-stone-700 font-medium
-                                       hover:bg-stone-50 px-4 py-2.5 transition-colors
-                                       min-h-[36px]"
-                          >
-                            Go to Shop →
-                          </button>
+                        {/* If user is currently on the profile page, show only Shop + Sign Out */}
+                        {isProfileRoute ? (
+                          <div className="border-t border-stone-100 mt-1">
+                            <button
+                              onClick={() => {
+                                navigate("/home");
+                                setMenuOpen?.(false);
+                              }}
+                              className="w-full text-left text-xs text-stone-700 font-medium
+                                         hover:bg-stone-50 px-4 py-2.5 transition-colors min-h-[36px]"
+                            >
+                              Go to Shop →
+                            </button>
+
+                            <button
+                              onClick={handleSignOut}
+                              className="w-full text-left text-xs text-stone-500 hover:bg-stone-50
+                                         px-4 py-2.5 transition-colors min-h-[36px]"
+                            >
+                              Sign Out
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            {isLanding && (
+                              <button
+                                onClick={() => {
+                                  navigate("/home");
+                                  setMenuOpen?.(false);
+                                }}
+                                className="w-full text-left text-xs text-stone-700 font-medium
+                                           hover:bg-stone-50 px-4 py-2.5 transition-colors
+                                           min-h-[36px]"
+                              >
+                                Go to Shop →
+                              </button>
+                            )}
+
+                            <div className="border-t border-stone-100 mt-1">
+                              <button
+                                onClick={() => {
+                                  navigate('/profile');
+                                  setMenuOpen?.(false);
+                                }}
+                                className="w-full text-left text-xs text-stone-700 hover:bg-stone-50
+                                           px-4 py-2.5 transition-colors min-h-[36px]"
+                              >
+                                View Profile
+                              </button>
+
+                              <button
+                                onClick={handleSignOut}
+                                className="w-full text-left text-xs text-stone-500 hover:bg-stone-50
+                                           px-4 py-2.5 transition-colors min-h-[36px]"
+                              >
+                                Sign Out
+                              </button>
+                            </div>
+                          </>
                         )}
-
-                        <div className="border-t border-stone-100 mt-1">
-                          <button
-                            onClick={() => {
-                              navigate('/profile');
-                              setMenuOpen?.(false);
-                            }}
-                            className="w-full text-left text-xs text-stone-700 hover:bg-stone-50
-                                       px-4 py-2.5 transition-colors min-h-[36px]"
-                          >
-                            View Profile
-                          </button>
-
-                          <button
-                            onClick={handleSignOut}
-                            className="w-full text-left text-xs text-stone-500 hover:bg-stone-50
-                                       px-4 py-2.5 transition-colors min-h-[36px]"
-                          >
-                            Sign Out
-                          </button>
-                        </div>
                       </div>
                     </>
                   )}
