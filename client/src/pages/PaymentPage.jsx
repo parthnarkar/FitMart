@@ -78,7 +78,7 @@ export default function PaymentPage() {
     }
 
     navigate("/payment-confirmation", {
-      state: { items, total, subtotal, discountAmt, discountPercent, discountApplied, paymentId },
+      state: { items, total, subtotal, discountAmt, discountPercent, discountApplied, paymentId, address },
     });
   };
 
