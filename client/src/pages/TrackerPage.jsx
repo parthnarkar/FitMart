@@ -64,10 +64,20 @@ export default function TrackerPage() {
             }
             .fc .fc-toolbar-title {
               font-family: 'DM Serif Display', serif;
-              font-size: 1.5rem;
+              font-size: 1.25rem;
               color: #1c1917;
             }
-            .fc .fc-button-primary { border-radius: 9999px; }
+            @media (min-width: 640px) {
+              .fc .fc-toolbar-title { font-size: 1.5rem; }
+            }
+            .fc .fc-toolbar {
+              flex-wrap: wrap;
+              gap: 0.75rem;
+            }
+            .fc .fc-button-primary { border-radius: 9999px; font-size: 0.75rem; padding: 0.4rem 0.8rem; }
+            @media (min-width: 640px) {
+              .fc .fc-button-primary { font-size: 0.85rem; padding: 0.6rem 1rem; }
+            }
             .fc .fc-button-primary:not(:disabled).fc-button-active { color: white; }
             .fc-event {
               cursor: pointer;
@@ -109,7 +119,7 @@ export default function TrackerPage() {
             dateClick={handleDateClick}
             eventClick={handleEventClick}
             height="auto"
-            aspectRatio={1.5}
+            aspectRatio={window.innerWidth < 768 ? 0.8 : 1.5}
             selectable={true}
           />
 

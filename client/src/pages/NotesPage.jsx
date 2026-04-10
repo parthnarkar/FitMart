@@ -85,7 +85,7 @@ export default function NotesPage() {
     <div className="min-h-screen bg-stone-50 font-['DM_Sans',sans-serif]">
       <Navbar variant="product" />
 
-      <main className="max-w-5xl mx-auto px-5 lg:px-10 py-16">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-10 py-10 sm:py-16">
         <button
           onClick={() => navigate("/tracker")}
           className="text-xs tracking-[0.2em] uppercase text-stone-400 hover:text-stone-900 transition-colors mb-12 flex items-center gap-2 group"
@@ -93,10 +93,10 @@ export default function NotesPage() {
           <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Calendar
         </button>
 
-        <div className="bg-white border border-stone-200 rounded-2xl p-8 md:p-10 shadow-sm">
-          <header className="mb-10 text-center">
-            <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2 font-medium">Training Session For</p>
-            <h1 className="font-['DM_Serif_Display'] text-3xl md:text-4xl text-stone-900">{formattedDate}</h1>
+        <div className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 md:p-10 shadow-sm">
+          <header className="mb-8 sm:mb-10 text-center md:text-left">
+            <p className="text-[10px] sm:text-xs tracking-[0.2em] uppercase text-stone-400 mb-2 font-medium">Training Session For</p>
+            <h1 className="font-['DM_Serif_Display'] text-2xl sm:text-3xl md:text-4xl text-stone-900">{formattedDate}</h1>
           </header>
 
           <div className="space-y-8">
@@ -110,7 +110,7 @@ export default function NotesPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Chest Day"
-                className="w-full border-b border-stone-200 bg-transparent py-4 text-3xl md:text-4xl text-stone-900 
+                className="w-full border-b border-stone-200 bg-transparent py-3 text-2xl sm:text-3xl md:text-4xl text-stone-900 
                            font-['DM_Serif_Display'] placeholder-stone-200 focus:outline-none focus:border-stone-900 transition-colors"
               />
             </div>
@@ -124,10 +124,10 @@ export default function NotesPage() {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="List exercises, weight, reps..."
-                rows={18}
-                className="w-full border border-stone-200 bg-white rounded-2xl px-6 py-6 text-base text-stone-700 
+                rows={12}
+                className="w-full border border-stone-200 bg-white rounded-xl sm:rounded-2xl px-4 sm:px-6 py-4 sm:py-6 text-sm sm:text-base text-stone-700 
                            placeholder-stone-300 focus:outline-none focus:border-stone-900 transition-colors resize-none
-                           min-h-[450px] leading-relaxed"
+                           min-h-[300px] sm:min-h-[450px] leading-relaxed"
               />
             </div>
 

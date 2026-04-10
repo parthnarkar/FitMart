@@ -503,19 +503,19 @@ export default function HomePage() {
         </section>
 
         {/* ── Workout Tracking section ── */}
-        <section id="tracking" className="py-8 md:py-12 border-y border-stone-100">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <section id="tracking" className="py-12 sm:py-16 border-y border-stone-100">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 md:gap-12">
             <div className="text-center md:text-left">
-              <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-3 font-medium">Personal Progress</p>
-              <h2 className="font-['DM_Serif_Display'] text-3xl md:text-4xl lg:text-5xl text-stone-900 leading-tight">
+              <p className="text-[10px] sm:text-xs tracking-[0.2em] uppercase text-stone-400 mb-3 font-medium">Personal Progress</p>
+              <h2 className="font-['DM_Serif_Display'] text-3xl sm:text-4xl lg:text-5xl text-stone-900 leading-tight">
                 Track your fitness routine
               </h2>
             </div>
             <button 
               onClick={() => navigate("/tracker")}
-              className="bg-stone-900 text-white text-sm px-10 py-4 rounded-full 
+              className="bg-stone-900 text-white text-xs sm:text-sm px-8 sm:px-10 py-3.5 sm:py-4 rounded-full 
                          hover:bg-stone-700 transition-all duration-300 font-medium
-                         shadow-lg shadow-stone-200/50 self-center md:self-auto"
+                         shadow-lg shadow-stone-200/50 self-center md:self-auto w-full sm:w-auto"
             >
               Open Calendar →
             </button>
