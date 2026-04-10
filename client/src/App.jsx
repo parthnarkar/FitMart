@@ -17,6 +17,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminReports from "./pages/AdminReports";
 import AdminCustomers from "./pages/AdminCustomers";
 import AdminCustomerDetail from "./pages/AdminCustomerDetail";
+import AdminBugs from "./pages/AdminBugs";
 import NonAdminRoute from "./components/NonAdminRoute";
 
 export default function App() {
@@ -49,6 +50,14 @@ export default function App() {
           element={
             <AdminRoute>
               <AdminReports />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/bugs"
+          element={
+            <AdminRoute>
+              <AdminBugs />
             </AdminRoute>
           }
         />

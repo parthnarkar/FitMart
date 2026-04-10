@@ -62,7 +62,8 @@ app.use(
       if (allowedOrigins.includes(origin)) return callback(null, true);
       return callback(new Error("Not allowed by CORS"));
     },
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   }),
 );
@@ -100,6 +101,7 @@ app.use("/api/reports", require("./routes/reports"));
 app.use("/api/chat", require("./routes/chat"));
 app.use("/api/user", require("./routes/user"));
 app.use("/api/customers", require("./routes/customers"));
+app.use("/api/bugs", require("./routes/bugs"));
 
 // ── // Razorpay / payment routes (prefixed with /api/payment) ─────────────────
 // These handle:  POST /create-order

@@ -212,6 +212,16 @@ export default function AdminDashboard() {
                   </svg>
                 ),
               },
+              {
+                href: "/admin/bugs", title: "Bug Reports",
+                desc: "View and triage bug reports submitted by users.",
+                cta: "View bug reports →",
+                icon: (
+                  <svg className="w-6 h-6 text-stone-600 group-hover:text-white transition-colors duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 2v2M6.2 4.2l1.4 1.4M2 12h2M4.2 17.8l1.4-1.4M12 20v2M17.8 19.8l-1.4-1.4M20 12h2M19.8 6.2l-1.4 1.4M7 11a5 5 0 1010 0 5 5 0 00-10 0z" />
+                  </svg>
+                ),
+              },
             ].map(card => (
               <div key={card.href}
                 onClick={() => window.location.href = card.href}
