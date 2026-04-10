@@ -184,6 +184,17 @@ export default function Navbar({
 
                         <div className="border-t border-stone-100 mt-1">
                           <button
+                            onClick={() => {
+                              navigate('/profile');
+                              setMenuOpen?.(false);
+                            }}
+                            className="w-full text-left text-xs text-stone-700 hover:bg-stone-50
+                                       px-4 py-2.5 transition-colors min-h-[36px]"
+                          >
+                            View Profile
+                          </button>
+
+                          <button
                             onClick={handleSignOut}
                             className="w-full text-left text-xs text-stone-500 hover:bg-stone-50
                                        px-4 py-2.5 transition-colors min-h-[36px]"

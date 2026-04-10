@@ -9,6 +9,7 @@ import Payment from "./pages/PaymentPage";
 import ProductConfirmation from "./pages/ProductConfirmation";
 import NotFound from "./pages/NotFound";
 import AdminInventory from "./pages/AdminInventory";
+import Profile from "./pages/Profile";
 import AdminRoute from "./components/AdminRoute";
 import WeightLossPlans from "./pages/WeightLossPlans";
 import MuscleBuildingPlans from "./pages/MuscleBuildingPlans";
@@ -30,6 +31,7 @@ export default function App() {
         <Route path="/home" element={<NonAdminRoute><HomePage /></NonAdminRoute>} />
         <Route path="/product/:productId" element={<NonAdminRoute><ProductPage /></NonAdminRoute>} />
         <Route path="/checkout" element={<NonAdminRoute><Checkout /></NonAdminRoute>} />
+        <Route path="/profile" element={<NonAdminRoute><Profile /></NonAdminRoute>} />
         <Route path="/payment" element={<NonAdminRoute><Payment /></NonAdminRoute>} />
         <Route path="/payment-confirmation" element={<NonAdminRoute><ProductConfirmation /></NonAdminRoute>} />
         <Route path="/plans/weight-loss" element={<WeightLossPlans />} />

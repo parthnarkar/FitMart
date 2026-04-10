@@ -129,4 +129,53 @@ router.get("/discount-status/:userId", async (req, res) => {
   }
 });
 
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/user/profile/:userId
+// Returns stored profile (including addresses) for a user
+// ─────────────────────────────────────────────────────────────────────────────
+router.get("/profile/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!userId) return res.status(400).json({ error: "userId required" });
+
+    const profile = await UserProfile.findOne({ userId });
+    if (!profile) return res.json({});
+    res.json(profile);
+  } catch (err) {
+    console.error("user/profile GET error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PUT /api/user/profile/:userId
+// Body: fields to merge into profile (name, phone, addresses, defaultAddressId)
+// Creates profile if missing.
+// ─────────────────────────────────────────────────────────────────────────────
+router.put("/profile/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!userId) return res.status(400).json({ error: "userId required" });
+
+    const update = {};
+    const allowed = ["name", "phone", "addresses", "defaultAddressId"];
+    for (const k of allowed) {
+      if (req.body[k] !== undefined) update[k] = req.body[k];
+    }
+
+    const profile = await UserProfile.findOneAndUpdate(
+      { userId },
+      { $set: update },
+      { upsert: true, new: true }
+    );
+
+    res.json(profile);
+  } catch (err) {
+    console.error("user/profile PUT error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
