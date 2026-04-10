@@ -41,7 +41,7 @@ const Empty = () => (
 );
 
 // Mobile bug card
-const BugMobileCard = ({ bug, index, onClick }) => (
+const BugMobileCard = ({ bug, index, onClick, onStatusClick }) => (
   <div
     role="button"
     tabIndex={0}
@@ -58,10 +58,13 @@ const BugMobileCard = ({ bug, index, onClick }) => (
     <div className="flex-1 min-w-0">
       <div className="flex items-center gap-2 mb-0.5">
         <p className="text-sm font-medium text-stone-700 truncate">{bug.title}</p>
-        <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium capitalize flex-shrink-0
-                          ${SEGMENT_STYLES[bug.status] || 'bg-stone-100 text-stone-600'}`}>
+        <button
+          onClick={(e) => { e.stopPropagation(); onStatusClick && onStatusClick(bug); }}
+          className={`px-2 py-0.5 rounded-full text-[10px] font-medium capitalize flex-shrink-0 focus:outline-none
+                     ${SEGMENT_STYLES[bug.status] || 'bg-stone-100 text-stone-600'}`}
+        >
           {bug.status}
-        </span>
+        </button>
       </div>
       <p className="text-xs text-stone-500 truncate">{bug.description}</p>
       <p className="text-[10px] text-stone-400 mt-1">{new Date(bug.createdAt).toLocaleString()}</p>
@@ -80,6 +83,43 @@ export default function AdminBugs() {
   const [error, setError] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [loadingBugs, setLoadingBugs] = useState(true);
+  // Mobile status picker state: { id, status }
+  const [mobilePicker, setMobilePicker] = useState(null);
+
+  const openMobilePicker = (bug) => {
+    setMobilePicker({ id: bug._id, status: bug.status });
+  };
+
+  const closeMobilePicker = () => setMobilePicker(null);
+
+  const handleMobileStatusChange = async (newStatus) => {
+    if (!mobilePicker) return;
+    const id = mobilePicker.id;
+    const prev = bugs.find(b => b._id === id)?.status;
+    // optimistic update
+    setBugs((cur) => cur.map(b => (b._id === id ? { ...b, status: newStatus } : b)));
+    try {
+      const token = await user.getIdToken();
+      const url = `${API}/api/bugs/${id}`;
+      const res = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (!res.ok) {
+        let body = null;
+        try { body = await res.json(); } catch (e) { body = await res.text(); }
+        console.error('PATCH failed', { url, status: res.status, body });
+        throw new Error(`update failed (${res.status})`);
+      }
+      setMobilePicker(null);
+    } catch (err) {
+      console.error(err);
+      // rollback
+      setBugs((cur) => cur.map(b => (b._id === id ? { ...b, status: prev } : b)));
+      alert('Failed to update status');
+    }
+  };
 
   useEffect(() => {
     if (loading || !user) return;
@@ -252,8 +292,34 @@ export default function AdminBugs() {
                 bug={bug}
                 index={index}
                 onClick={() => { }} // Add navigation if you have a detail view
+                onStatusClick={openMobilePicker}
               />
             ))}
+
+            {mobilePicker && (
+              <div className="fixed inset-x-0 bottom-0 z-50 bg-white border-t border-stone-200 p-4 md:hidden">
+                <div className="max-w-2xl mx-auto">
+                  <p className="text-xs text-stone-400 mb-2">Change status</p>
+                  <div className="flex gap-2">
+                    <button onClick={() => handleMobileStatusChange('open')}
+                      className={`flex-1 py-2 rounded-full text-sm ${mobilePicker.status === 'open' ? 'bg-stone-900 text-white' : 'border border-stone-200 text-stone-700'}`}>
+                      Open
+                    </button>
+                    <button onClick={() => handleMobileStatusChange('in-progress')}
+                      className={`flex-1 py-2 rounded-full text-sm ${mobilePicker.status === 'in-progress' ? 'bg-stone-900 text-white' : 'border border-stone-200 text-stone-700'}`}>
+                      In Progress
+                    </button>
+                    <button onClick={() => handleMobileStatusChange('resolved')}
+                      className={`flex-1 py-2 rounded-full text-sm ${mobilePicker.status === 'resolved' ? 'bg-stone-900 text-white' : 'border border-stone-200 text-stone-700'}`}>
+                      Resolved
+                    </button>
+                  </div>
+                  <div className="mt-3 text-center">
+                    <button onClick={closeMobilePicker} className="text-xs text-stone-500">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Desktop table */}
@@ -323,7 +389,12 @@ export default function AdminBugs() {
                                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                                 body: JSON.stringify({ status: newStatus }),
                               });
-                              if (!res.ok) throw new Error('update failed');
+                              if (!res.ok) {
+                                let body = null;
+                                try { body = await res.json(); } catch (e) { body = await res.text(); }
+                                console.error('PATCH failed', { url: `${API}/api/bugs/${bug._id}`, status: res.status, body });
+                                throw new Error(`update failed (${res.status})`);
+                              }
                             } catch (err) {
                               console.error(err);
                               // rollback
