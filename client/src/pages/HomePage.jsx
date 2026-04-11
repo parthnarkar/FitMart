@@ -1,5 +1,6 @@
 // src/pages/HomePage.jsx
 import { useState, useEffect } from "react";
+import PropTypes from 'prop-types';
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { signOut } from "firebase/auth";
@@ -64,6 +65,11 @@ const Stars = ({ rating = 0, size = "sm" }) => {
       ))}
     </span>
   );
+};
+
+Stars.propTypes = {
+  rating: PropTypes.number,
+  size: PropTypes.oneOf(["sm", "lg"]),
 };
 
 function mapCart(cartDoc, products) {
@@ -202,6 +208,33 @@ function ProductCard({ product, onAdd, cartItems = [], updateQty }) {
     </div>
   );
 }
+
+ProductCard.propTypes = {
+  product: PropTypes.shape({
+    productId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    name: PropTypes.string.isRequired,
+    brand: PropTypes.string,
+    image: PropTypes.string,
+    category: PropTypes.string,
+    badge: PropTypes.string,
+    price: PropTypes.number.isRequired,
+    originalPrice: PropTypes.number,
+    rating: PropTypes.number,
+    reviews: PropTypes.number,
+  }).isRequired,
+
+  onAdd: PropTypes.func.isRequired,
+
+  cartItems: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      qty: PropTypes.number,
+    })
+  ),
+
+  updateQty: PropTypes.func.isRequired,
+};
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function HomePage() {
