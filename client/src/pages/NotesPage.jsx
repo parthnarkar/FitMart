@@ -1,20 +1,23 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
-import { getWorkoutByDate, saveWorkout } from "../utils/workoutStorage";
+import { getWorkoutByDate, saveWorkout, removeExerciseFromWorkout } from "../utils/workoutStorage";
 
 /**
  * NotesPage
  * Allows users to write workout details for a selected date.
- * Strictly follows Part 2 and Part 6 (edge cases) requirements.
+ * Supports adding exercises, viewing exercise GIFs, and managing workout details.
+ * Preserves content when navigating between notes and exercise selection.
  */
 export default function NotesPage() {
   const navigate = useNavigate();
   const [date, setDate] = useState("");
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
+  const [exercises, setExercises] = useState([]);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
+  const [imageErrors, setImageErrors] = useState(new Set());
 
   useEffect(() => {
     // Get selectedDate from localStorage
@@ -30,6 +33,7 @@ export default function NotesPage() {
     if (workout) {
       setTitle(workout.title || "");
       setNotes(workout.notes || "");
+      setExercises(workout.exercises || []);
     }
   }, []);
 
@@ -45,6 +49,7 @@ export default function NotesPage() {
       date,
       title,
       notes,
+      exercises,
     };
 
     // Save functionality
@@ -55,6 +60,21 @@ export default function NotesPage() {
     setTimeout(() => {
       navigate("/tracker");
     }, 1000);
+  };
+
+  const handleAddExercise = () => {
+    // Note: We don't save here — user can add exercises and navigation back will reload from storage
+    localStorage.setItem("selectedDate", date);
+    navigate("/exercises");
+  };
+
+  const handleRemoveExercise = (exerciseId) => {
+    removeExerciseFromWorkout(date, exerciseId);
+    setExercises(exercises.filter(e => e.id !== exerciseId));
+  };
+
+  const handleImageError = (exerciseId) => {
+    setImageErrors((prev) => new Set([...prev, exerciseId]));
   };
 
   const formattedDate = date ? new Date(date).toLocaleDateString("en-US", {
@@ -130,6 +150,87 @@ export default function NotesPage() {
                            min-h-[300px] sm:min-h-[450px] leading-relaxed"
               />
             </div>
+
+            {/* Selected Exercises Section */}
+            {exercises && exercises.length > 0 && (
+              <div>
+                <label className="block text-xs text-stone-500 mb-4 tracking-wide uppercase">
+                  Selected Exercises ({exercises.length})
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {exercises.map((exercise) => (
+                    <div
+                      key={exercise.id}
+                      className="bg-stone-50 border border-stone-200 rounded-xl overflow-hidden hover:border-stone-900 transition-all flex flex-col"
+                    >
+                      {/* Exercise Media Preview */}
+                      <div className="w-full bg-stone-100 overflow-hidden aspect-video flex items-center justify-center">
+                        {exercise.gifUrl && exercise.gifUrl.trim() !== "" && !imageErrors.has(exercise.id) ? (
+                          <img
+                            src={exercise.gifUrl}
+                            alt={exercise.name}
+                            className="w-full h-full object-cover"
+                            onError={() => handleImageError(exercise.id)}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-stone-100">
+                            <div className="text-center">
+                              <p className="text-stone-400 text-2xl mb-1">🏋️</p>
+                              <p className="text-stone-400 text-xs uppercase tracking-wide font-medium">
+                                Exercise
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Exercise Details */}
+                      <div className="p-4 flex flex-col flex-grow">
+                        <h4 className="font-['DM_Serif_Display'] text-base md:text-lg text-stone-900 mb-2 capitalize">
+                          {exercise.name}
+                        </h4>
+
+                        <div className="space-y-1 text-xs text-stone-500 mb-4 flex-grow">
+                          {exercise.target && (
+                            <p>
+                              <span className="uppercase tracking-wide">Target:</span>{" "}
+                              <span className="text-stone-700 capitalize">{exercise.target}</span>
+                            </p>
+                          )}
+                          {exercise.equipment && (
+                            <p>
+                              <span className="uppercase tracking-wide">Equipment:</span>{" "}
+                              <span className="text-stone-700 capitalize">{exercise.equipment}</span>
+                            </p>
+                          )}
+                          {exercise.bodyPart && (
+                            <p>
+                              <span className="uppercase tracking-wide">Body Part:</span>{" "}
+                              <span className="text-stone-700 capitalize">{exercise.bodyPart}</span>
+                            </p>
+                          )}
+                        </div>
+
+                        <button
+                          onClick={() => handleRemoveExercise(exercise.id)}
+                          className="text-xs text-stone-500 hover:text-stone-700 font-medium uppercase tracking-wide transition-colors"
+                        >
+                          ✕ Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Add Exercise Button */}
+            <button
+              onClick={handleAddExercise}
+              className="w-full bg-stone-100 text-stone-900 text-sm py-4 rounded-full hover:bg-stone-900 hover:text-white transition-all font-medium border border-stone-200 hover:border-stone-900 active:scale-95"
+            >
+              + Add Your Exercise
+            </button>
 
             {/* Save Button */}
             <button

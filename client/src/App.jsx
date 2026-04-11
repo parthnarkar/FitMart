@@ -20,6 +20,7 @@ import AdminCustomerDetail from "./pages/AdminCustomerDetail";
 import NonAdminRoute from "./components/NonAdminRoute";
 import WorkoutNotes from "./pages/NotesPage";
 import WorkoutTracker from "./pages/TrackerPage";
+import ExercisePage from "./pages/ExercisePage";
 
 export default function App() {
   return (
@@ -36,9 +37,9 @@ export default function App() {
         <Route path="/plans/weight-loss" element={<WeightLossPlans />} />
         <Route path="/plans/muscle-building" element={<MuscleBuildingPlans />} />
         <Route path="/plans/mobility-recovery" element={<MobilityRecoveryPlans />} />
-        <Route path="/workout-notes/:date" element={<NonAdminRoute><WorkoutNotes /></NonAdminRoute>} />
         <Route path="/tracker" element={<NonAdminRoute><WorkoutTracker /></NonAdminRoute>} />
         <Route path="/notes" element={<NonAdminRoute><WorkoutNotes /></NonAdminRoute>} />
+        <Route path="/exercises" element={<NonAdminRoute><ExercisePage /></NonAdminRoute>} />
 
         {/* Admin routes (guarded) */}
         <Route
