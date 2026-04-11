@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../auth/firebase";
 import { useAuth } from "../auth/useAuth";
+import PropTypes from 'prop-types'; // ✅ PropTypes import added
 
 export default function Navbar({
   variant = "landing",
@@ -29,7 +30,6 @@ export default function Navbar({
 
   const isLanding = variant === "landing";
 
-  // ✅ handleNav function added
   const handleNav = () => {
     if (isLanding) window.scrollTo({ top: 0, behavior: "smooth" });
     else navigate("/home");
@@ -57,7 +57,6 @@ export default function Navbar({
                       flex items-center justify-between">
 
         {/* ── Brand ── */}
-        {/* ✅ tabIndex, role, onKeyDown added */}
         <span
           className={`font-['DM_Serif_Display'] text-lg sm:text-xl tracking-tight
                        cursor-pointer transition-colors ${logoColor}`}
@@ -116,9 +115,7 @@ export default function Navbar({
           {!authLoading && (
             <>
               {user ? (
-                /* ── Logged IN: avatar + dropdown ── */
                 <div className="relative">
-                  {/* ✅ aria-expanded and aria-controls added */}
                   <button
                     onClick={() => setMenuOpen?.((p) => !p)}
                     aria-expanded={menuOpen}
@@ -132,7 +129,6 @@ export default function Navbar({
                         : "border-stone-200"
                       }`}
                   >
-                    {/* Avatar */}
                     <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0
                                     bg-stone-200 flex items-center justify-center">
                       {user.photoURL ? (
@@ -152,7 +148,6 @@ export default function Navbar({
                         </span>
                       )}
                     </div>
-                    {/* Name — hidden on mobile */}
                     {!isLanding && (
                       <span className="hidden sm:block text-xs text-stone-700
                                        max-w-[80px] sm:max-w-[96px] truncate">
@@ -161,7 +156,6 @@ export default function Navbar({
                     )}
                   </button>
 
-                  {/* Dropdown */}
                   {menuOpen && (
                     <>
                       <div
@@ -210,7 +204,6 @@ export default function Navbar({
                 </div>
 
               ) : (
-                /* ── Logged OUT ── */
                 <div className="flex items-center gap-1.5 sm:gap-2 ml-0.5 sm:ml-1">
                   <button
                     onClick={() => navigate(user ? "/home" : "/auth")}
@@ -242,3 +235,15 @@ export default function Navbar({
     </nav>
   );
 }
+
+// ✅ PropTypes added
+Navbar.propTypes = {
+  variant: PropTypes.string,
+  navOpaque: PropTypes.bool,
+  onSearchToggle: PropTypes.func,
+  cartCount: PropTypes.number,
+  onCartOpen: PropTypes.func,
+  menuOpen: PropTypes.bool,
+  setMenuOpen: PropTypes.func,
+  onSignOut: PropTypes.func,
+};
