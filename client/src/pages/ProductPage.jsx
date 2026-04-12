@@ -5,45 +5,11 @@ import { auth } from "../auth/firebase";
 import { getAuthHeaders } from "../utils/getAuthHeaders";
 import { fmt } from "../utils/formatters";
 import CartDrawer from "../components/CartDrawer";
+import StarRating from "../components/StarRating";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-const Stars = ({ rating = 0, size = "sm" }) => {
-  const full = Math.floor(rating || 0);
-  const half = (rating || 0) % 1 >= 0.5 ? 1 : 0;
-  const empty = 5 - full - half;
-  const starPath = "M12 .587l3.668 7.431L24 9.748l-6 5.847L19.335 24 12 19.897 4.665 24 6 15.595 0 9.748l8.332-1.73L12 .587z";
-  const sizeClass = size === "lg" ? "w-4 h-4" : "w-3 h-3";
 
-  return (
-    <span className={`inline-flex items-center gap-0.5 ${size === "lg" ? "text-base" : "text-xs"}`} aria-hidden>
-      {Array.from({ length: full }).map((_, i) => (
-        <svg key={`full-${i}`} className={`${sizeClass} text-stone-700`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d={starPath} fill="currentColor" />
-        </svg>
-      ))}
-
-      {half ? (() => {
-        const id = `half-${Math.random().toString(36).slice(2)}`;
-        return (
-          <svg key="half" className={`${sizeClass} text-stone-700`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <clipPath id={id}><rect x="0" y="0" width="12" height="24" /></clipPath>
-            </defs>
-            <path d={starPath} fill="currentColor" className="text-stone-300" style={{ fill: 'currentColor', opacity: 0.28 }} />
-            <path d={starPath} fill="currentColor" clipPath={`url(#${id})`} />
-          </svg>
-        );
-      })() : null}
-
-      {Array.from({ length: empty }).map((_, i) => (
-        <svg key={`empty-${i}`} className={`${sizeClass} text-stone-300`} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path d={starPath} fill="currentColor" style={{ opacity: 0.28 }} />
-        </svg>
-      ))}
-    </span>
-  );
-};
 
 const FEATURE_MAP = {
   Equipment: ["Free shipping", "Assembly guide included", "2-year warranty", "Returns within 30 days"],
@@ -386,7 +352,7 @@ export default function ProductPage() {
               {/* Rating */}
               <div className={`pd-fade pd-d2 ${visible ? "in" : ""}
                                flex items-center gap-2 sm:gap-3 mb-5 sm:mb-6 flex-wrap`}>
-                <Stars rating={product.rating} size="lg" />
+                <StarRating rating={product.rating} size="lg" color="dark" />
                 <span className="text-sm text-stone-500">{product.rating.toFixed(1)}</span>
                 <div className="w-px h-4 bg-stone-200" />
                 <span className="text-sm text-stone-500">
@@ -694,7 +660,7 @@ export default function ProductPage() {
                             className="text-base sm:text-lg text-stone-900">
                             {fmt(rel.price)}
                           </span>
-                          <Stars rating={rel.rating} />
+                          <StarRating rating={rel.rating} color="dark" />
                         </div>
                       </div>
                     </div>
