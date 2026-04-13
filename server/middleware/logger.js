@@ -51,12 +51,44 @@ const logger = (req, res, next) => {
     );
 
     // Log request body for non-GET requests (optional)
-    if (req.method !== 'GET' && Object.keys(req.body || {}).length > 0) {
-      console.log(`   Body: ${JSON.stringify(req.body)}`);
+    const redact = (body) => {
+  const sensitiveFields = ['password', 'token'];
+  const newBody = { ...body };
+
+  for (let key of sensitiveFields) {
+    if (newBody[key]) {
+      newBody[key] = '[REDACTED]';
     }
-  });
+  }
+
+  return newBody;
+};
+
+const logger = (req, res, next) => {
+  const timestamp = new Date().toISOString();
+
+  if (req.method !== 'GET') {
+    const bodyStr = JSON.stringify(req.body);
+
+    if (bodyStr.length < 1000) {
+      console.log(
+        `[${timestamp}] ${req.method} ${req.url}`,
+        redact(req.body)
+      );
+    } else {
+      console.log(
+        `[${timestamp}] ${req.method} ${req.url} [body too large to log]`
+      );
+    }
+  } else {
+    console.log(`[${timestamp}] ${req.method} ${req.url}`);
+  }
 
   next();
+};
+
+module.exports = logger;
+next();
 };
 
 module.exports = logger;
