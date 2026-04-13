@@ -51,12 +51,28 @@ router.post('/:userId/add', verifyFirebaseToken, async (req, res) => {
   if (!checkOwnership(req, res)) return;
 
   try {
-    const { userId } = req.params;
-    const { productId, quantity } = req.body;
-    if (productId == null || quantity == null) return res.status(400).json({ error: 'productId and quantity required' });
+    // const { userId } = req.params;
+    // const { productId, quantity } = req.body;
+    // if (productId == null || quantity == null) return res.status(400).json({ error: 'productId and quantity required' });
 
-    const qty = Number(quantity);
-    if (Number.isNaN(qty) || qty <= 0) return res.status(400).json({ error: 'quantity must be a positive number' });
+    // const qty = Number(quantity);
+    // if (Number.isNaN(qty) || qty <= 0) return res.status(400).json({ error: 'quantity must be a positive number' });
+
+    const { productId, quantity } = req.body;
+
+    if (productId == null || quantity == null) {
+      return res.status(400).json({ error: 'productId and quantity required' });
+    }
+
+    if (typeof productId !== 'number') {
+      return res.status(400).json({ error: 'productId must be a number' });
+    }
+
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+      return res.status(400).json({ error: 'quantity must be a positive integer' });
+    }
+
+    const qty = quantity;
 
     const product = await Product.findOne({ productId: Number(productId) });
     if (!product) return res.status(404).json({ error: 'Product not found' });
@@ -93,12 +109,28 @@ router.post('/:userId/remove', verifyFirebaseToken, async (req, res) => {
   if (!checkOwnership(req, res)) return;
 
   try {
-    const { userId } = req.params;
-    const { productId, quantity } = req.body;
-    if (productId == null || quantity == null) return res.status(400).json({ error: 'productId and quantity required' });
+    // const { userId } = req.params;
+    // const { productId, quantity } = req.body;
+    // if (productId == null || quantity == null) return res.status(400).json({ error: 'productId and quantity required' });
 
-    const qty = Number(quantity);
-    if (Number.isNaN(qty) || qty <= 0) return res.status(400).json({ error: 'quantity must be a positive number' });
+    // const qty = Number(quantity);
+    // if (Number.isNaN(qty) || qty <= 0) return res.status(400).json({ error: 'quantity must be a positive number' });
+
+    const { productId, quantity } = req.body;
+
+    if (productId == null || quantity == null) {
+      return res.status(400).json({ error: 'productId and quantity required' });
+    }
+
+    if (typeof productId !== 'number') {
+      return res.status(400).json({ error: 'productId must be a number' });
+    }
+
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+      return res.status(400).json({ error: 'quantity must be a positive integer' });
+    }
+
+    const qty = quantity;
 
     const cart = await Cart.findOne({ userId });
     if (!cart) return res.status(404).json({ error: 'Cart not found' });
