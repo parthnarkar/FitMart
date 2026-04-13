@@ -7,34 +7,57 @@ const rateLimit = require("express-rate-limit");
 const app = express();
 const port = process.env.PORT || 5000;
 const allowedOrigin = process.env.ALLOWED_ORIGIN || "http://localhost:5173";
-const allowedOrigins = allowedOrigin.split(",").map((s) => s.trim()).filter(Boolean);
+const allowedOrigins = allowedOrigin
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
 
-// Display missing variables at server startup. Only require truly critical vars
-// to avoid failing entirely in environments where optional services (Razorpay)
-// are intentionally not configured (for example: demo deployments on Vercel).
+// Display missing variables at server startup.
+// Services like Razorpay and Gemini can be disabled in some deployments,
+// but MongoDB and Firebase auth configuration are required.
 const CRITICAL_ENV_VARS = ["MONGO_URI"];
 const OPTIONAL_ENV_VARS = [
   "RAZORPAY_KEY_ID",
   "RAZORPAY_KEY_SECRET",
   "MONGO_DB",
   "PORT",
-  "FIREBASE_PROJECT_ID",
-  "FIREBASE_CLIENT_EMAIL",
-  "FIREBASE_PRIVATE_KEY",
+  "GEMINI_API_KEY",
 ];
 
 const missingCritical = CRITICAL_ENV_VARS.filter((v) => !process.env[v]);
 const missingOptional = OPTIONAL_ENV_VARS.filter((v) => !process.env[v]);
+const hasFirebaseServiceAccountEnv =
+  !!process.env.FIREBASE_PROJECT_ID &&
+  !!process.env.FIREBASE_CLIENT_EMAIL &&
+  !!process.env.FIREBASE_PRIVATE_KEY;
+const hasGoogleApplicationCredentials =
+  !!process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
 if (missingCritical.length > 0) {
-  console.error(`❌ Missing critical environment variables: ${missingCritical.join(", ")}`);
-  console.error("Server cannot start without these. Please set them in your environment.");
+  console.error(
+    `❌ Missing critical environment variables: ${missingCritical.join(", ")}`,
+  );
+  console.error(
+    "Server cannot start without these. Please set them in your environment.",
+  );
+  process.exit(1);
+}
+
+if (!hasFirebaseServiceAccountEnv && !hasGoogleApplicationCredentials) {
+  console.error(
+    "❌ Missing Firebase admin credentials. Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY, or set GOOGLE_APPLICATION_CREDENTIALS.",
+  );
+  console.error("Server cannot start without Firebase admin credentials.");
   process.exit(1);
 }
 
 if (missingOptional.length > 0) {
-  console.warn(`⚠️ Missing optional environment variables: ${missingOptional.join(", ")}`);
-  console.warn("Continuing startup; some optional functionality may be disabled.");
+  console.warn(
+    `⚠️ Missing optional environment variables: ${missingOptional.join(", ")}`,
+  );
+  console.warn(
+    "Continuing startup; some optional functionality may be disabled.",
+  );
 }
 
 // ── Middleware ──────────────────────────────────────────────────────────────
@@ -71,11 +94,11 @@ app.use(
 app.use(helmet());
 app.use(express.json());
 // Disable automatic ETag generation to avoid conditional 304 responses
-app.disable('etag');
+app.disable("etag");
 
 // Ensure API responses are not served from client caches (avoid 304 from conditional requests)
-app.use('/api', (req, res, next) => {
-  res.setHeader('Cache-Control', 'no-store');
+app.use("/api", (req, res, next) => {
+  res.setHeader("Cache-Control", "no-store");
   next();
 });
 app.use("/api", apiLimiter);
@@ -90,13 +113,13 @@ const logger = require("./middleware/logger");
 app.use(logger);
 //Dashboard route needs logger to parse query params for logging
 
-const dashboardRoutes = require('./routes/dashboard');
+const dashboardRoutes = require("./routes/dashboard");
 
 // ── API routes (prefixed) ───────────────────────────────────────────────────
 app.use("/api/products", require("./routes/products"));
 app.use("/api/cart", require("./routes/cart"));
 app.use("/api/orders", require("./routes/orders"));
-app.use('/api/dashboard', dashboardRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/reports", require("./routes/reports"));
 app.use("/api/chat", require("./routes/chat"));
 app.use("/api/user", require("./routes/user"));
