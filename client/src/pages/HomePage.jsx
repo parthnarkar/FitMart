@@ -218,6 +218,7 @@ export default function HomePage() {
   const [products, setProducts] = useState([]);
   const [backendError, setBackendError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showAll, setShowAll] = useState(false);
 
   const { showBanner, dismissBanner } = useWelcomeDiscount(user);
 
@@ -357,11 +358,17 @@ export default function HomePage() {
         <p className="text-sm">No products match your search.</p>
       </div>
     );
+    
+    // Limit to 8 products if in "all" category and showAll is false
+    const displayedProducts = activeCategory === "all" && !showAll
+      ? filtered.slice(0, 8)
+      : filtered;
+    
     return (
       // 2-col on mobile, 3-col on md, 4-col on lg
       <div className={`fade-in d3 ${visible ? "show" : ""}
                        grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5`}>
-        {filtered.map(p => (
+        {displayedProducts.map(p => (
           <ProductCard key={p.id} product={p} onAdd={addToCart} cartItems={cart} updateQty={updateQty} />
         ))}
       </div>
@@ -455,7 +462,7 @@ export default function HomePage() {
                              flex gap-2 mb-5 sm:mb-8 overflow-x-auto pb-1
                              scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap`}>
               {CATEGORIES.map(c => (
-                <button key={c.value} onClick={() => setActiveCategory(c.value)}
+                <button key={c.value} onClick={() => { setActiveCategory(c.value); setShowAll(false); }}
                   className={`text-xs px-4 py-2 rounded-full transition-all whitespace-nowrap flex-shrink-0
                               ${activeCategory === c.value
                       ? "bg-stone-900 text-white"
@@ -468,6 +475,20 @@ export default function HomePage() {
             </div>
           )}
           {renderProductGrid()}
+          
+          {/* "See More" button */}
+          {!backendError && !loading && activeCategory === "all" && !showAll && filtered.length > 8 && (
+            <div className="mt-8 sm:mt-10 flex justify-center">
+              <button
+                onClick={() => setShowAll(true)}
+                className="text-sm px-8 sm:px-10 py-3 rounded-full transition-all
+                           border border-stone-300 text-stone-700 hover:bg-stone-900 hover:text-white hover:border-stone-900
+                           font-medium"
+              >
+                See More Products
+              </button>
+            </div>
+          )}
         </section>
 
         {/* ── Plans section ── */}

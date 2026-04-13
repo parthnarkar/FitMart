@@ -17,6 +17,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminReports from "./pages/AdminReports";
 import AdminCustomers from "./pages/AdminCustomers";
 import AdminCustomerDetail from "./pages/AdminCustomerDetail";
+import AdminMarketing from "./pages/AdminMarketing";
 import NonAdminRoute from "./components/NonAdminRoute";
 import WorkoutNotes from "./pages/NotesPage";
 import WorkoutTracker from "./pages/TrackerPage";
@@ -55,6 +56,14 @@ export default function App() {
           element={
             <AdminRoute>
               <AdminReports />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/marketing"
+          element={
+            <AdminRoute>
+              <AdminMarketing />
             </AdminRoute>
           }
         />

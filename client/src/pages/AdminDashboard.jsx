@@ -174,7 +174,7 @@ export default function AdminDashboard() {
             Command Centre
           </h1>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
             {[
               {
                 href: "/admin/inventory", title: "Inventory",
@@ -209,6 +209,18 @@ export default function AdminDashboard() {
                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                       d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                ),
+              },
+              {
+                href: "/admin/marketing", title: "Marketing",
+                desc: "Explore growth strategies including content, SEO, influencer, and email campaigns.",
+                cta: "View strategies →",
+                icon: (
+                  <svg className="w-6 h-6 text-stone-600 group-hover:text-white transition-colors duration-300"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
                 ),
               },
