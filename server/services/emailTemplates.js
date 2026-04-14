@@ -282,6 +282,245 @@ function escapeHtml(str) {
     .replace(/'/g, "&#39;");
 }
 
+/**
+ * Generate the inactivity reminder email template.
+ * @param {Object} options - { customerName }
+ * @returns {Object} - { subject, previewText, htmlTemplate, textTemplate }
+ */
+function generateInactivityReminderEmail(options = {}) {
+  const { customerName = "Friend" } = options;
+
+  const subject = "We've Missed You at FitMart";
+  const previewText = "It's been over a month since your last purchase. Check out our latest offers and get back on track.";
+
+  const htmlTemplate = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${subject}</title>
+  <style>
+    * { margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+      color: #3a3a3a;
+      background-color: #f9f9f7;
+      line-height: 1.6;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+    }
+    .header {
+      background-color: #ffffff;
+      border-bottom: 1px solid #e5e5e0;
+      padding: 36px 30px;
+      text-align: center;
+    }
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #2a2a2a;
+      margin: 0;
+    }
+    .content {
+      padding: 36px 30px;
+    }
+    .greeting {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2a2a2a;
+      margin-bottom: 20px;
+    }
+    .message {
+      font-size: 15px;
+      color: #5a5a5a;
+      line-height: 1.8;
+      margin-bottom: 24px;
+    }
+    .highlight-box {
+      background-color: #f9f9f7;
+      border-left: 4px solid #9c9c94;
+      padding: 16px;
+      margin: 24px 0;
+      border-radius: 4px;
+    }
+    .highlight-text {
+      font-size: 14px;
+      color: #2a2a2a;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .highlight-description {
+      font-size: 13px;
+      color: #666666;
+      line-height: 1.6;
+    }
+    .features-heading {
+      font-size: 16px;
+      font-weight: 600;
+      color: #2a2a2a;
+      margin: 28px 0 20px 0;
+    }
+    .features-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 0 0 24px 0;
+    }
+    .feature-block {
+      padding: 12px;
+      border-left: 4px solid #9c9c94;
+      background-color: #f9f9f7;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: #666666;
+      line-height: 1.6;
+    }
+    .feature-block:last-child {
+      margin-bottom: 0;
+    }
+    .signoff-section {
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid #e5e5e0;
+    }
+    .footer {
+      background-color: #f9f9f7;
+      border-top: 1px solid #e5e5e0;
+      padding: 28px 30px;
+      text-align: center;
+      font-size: 13px;
+      color: #8a8a84;
+    }
+    .footer-text {
+      margin: 0;
+    }
+    @media (max-width: 600px) {
+      .header {
+        padding: 28px 20px;
+      }
+      .header h1 {
+        font-size: 24px;
+      }
+      .content {
+        padding: 28px 20px;
+      }
+      .greeting {
+        font-size: 16px;
+      }
+      .message {
+        font-size: 14px;
+      }
+      .highlight-box {
+        padding: 14px;
+      }
+      .feature-block {
+        padding: 10px;
+      }
+      .footer {
+        padding: 24px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <!-- Header -->
+    <div class="header">
+      <h1>FitMart</h1>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <p class="greeting">Hi ${escapeHtml(customerName)},</p>
+
+      <p class="message">
+        It's been over a month since your last purchase from FitMart, and we've missed having you with us.
+      </p>
+
+      <p class="message">
+        Consistency is a big part of every fitness journey, and we know how important it is to have the right products by your side. Whether you're restarting your routine, upgrading your essentials, or getting back on track, this is the perfect time to return.
+      </p>
+
+      <!-- Offer Highlight -->
+      <div class="highlight-box">
+        <p class="highlight-text">🎯 Special Offer Inside</p>
+        <p class="highlight-description">Check out the latest offers and combo items currently available at FitMart. This is a great opportunity to stock up on your fitness essentials, supplements, accessories, and training gear.</p>
+      </div>
+
+      <!-- Features Section -->
+      <h2 class="features-heading">Continue Your Fitness Journey With</h2>
+      <div class="features-list">
+        <div class="feature-block">• Weight Loss Plans</div>
+        <div class="feature-block">• Muscle Building Plans</div>
+        <div class="feature-block">• Mobility & Recovery Plans</div>
+        <div class="feature-block">• Premium fitness products and essentials curated for your goals</div>
+      </div>
+
+      <!-- Signoff Section -->
+      <div class="signoff-section">
+        <p class="message">
+          We'd love to welcome you back and continue being part of your progress.
+        </p>
+
+        <p class="message">
+          Warm regards,<br>
+          <strong>Team FitMart</strong>
+        </p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p class="footer-text">FitMart © 2026. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>
+  `.trim();
+
+  const textTemplate = `
+FitMart
+
+Hi ${customerName},
+
+It's been over a month since your last purchase from FitMart, and we've missed having you with us.
+
+Consistency is a big part of every fitness journey, and we know how important it is to have the right products by your side. Whether you're restarting your routine, upgrading your essentials, or getting back on track, this is the perfect time to return.
+
+SPECIAL OFFER INSIDE
+
+Check out the latest offers and combo items currently available at FitMart. This is a great opportunity to stock up on your fitness essentials, supplements, accessories, and training gear.
+
+CONTINUE YOUR FITNESS JOURNEY WITH
+
+• Weight Loss Plans
+• Muscle Building Plans
+• Mobility & Recovery Plans
+• Premium fitness products and essentials curated for your goals
+
+We'd love to welcome you back and continue being part of your progress.
+
+Warm regards,
+Team FitMart
+
+---
+FitMart © 2026. All rights reserved.
+  `.trim();
+
+  return {
+    subject,
+    previewText,
+    htmlTemplate,
+    textTemplate,
+  };
+}
+
 module.exports = {
   generateFirstPurchaseEmail,
+  generateInactivityReminderEmail,
 };

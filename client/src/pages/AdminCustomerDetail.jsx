@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AdminNavbar from "../components/AdminNavbar";
 import { fmt } from "../utils/formatters";
+import { getAuthHeaders } from "../utils/getAuthHeaders";
 
 const API_BASE = `${import.meta.env.VITE_API_URL}/api`;
 
@@ -133,6 +134,9 @@ export default function AdminCustomerDetail() {
   const [expanded, setExpanded] = useState({});
   const [menuOpen, setMenuOpen] = useState(false);
   const [productMap, setProductMap] = useState({});
+  const [sendingReminder, setSendingReminder] = useState(false);
+  const [reminderSent, setReminderSent] = useState(false);
+  const [reminderError, setReminderError] = useState(null);
 
   const toggleOrder = (id) =>
     setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
@@ -141,11 +145,15 @@ export default function AdminCustomerDetail() {
     fetch(`${API_BASE}/customers/${userId}`)
       .then(res => res.json())
       .then(json => {
-        if (!json.success) throw new Error(json.error);
+        if (!json.success) throw new Error(json.error || "Failed to load customer");
         setData(json.data);
         setLoading(false);
       })
-      .catch(() => { setError("Customer not found"); setLoading(false); });
+      .catch(err => {
+        console.error("Customer detail fetch error:", err);
+        setError(err.message || "Customer not found");
+        setLoading(false);
+      });
   }, [userId]);
 
   // Fetch product details for all products referenced in orders (watch `data` to avoid TDZ)
@@ -230,10 +238,35 @@ export default function AdminCustomerDetail() {
     }
   };
 
+  const handleSendReminder = async () => {
+    setSendingReminder(true);
+    setReminderError(null);
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch(`${API_BASE}/customers/${userId}/send-reminder`, {
+        method: "POST",
+        headers,
+        credentials: "include",
+      });
+      const resData = await res.json();
+      if (!res.ok) {
+        setReminderError(resData.error || "Failed to send reminder");
+        return;
+      }
+      setReminderSent(true);
+      // Clear success message after 3 seconds
+      setTimeout(() => setReminderSent(false), 3000);
+    } catch (err) {
+      setReminderError(err.message || "Error sending reminder");
+    } finally {
+      setSendingReminder(false);
+    }
+  };
+
   const {
     customerName, customerEmail, customerPhoto,
     orderCount, totalSpend, firstOrder, lastOrder,
-    segment, orders,
+    segment, orders, daysSinceLastOrder, eligibleForReminder, lastReminderEmailSentAt,
   } = data || {};
 
   return (
@@ -315,6 +348,55 @@ export default function AdminCustomerDetail() {
             </div>
           )}
         </div>
+
+        {/* Reminder Email Section */}
+        {!loading && (
+          <div className="mb-8 md:mb-10 bg-white border border-stone-200 rounded-2xl p-6 md:p-8">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div>
+                <p className="text-xs tracking-[0.15em] md:tracking-[0.2em] uppercase text-stone-400 mb-2 leading-tight">
+                  Engagement
+                </p>
+                <p className="text-sm md:text-base text-stone-600 mb-4">
+                  {eligibleForReminder 
+                    ? `Customer inactive for ${daysSinceLastOrder} days`
+                    : `Last order ${daysSinceLastOrder} days ago (< 30 days inactive)`}
+                </p>
+                {lastReminderEmailSentAt && (
+                  <p className="text-xs text-stone-400">
+                    Last reminder: {new Date(lastReminderEmailSentAt).toLocaleDateString("en-IN", {
+                      day: "2-digit", month: "short", year: "numeric",
+                    })}
+                  </p>
+                )}
+              </div>
+              <div>
+                {reminderSent ? (
+                  <div className="px-4 py-2.5 bg-stone-50 border border-stone-300 rounded-lg text-sm text-stone-600 text-center">
+                    ✓ Reminder sent
+                  </div>
+                ) : reminderError ? (
+                  <div className="px-4 py-2.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 text-center max-w-xs">
+                    {reminderError}
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleSendReminder}
+                    disabled={!eligibleForReminder || sendingReminder || loading}
+                    title={!eligibleForReminder ? `Customer must be inactive for 30+ days (currently ${daysSinceLastOrder} days)` : "Send reminder email to customer"}
+                    className={`px-5 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                      eligibleForReminder 
+                        ? "bg-stone-900 text-white hover:bg-stone-800 active:scale-95 cursor-pointer" 
+                        : "bg-stone-100 text-stone-400 cursor-default opacity-60"
+                    }`}
+                  >
+                    {sendingReminder ? "Sending..." : "Send Reminder"}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* KPI Cards — 2 cols on mobile, 4 on sm+ */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-5 mb-8 md:mb-10">

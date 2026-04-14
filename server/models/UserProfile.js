@@ -10,6 +10,7 @@ const userProfileSchema = new mongoose.Schema(
     // Email and first-purchase tracking
     email: { type: String },                                       // User's email address (synced from Firebase)
     firstPurchaseEmailSentAt: { type: Date },                     // Timestamp when first-purchase email was sent
+    lastReminderEmailSentAt: { type: Date },                      // Timestamp when inactivity reminder email was sent
     // Profile fields
     name: { type: String },
     phone: { type: String },

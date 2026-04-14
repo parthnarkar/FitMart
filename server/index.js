@@ -6,8 +6,9 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const app = express();
 const port = process.env.PORT || 5000;
-const allowedOrigin = process.env.ALLOWED_ORIGIN || "http://localhost:5173";
+const allowedOrigin = process.env.ALLOWED_ORIGIN || "http://localhost:5173,http://127.0.0.1:5173";
 const allowedOrigins = allowedOrigin.split(",").map((s) => s.trim()).filter(Boolean);
+const isDev = process.env.NODE_ENV === 'development';
 
 // Display missing variables at server startup. Only require truly critical vars
 // to avoid failing entirely in environments where optional services (Razorpay)
@@ -63,8 +64,25 @@ const paymentLimiter = rateLimit({
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) {
+        console.log('[CORS] Allowing request with no origin');
+        return callback(null, true);
+      }
+      
+      // In development, be more permissive
+      if (isDev && origin.includes('localhost') || origin.includes('127.0.0.1')) {
+        console.log(`[CORS] Allowing local development origin: ${origin}`);
+        return callback(null, true);
+      }
+      
+      // Check against allowed origins
+      if (allowedOrigins.includes(origin)) {
+        console.log(`[CORS] Allowing whitelisted origin: ${origin}`);
+        return callback(null, true);
+      }
+      
+      console.error(`[CORS] Rejecting origin: ${origin}. Allowed origins: ${allowedOrigins.join(', ')}`);
       return callback(new Error("Not allowed by CORS"));
     },
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
