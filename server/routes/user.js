@@ -1,6 +1,7 @@
 // server/routes/user.js
 const express = require("express");
 const UserProfile = require("../models/UserProfile");
+const admin = require("../firebaseAdmin");
 const router = express.Router();
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -10,22 +11,47 @@ const router = express.Router();
 // - If profile doesn't exist → create it (isFirstLogin: true) → return showBanner: true
 // - If profile exists and isFirstLogin is true → flip it false → return showBanner: true
 // - If profile exists and isFirstLogin is false → return showBanner: false
+// Also syncs user email from Firebase to the profile for email sending.
 // ─────────────────────────────────────────────────────────────────────────────
 router.post("/login", async (req, res) => {
   try {
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ error: "userId required" });
 
+    // Fetch Firebase user to get email and display name
+    let firebaseEmail = null;
+    let displayName = null;
+    try {
+      const firebaseUser = await admin.auth().getUser(userId);
+      firebaseEmail = firebaseUser.email || null;
+      displayName = firebaseUser.displayName || null;
+    } catch (err) {
+      console.warn(`Could not fetch Firebase user for ${userId}:`, err.message);
+    }
+
     let profile = await UserProfile.findOne({ userId });
 
     if (!profile) {
-      // Brand new user — create profile, banner should show
-      profile = await UserProfile.create({ userId });
+      // Brand new user — create profile with email, banner should show
+      profile = await UserProfile.create({
+        userId,
+        email: firebaseEmail,
+        name: displayName,
+      });
       return res.json({
         showBanner: true,
         discountUsed: false,
         discountPercent: profile.discountPercent,
       });
+    }
+
+    // Sync email from Firebase if not already set
+    if (firebaseEmail && !profile.email) {
+      profile = await UserProfile.findOneAndUpdate(
+        { userId },
+        { $set: { email: firebaseEmail, name: displayName || profile.name } },
+        { new: true }
+      );
     }
 
     if (profile.isFirstLogin) {
