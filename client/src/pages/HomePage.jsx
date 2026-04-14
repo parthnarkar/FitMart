@@ -11,6 +11,7 @@ import FitnessChatBot from "../components/FitnessChatBot";
 import WelcomeBanner from "../components/WelcomeBanner";
 import { useWelcomeDiscount } from "../auth/useWelcomeDiscount";
 import BMICalculator from "../components/BMICalculator";
+import CalorieCalculator from "../components/CalorieCalculator";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -217,6 +218,7 @@ export default function HomePage() {
   const [products, setProducts] = useState([]);
   const [backendError, setBackendError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showAll, setShowAll] = useState(false);
 
   const { showBanner, dismissBanner } = useWelcomeDiscount(user);
 
@@ -356,11 +358,17 @@ export default function HomePage() {
         <p className="text-sm">No products match your search.</p>
       </div>
     );
+    
+    // Limit to 8 products if in "all" category and showAll is false
+    const displayedProducts = activeCategory === "all" && !showAll
+      ? filtered.slice(0, 8)
+      : filtered;
+    
     return (
       // 2-col on mobile, 3-col on md, 4-col on lg
       <div className={`fade-in d3 ${visible ? "show" : ""}
                        grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5`}>
-        {filtered.map(p => (
+        {displayedProducts.map(p => (
           <ProductCard key={p.id} product={p} onAdd={addToCart} cartItems={cart} updateQty={updateQty} />
         ))}
       </div>
@@ -454,7 +462,7 @@ export default function HomePage() {
                              flex gap-2 mb-5 sm:mb-8 overflow-x-auto pb-1
                              scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap`}>
               {CATEGORIES.map(c => (
-                <button key={c.value} onClick={() => setActiveCategory(c.value)}
+                <button key={c.value} onClick={() => { setActiveCategory(c.value); setShowAll(false); }}
                   className={`text-xs px-4 py-2 rounded-full transition-all whitespace-nowrap flex-shrink-0
                               ${activeCategory === c.value
                       ? "bg-stone-900 text-white"
@@ -467,6 +475,20 @@ export default function HomePage() {
             </div>
           )}
           {renderProductGrid()}
+          
+          {/* "See More" button */}
+          {!backendError && !loading && activeCategory === "all" && !showAll && filtered.length > 8 && (
+            <div className="mt-8 sm:mt-10 flex justify-center">
+              <button
+                onClick={() => setShowAll(true)}
+                className="text-sm px-8 sm:px-10 py-3 rounded-full transition-all
+                           border border-stone-300 text-stone-700 hover:bg-stone-900 hover:text-white hover:border-stone-900
+                           font-medium"
+              >
+                See More Products
+              </button>
+            </div>
+          )}
         </section>
 
         {/* ── Plans section ── */}
@@ -502,6 +524,26 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ── Workout Tracking section ── */}
+        <section id="tracking" className="py-12 sm:py-16 border-y border-stone-100">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 md:gap-12">
+            <div className="text-center md:text-left">
+              <p className="text-[10px] sm:text-xs tracking-[0.2em] uppercase text-stone-400 mb-3 font-medium">Personal Progress</p>
+              <h2 className="font-['DM_Serif_Display'] text-3xl sm:text-4xl lg:text-5xl text-stone-900 leading-tight">
+                Track your fitness routine
+              </h2>
+            </div>
+            <button 
+              onClick={() => navigate("/tracker")}
+              className="bg-stone-900 text-white text-xs sm:text-sm px-8 sm:px-10 py-3.5 sm:py-4 rounded-full 
+                         hover:bg-stone-700 transition-all duration-300 font-medium
+                         shadow-lg shadow-stone-200/50 self-center md:self-auto w-full sm:w-auto"
+            >
+              Open Calendar →
+            </button>
+          </div>
+        </section>
+
         {/* ── Loyalty banner ── */}
         <section>
           <div className="bg-stone-100 rounded-2xl p-6 sm:p-8 md:p-10
@@ -526,6 +568,11 @@ export default function HomePage() {
         {/* ── BMI Calculator ── */}
         <section>
           <BMICalculator />
+        </section>
+
+        {/* ── Calorie Calculator ── */}
+        <section>
+          <CalorieCalculator />
         </section>
 
         {/* ── Membership upgrade ── */}

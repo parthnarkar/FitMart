@@ -39,6 +39,7 @@ export default function PaymentPage() {
     discountAmt = 0,
     discountPercent = 0,
     discountApplied = false,
+    address = null,
   } = location.state || {};
 
   useEffect(() => {
@@ -77,7 +78,7 @@ export default function PaymentPage() {
     }
 
     navigate("/payment-confirmation", {
-      state: { items, total, subtotal, discountAmt, discountPercent, discountApplied, paymentId },
+      state: { items, total, subtotal, discountAmt, discountPercent, discountApplied, paymentId, address },
     });
   };
 
@@ -203,6 +204,13 @@ export default function PaymentPage() {
           </p>
 
           <div className="space-y-3 mb-5">
+            {address && (
+              <div className="bg-stone-50 border border-stone-200 rounded-lg p-3 mb-2">
+                <div className="text-sm font-medium text-stone-900">Shipping to</div>
+                <div className="text-sm text-stone-700">{address.label} — {address.line1}{address.line2 ? `, ${address.line2}` : ''}</div>
+                <div className="text-sm text-stone-700">{address.city}{address.state ? `, ${address.state}` : ''} {address.zip}</div>
+              </div>
+            )}
             {items.map(({ product, quantity }) => (
               <div key={product.productId} className="flex items-center gap-3">
                 <img

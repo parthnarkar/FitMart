@@ -163,9 +163,28 @@ export default function AdminCustomerDetail() {
   }, [data]);
 
   // Generate and open a simple invoice HTML for a given order
-  const downloadInvoice = (order) => {
+  const downloadInvoice = async (order) => {
     try {
       const customer = { name: customerName || userId, email: customerEmail || "" };
+      // Try to fetch saved profile/address for the user to include in invoice
+      let profileAddrHtml = "";
+      try {
+        const root = API_BASE.replace(/\/api$/, "");
+        const res = await fetch(`${root}/api/user/profile/${userId}`, { credentials: 'include' });
+        if (res.ok) {
+          const p = await res.json();
+          const addr = (p?.addresses || []).find(a => a.id === p?.defaultAddressId) || (p?.addresses || [])[0];
+          if (addr) {
+            profileAddrHtml = `<div style="margin-top:6px">${addr.label || ''}</div>` +
+              `<div style="margin-top:4px">${addr.line1 || ''}${addr.line2 ? ', ' + addr.line2 : ''}</div>` +
+              `<div style="margin-top:4px">${[addr.city, addr.state, addr.zip].filter(Boolean).join(', ')}</div>` +
+              `${addr.country ? `<div style="margin-top:4px">${addr.country}</div>` : ''}` +
+              `${addr.phone ? `<div style="margin-top:4px">${addr.phone}</div>` : ''}`;
+          }
+        }
+      } catch (e) {
+        // ignore profile fetch errors — invoice will still work without address
+      }
       const itemsHtml = order.items.map(({ productId, quantity, price }) => {
         const prod = productMap[productId] || {};
         const name = prod.name || `Product #${productId}`;
@@ -194,7 +213,7 @@ export default function AdminCustomerDetail() {
       <div class="brand">FitMart</div>
       <div style="margin-top:8px;color:#78716c;font-size:12px">Tax Invoice · ${new Date(order.createdAt).toLocaleString()}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:20px">
-        <div><h4 style="font-size:10px;color:#78716c;text-transform:uppercase">Billed To</h4><div style="margin-top:6px">${customer.name}</div>${customer.email ? `<div style="margin-top:4px">${customer.email}</div>` : ''}</div>
+        <div><h4 style="font-size:10px;color:#78716c;text-transform:uppercase">Billed To</h4><div style="margin-top:6px">${customer.name}</div>${customer.email ? `<div style="margin-top:4px">${customer.email}</div>` : ''}${profileAddrHtml ? `<div style="margin-top:8px">${profileAddrHtml}</div>` : ''}</div>
         <div><h4 style="font-size:10px;color:#78716c;text-transform:uppercase">Sold By</h4><div style="margin-top:6px">FitMart India Pvt. Ltd.</div><div>Mumbai</div></div>
       </div>
       <table><thead><tr><th>Item</th><th style="text-align:center">Qty</th><th style="text-align:right">Amount</th></tr></thead><tbody>${itemsHtml}</tbody></table>
