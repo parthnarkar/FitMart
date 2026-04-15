@@ -26,7 +26,6 @@ const OPTIONAL_ENV_VARS = [
   "SMTP_PORT",
   "SMTP_USER",
   "SMTP_PASS",
-  "APP_BASE_URL",
 ];
 
 const missingCritical = CRITICAL_ENV_VARS.filter((v) => !process.env[v]);
@@ -69,19 +68,19 @@ app.use(
         console.log('[CORS] Allowing request with no origin');
         return callback(null, true);
       }
-      
+
       // In development, be more permissive
       if (isDev && origin.includes('localhost') || origin.includes('127.0.0.1')) {
         console.log(`[CORS] Allowing local development origin: ${origin}`);
         return callback(null, true);
       }
-      
+
       // Check against allowed origins
       if (allowedOrigins.includes(origin)) {
         console.log(`[CORS] Allowing whitelisted origin: ${origin}`);
         return callback(null, true);
       }
-      
+
       console.error(`[CORS] Rejecting origin: ${origin}. Allowed origins: ${allowedOrigins.join(', ')}`);
       return callback(new Error("Not allowed by CORS"));
     },
@@ -132,6 +131,9 @@ app.use("/api/bugs", require("./routes/bugs"));
 //                POST /verify-payment
 //                POST /clear-cart
 app.use("/api/payment", require("./routes/payment"));
+
+// Nearby fitness centers
+app.use("/api/fitness-centers", require("./routes/fitnessCenters"));
 
 // ── Health check ─────────────────────────────────────────────────────────────
 app.get("/", (req, res) => res.send("FitMart server running"));

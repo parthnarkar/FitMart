@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "seed": "node seed.js"
+    "seed": "node seed.js",
+    "seed:fitness": "node seedFitnessCenters.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
