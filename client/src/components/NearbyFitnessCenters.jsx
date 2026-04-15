@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getAuthHeaders } from "../utils/getAuthHeaders";
+import FitnessCenterDetail from "./FitnessCenterDetail";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -25,6 +26,8 @@ export default function NearbyFitnessCenters({ visible = true }) {
   const [centers, setCenters] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [selected, setSelected] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -76,7 +79,12 @@ export default function NearbyFitnessCenters({ visible = true }) {
           <div className="text-center py-8 text-stone-400 col-span-full">No nearby fitness centers found.</div>
         ) : (
           centers.map((c, i) => (
-            <div key={c._id} className={`bg-white border border-stone-200 rounded-2xl p-4 hover:border-stone-300 hover:shadow-lg transition-all duration-300 ${i < 2 ? 'relative' : ''}`}>
+            <button
+              key={c._id}
+              type="button"
+              onClick={() => { setSelected(c); setModalOpen(true); }}
+              className={`select-none text-left bg-white border border-stone-200 rounded-2xl p-4 hover:border-stone-300 hover:shadow-lg transition-all duration-300 ${i < 2 ? 'relative' : ''}`}
+            >
               {i < 2 && (
                 <span className="absolute top-3 left-3 text-[10px] tracking-widest uppercase bg-stone-900 text-white px-2 py-1 rounded-full">Near You</span>
               )}
@@ -101,10 +109,37 @@ export default function NearbyFitnessCenters({ visible = true }) {
                   </div>
                 </div>
               </div>
-            </div>
+            </button>
           ))
         )}
       </div>
+      {/* Modal */}
+      {modalOpen && selected && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-10">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setModalOpen(false)}
+            aria-hidden
+          />
+
+          <div className="relative w-full max-w-3xl mx-auto">
+            <div className="p-4">
+              <button
+                type="button"
+                onClick={() => setModalOpen(false)}
+                className="absolute -top-2 -right-2 bg-white rounded-full p-2 border border-stone-200 shadow-sm text-stone-600"
+                aria-label="Close"
+              >
+                ×
+              </button>
+              <div className="bg-white rounded-2xl p-6">
+                <FitnessCenterDetail center={selected} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </section>
   );
 }
