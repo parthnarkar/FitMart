@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import { auth } from "../auth/firebase";
 import { fmt } from "../utils/formatters";
+const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 // ── Static data ────────────────────────────────────────────────────────────
 // Real repo stats from GitHub API
@@ -103,6 +104,9 @@ export default function LandingPage() {
   const categoriesRef = useRef(null);
   const programsRef = useRef(null);
   const aboutRef = useRef(null);
+  const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [backendError, setBackendError] = useState(false);
 
   useEffect(() => {
     document.title = "FitMart - Fitness & Nutrition Store";
@@ -118,6 +122,25 @@ export default function LandingPage() {
   useEffect(() => {
     const t = setInterval(() => setActiveTestimonial(p => (p + 1) % TESTIMONIALS.length), 4000);
     return () => clearInterval(t);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      setLoadingProducts(true);
+      setBackendError(false);
+      try {
+        const res = await fetch(`${API}/api/products`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        setProducts(data.map(p => ({ ...p, id: p.productId || p.id })));
+      } catch (err) {
+        console.error("Error loading products:", err);
+        setBackendError(true);
+        setProducts([]);
+      } finally {
+        setLoadingProducts(false);
+      }
+    })();
   }, []);
 
   const navOpaque = scrollY > 60;
@@ -207,7 +230,7 @@ export default function LandingPage() {
                 Start Shopping
               </button>
 
-              {/* GitHub Star CTA */}
+              {/* GitHub Star CTA
               <a
                 href={GITHUB_REPO}
                 target="_blank"
@@ -224,10 +247,10 @@ export default function LandingPage() {
                                    font-medium min-w-[28px] text-center group-hover:bg-stone-800">
                   16
                 </span>
-              </a>
+              </a> */}
             </div>
 
-            {/* Open-source community note */}
+            {/* Open-source community note
             <div className={`fade-up ${visible ? "visible" : ""} delay-5 mt-6`}>
               <p className="text-xs text-stone-400 flex items-center gap-1.5 flex-wrap">
                 <GithubIcon className="w-3.5 h-3.5" />
@@ -243,11 +266,11 @@ export default function LandingPage() {
                 </a>
                 {" "}
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
 
-        {/* ── Stats bar — real GitHub stats ── */}
+        {/* ── Stats bar — real GitHub stats ──
         <div className="border-t border-stone-200 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8
                           grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
@@ -262,7 +285,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
       </section>
 
       {/* ── CATEGORIES ── */}
@@ -307,6 +330,54 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+      {/* ── FEATURED PRODUCTS (first 4) ── */}
+      <section className="py-12 sm:py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
+          <div className="mb-6 sm:mb-8">
+            <p className="text-xs tracking-[0.2em] uppercase text-stone-400 mb-2">Featured</p>
+            <h2 className="font-['DM_Serif_Display'] text-2xl sm:text-3xl md:text-4xl text-stone-900">
+              Popular products
+            </h2>
+          </div>
+
+          {loadingProducts ? (
+            <div className="text-center py-12 text-stone-400">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-4
+                              border-stone-300 border-t-stone-900 mb-4" />
+              <p className="text-sm">Loading products...</p>
+            </div>
+          ) : backendError ? (
+            <div className="text-center py-12 text-stone-400">
+              <p className="text-3xl mb-2">🔌</p>
+              <p className="text-sm mb-1">Cannot connect to the server</p>
+              <p className="text-xs">Make sure the backend is running on port 5000</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+              {products.slice(0, 4).map((p) => (
+                <div key={p.productId || p.id}
+                  onClick={() => navigate(`/product/${p.productId || p.id}`)}
+                  className="bg-white border border-stone-100 rounded-2xl overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-200">
+                  <div className="relative bg-stone-100 aspect-square flex items-center justify-center overflow-hidden">
+                    {p.image ? (
+                      <img src={p.image} alt={p.name} className="w-full h-full object-cover" onError={e => { e.currentTarget.onerror = null; e.currentTarget.style.display = 'none'; }} />
+                    ) : (
+                      <div className="text-4xl opacity-20 select-none">
+                        {p.category === "Nutrition" ? "🧴" : p.category === "Wearables" ? "⌚" : "🏋️"}
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-3 text-left">
+                    <p className="text-[10px] text-stone-400 mb-1 truncate">{p.brand}</p>
+                    <h3 className="text-sm font-medium text-stone-900 mb-1 line-clamp-2">{p.name}</h3>
+                    <div className="text-sm font-semibold text-stone-900">{fmt(p.price)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
