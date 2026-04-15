@@ -12,6 +12,7 @@ import WelcomeBanner from "../components/WelcomeBanner";
 import { useWelcomeDiscount } from "../auth/useWelcomeDiscount";
 import BMICalculator from "../components/BMICalculator";
 import CalorieCalculator from "../components/CalorieCalculator";
+import NearbyFitnessCenters from "../components/NearbyFitnessCenters";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -358,12 +359,12 @@ export default function HomePage() {
         <p className="text-sm">No products match your search.</p>
       </div>
     );
-    
+
     // Limit to 8 products if in "all" category and showAll is false
     const displayedProducts = activeCategory === "all" && !showAll
       ? filtered.slice(0, 8)
       : filtered;
-    
+
     return (
       // 2-col on mobile, 3-col on md, 4-col on lg
       <div className={`fade-in d3 ${visible ? "show" : ""}
@@ -475,7 +476,7 @@ export default function HomePage() {
             </div>
           )}
           {renderProductGrid()}
-          
+
           {/* "See More" button */}
           {!backendError && !loading && activeCategory === "all" && !showAll && filtered.length > 8 && (
             <div className="mt-8 sm:mt-10 flex justify-center">
@@ -490,6 +491,9 @@ export default function HomePage() {
             </div>
           )}
         </section>
+
+        {/* Nearby fitness centers */}
+        <NearbyFitnessCenters visible={visible} />
 
         {/* ── Plans section ── */}
         <section id="plans">
@@ -533,7 +537,7 @@ export default function HomePage() {
                 Track your fitness routine
               </h2>
             </div>
-            <button 
+            <button
               onClick={() => navigate("/tracker")}
               className="bg-stone-900 text-white text-xs sm:text-sm px-8 sm:px-10 py-3.5 sm:py-4 rounded-full 
                          hover:bg-stone-700 transition-all duration-300 font-medium
