@@ -213,6 +213,18 @@ export default function AdminDashboard() {
                 ),
               },
               {
+                href: "/admin/marketing", title: "Marketing",
+                desc: "Manage marketing campaigns, promotions, and customer communications.",
+                cta: "View marketing →",
+                icon: (
+                  <svg className="w-6 h-6 text-stone-600 group-hover:text-white transition-colors duration-300"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      d="M3 3v16a2 2 0 002 2h16M7 16l3-4 3 3 5-6" />
+                  </svg>
+                ),
+              },
+              {
                 href: "/admin/bugs", title: "Bug Reports",
                 desc: "View and triage bug reports submitted by users.",
                 cta: "View bug reports →",
