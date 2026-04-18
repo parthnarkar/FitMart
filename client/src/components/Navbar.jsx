@@ -54,7 +54,8 @@ export default function Navbar({
                       flex items-center justify-between">
 
         {/* ── Brand ── */}
-        <span
+        <a
+          href={isLanding ? "#" : "/home"}
           className={`font-['DM_Serif_Display'] text-lg sm:text-xl tracking-tight
                        cursor-pointer transition-colors ${logoColor}`}
           onClick={() => {
@@ -63,7 +64,7 @@ export default function Navbar({
           }}
         >
           FitMart
-        </span>
+        </a>
 
         {/* ── Right side ── */}
         <div className="flex items-center gap-0.5 sm:gap-1.5">
@@ -115,6 +116,8 @@ export default function Navbar({
                 /* ── Logged IN: avatar + dropdown ── */
                 <div className="relative">
                   <button
+                    aria-expanded={menuOpen}
+                    aria-controls="user-menu"
                     onClick={() => setMenuOpen?.((p) => !p)}
                     className={`flex items-center gap-1.5 sm:gap-2 border rounded-full
                                 px-2 sm:px-2.5 py-1.5 hover:bg-stone-50 transition-colors ml-0.5
@@ -160,7 +163,9 @@ export default function Navbar({
                         className="fixed inset-0 z-40"
                         onClick={() => setMenuOpen?.(false)}
                       />
-                      <div className="absolute right-0 top-full mt-2 w-44 sm:w-48 bg-white
+                      <div 
+                        id="user-menu"
+                        className="absolute right-0 top-full mt-2 w-44 sm:w-48 bg-white
                                       border border-stone-200 rounded-xl shadow-lg py-1 z-50">
                         <div className="px-4 py-2.5 border-b border-stone-100">
                           <p className="text-xs font-medium text-stone-900 truncate">
