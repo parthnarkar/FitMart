@@ -2,6 +2,7 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../auth/firebase";
+
 import { useAuth } from "../auth/useAuth";
 
 export default function Navbar({
