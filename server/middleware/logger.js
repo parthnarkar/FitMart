@@ -1,11 +1,8 @@
 // server/middleware/logger.js
 
-// Function to get base route only
 const getBaseRoute = (url) => {
-  // Match patterns like /api/cart, /api/products, /api/orders
   const match = url.match(/^(\/api\/(?:cart|products|orders))/);
   if (match) {
-    // If it's a cart route with additional path, append the action
     if (url.includes('/cart/') && !url.match(/^\/api\/cart\/?$/)) {
       if (url.includes('/add')) return '/api/cart/add';
       if (url.includes('/remove')) return '/api/cart/remove';
@@ -15,44 +12,72 @@ const getBaseRoute = (url) => {
   return url;
 };
 
-// Simple logger with colors (without timestamps)
+// 🔒 Redact sensitive fields
+const sanitizeBody = (body) => {
+  const sensitiveKeys = [
+    "token",
+    "password",
+    "secret",
+    "apikey",
+    "api_key",
+    "authorization",
+    "credential"
+  ];
+
+  let newBody = { ...body };
+
+  for (let key in newBody) {
+    if (sensitiveKeys.includes(key.toLowerCase())) {
+      newBody[key] = "***";
+    }
+  }
+
+  return newBody;
+};
+
 const logger = (req, res, next) => {
   const start = Date.now();
 
-  // Log when the request completes
   res.on('finish', () => {
     const duration = Date.now() - start;
     const status = res.statusCode;
 
-    // Get the simplified route
+    const timestamp = new Date().toISOString(); // ✅ ADD THIS
+
     const simplifiedUrl = getBaseRoute(req.originalUrl);
 
-    // Color coding for HTTP methods
     const methodColor = {
-      'GET': '\x1b[34m',    // Blue
-      'POST': '\x1b[32m',   // Green
-      'PUT': '\x1b[33m',    // Yellow
-      'DELETE': '\x1b[31m', // Red
-      'PATCH': '\x1b[35m',  // Magenta
-    }[req.method] || '\x1b[0m'; // Default
+      'GET': '\x1b[34m',
+      'POST': '\x1b[32m',
+      'PUT': '\x1b[33m',
+      'DELETE': '\x1b[31m',
+      'PATCH': '\x1b[35m',
+    }[req.method] || '\x1b[0m';
 
-    // Color coding for status codes
-    const statusColor = status >= 500 ? '\x1b[31m' : // Red
-      status >= 400 ? '\x1b[33m' : // Yellow
-        status >= 300 ? '\x1b[36m' : // Cyan
-          status >= 200 ? '\x1b[32m' : // Green
-            '\x1b[0m'; // Default
+    const statusColor = status >= 500 ? '\x1b[31m' :
+      status >= 400 ? '\x1b[33m' :
+        status >= 300 ? '\x1b[36m' :
+          status >= 200 ? '\x1b[32m' :
+            '\x1b[0m';
 
-    // Format the log message without timestamp
+    // ✅ ADD timestamp in log
     console.log(
+      `${timestamp} ` +  // 👈 NEW
       `${methodColor}${req.method.padEnd(6)}\x1b[0m ` +
       `${statusColor}${status}\x1b[0m ` +
-      `${simplifiedUrl}`
+      `${simplifiedUrl} (${duration}ms)`
     );
 
-    // Log request body for non-GET requests (optional)
+    // ✅ SAFE BODY LOGGING
     if (req.method !== 'GET' && Object.keys(req.body || {}).length > 0) {
-      console.log(`   Body: ${JSON.stringify(req.body)}`);
+      const bodyString = JSON.stringify(req.body);
+
+      if (bodyString.length > 1000) {
+        console.log(`${timestamp} Body too large (${bodyString.length} chars)`);
+      } else {
+        const safeBody = sanitizeBody(req.body);
+        console.log(`${timestamp} Body: ${JSON.stringify(safeBody)}`);
+      }
     }
   });
 
