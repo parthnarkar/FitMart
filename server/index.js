@@ -12,7 +12,12 @@ const allowedOrigins = allowedOrigin.split(",").map((s) => s.trim()).filter(Bool
 // Display missing variables at server startup. Only require truly critical vars
 // to avoid failing entirely in environments where optional services (Razorpay)
 // are intentionally not configured (for example: demo deployments on Vercel).
-const CRITICAL_ENV_VARS = ["MONGO_URI"];
+const CRITICAL_ENV_VARS = [
+  "MONGO_URI",
+  "FIREBASE_PROJECT_ID",
+  "FIREBASE_CLIENT_EMAIL",
+  "FIREBASE_PRIVATE_KEY",
+];
 const OPTIONAL_ENV_VARS = [
   "RAZORPAY_KEY_ID",
   "RAZORPAY_KEY_SECRET",
