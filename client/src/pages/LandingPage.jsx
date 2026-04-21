@@ -9,10 +9,10 @@ const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 // ── Static data ────────────────────────────────────────────────────────────
 // Real repo stats from GitHub API
 const STATS = [
-  { value: "16", label: "GitHub Stars" },
-  { value: "21", label: "Forks" },
+  { value: "105", label: "GitHub Stars" },
+  { value: "144", label: "Forks" },
   { value: "20", label: "Contributors" },
-  { value: "65+", label: "Commits" },
+  { value: "82+", label: "Commits" },
 ];
 
 const CATEGORIES = [
@@ -230,7 +230,7 @@ export default function LandingPage() {
                 Start Shopping
               </button>
 
-              {/* GitHub Star CTA
+              {/* GitHub Star CTA */}
               <a
                 href={GITHUB_REPO}
                 target="_blank"
@@ -245,12 +245,12 @@ export default function LandingPage() {
                 <span>Star on GitHub</span>
                 <span className="bg-stone-100 text-stone-700 text-xs px-2 py-0.5 rounded-full
                                    font-medium min-w-[28px] text-center group-hover:bg-stone-800">
-                  16
+                  105
                 </span>
-              </a> */}
+              </a>
             </div>
 
-            {/* Open-source community note
+            {/* Open-source community note */}
             <div className={`fade-up ${visible ? "visible" : ""} delay-5 mt-6`}>
               <p className="text-xs text-stone-400 flex items-center gap-1.5 flex-wrap">
                 <GithubIcon className="w-3.5 h-3.5" />
@@ -266,11 +266,11 @@ export default function LandingPage() {
                 </a>
                 {" "}
               </p>
-            </div> */}
+            </div>
           </div>
         </div>
 
-        {/* ── Stats bar — real GitHub stats ──
+        {/* ── Stats bar — real GitHub stats ── */}
         <div className="border-t border-stone-200 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-8
                           grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
@@ -285,7 +285,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-        </div> */}
+        </div>
       </section>
 
       {/* ── CATEGORIES ── */}
@@ -658,7 +658,7 @@ function NavbarWithGithub({ navOpaque, menuOpen, setMenuOpen }) {
             <span>Star</span>
             <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium
                                 ${isOpaque ? "bg-stone-100 text-stone-700" : "bg-white/10 text-white/70"}`}>
-              16
+              105
             </span>
           </a>
 
@@ -736,8 +736,8 @@ function LandingFooter({ aboutRef }) {
             {/* GitHub stats pills */}
             <div className="flex flex-wrap gap-2">
               {[
-                { icon: <StarIcon className="w-3 h-3" />, label: "16 stars" },
-                { icon: <GithubIcon className="w-3 h-3" />, label: "21 forks" },
+                { icon: <StarIcon className="w-3 h-3" />, label: "105 stars" },
+                { icon: <GithubIcon className="w-3 h-3" />, label: "144 forks" },
               ].map(({ icon, label }) => (
                 <a
                   key={label}
