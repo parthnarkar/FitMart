@@ -54,16 +54,24 @@ export default function Navbar({
                       flex items-center justify-between">
 
         {/* ── Brand ── */}
-        <span
-          className={`font-['DM_Serif_Display'] text-lg sm:text-xl tracking-tight
-                       cursor-pointer transition-colors ${logoColor}`}
-          onClick={() => {
-            if (isLanding) window.scrollTo({ top: 0, behavior: "smooth" });
-            else navigate("/home");
-          }}
-        >
-          FitMart
-        </span>
+      <span
+  role="button"
+  tabIndex={0}
+  className={`font-['DM_Serif_Display'] text-lg sm:text-xl tracking-tight
+               cursor-pointer transition-colors ${logoColor}`}
+  onClick={() => {
+    if (isLanding) window.scrollTo({ top: 0, behavior: "smooth" });
+    else navigate("/home");
+  }}
+  onKeyDown={(e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      if (isLanding) window.scrollTo({ top: 0, behavior: "smooth" });
+      else navigate("/home");
+    }
+  }}
+>
+  FitMart
+</span>
 
         {/* ── Right side ── */}
         <div className="flex items-center gap-0.5 sm:gap-1.5">
@@ -113,16 +121,13 @@ export default function Navbar({
             <>
               {user ? (
                 /* ── Logged IN: avatar + dropdown ── */
+
                 <div className="relative">
                   <button
-                    onClick={() => setMenuOpen?.((p) => !p)}
-                    className={`flex items-center gap-1.5 sm:gap-2 border rounded-full
-                                px-2 sm:px-2.5 py-1.5 hover:bg-stone-50 transition-colors ml-0.5
-                                min-h-[36px]
-                                ${isLanding && !navOpaque
-                        ? "border-white/30 hover:bg-white/10"
-                        : "border-stone-200"
-                      }`}
+  onClick={() => setMenuOpen?.((p) => !p)}
+  aria-expanded={menuOpen}
+  aria-haspopup="menu"
+  aria-label="User menu"
                   >
                     {/* Avatar */}
                     <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0
