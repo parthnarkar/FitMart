@@ -31,6 +31,12 @@ router.post('/:userId/add', async (req, res) => {
 
   // ✅ ADD VALIDATION HERE
   const { productId, quantity } = req.body;
+  if (typeof productId !== 'number') {
+  return res.status(400).json({ error: 'productId must be a number' });
+}
+if (!Number.isInteger(quantity) || quantity <= 0) {
+  return res.status(400).json({ error: 'quantity must be a positive integer' });
+}
 
   if (typeof productId !== 'number') {
     return res.status(400).json({ 
@@ -66,10 +72,17 @@ router.get('/:userId', verifyFirebaseToken, async (req, res) => {
  * @desc    Remove an item (or reduce its quantity) from the user's cart and release reserved stock
  * @access  Private
  */
+
 router.post('/:userId/remove', async (req, res) => {
 
   // ✅ ADD VALIDATION HERE
   const { productId, quantity } = req.body;
+  if (typeof productId !== 'number') {
+  return res.status(400).json({ error: 'productId must be a number' });
+}
+if (!Number.isInteger(quantity) || quantity <= 0) {
+  return res.status(400).json({ error: 'quantity must be a positive integer' });
+}
 
   if (typeof productId !== 'number') {
     return res.status(400).json({ 
