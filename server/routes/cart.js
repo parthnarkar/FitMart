@@ -53,6 +53,15 @@ router.post('/:userId/add', verifyFirebaseToken, async (req, res) => {
   try {
     const { userId } = req.params;
     const { productId, quantity } = req.body;
+
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+    return res.status(400).json({ error: 'quantity must be a positive integer' });
+    } 
+
+    if (typeof productId !== 'number') {
+    return res.status(400).json({ error: 'productId must be a number' });
+    }
+
     if (productId == null || quantity == null) return res.status(400).json({ error: 'productId and quantity required' });
 
     const qty = Number(quantity);
@@ -95,6 +104,14 @@ router.post('/:userId/remove', verifyFirebaseToken, async (req, res) => {
   try {
     const { userId } = req.params;
     const { productId, quantity } = req.body;
+    if (!Number.isInteger(quantity) || quantity <= 0) {
+    return res.status(400).json({ error: 'quantity must be a positive integer' });
+    } 
+
+    if (typeof productId !== 'number') {
+    return res.status(400).json({ error: 'productId must be a number' });
+    }
+    
     if (productId == null || quantity == null) return res.status(400).json({ error: 'productId and quantity required' });
 
     const qty = Number(quantity);
