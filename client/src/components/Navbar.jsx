@@ -55,11 +55,18 @@ export default function Navbar({
 
         {/* ── Brand ── */}
         <span
-          className={`font-['DM_Serif_Display'] text-lg sm:text-xl tracking-tight
-                       cursor-pointer transition-colors ${logoColor}`}
+          role="button"
+          tabIndex="0"
+          className={`font-['DM_Serif_Display'] text-lg sm:text-xl tracking-tight cursor-pointer transition-colors ${logoColor}`}
           onClick={() => {
             if (isLanding) window.scrollTo({ top: 0, behavior: "smooth" });
             else navigate("/home");
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              if (isLanding) window.scrollTo({ top: 0, behavior: "smooth" });
+              else navigate("/home");
+            }
           }}
         >
           FitMart
@@ -90,7 +97,7 @@ export default function Navbar({
               onClick={onCartOpen}
               className={`relative p-2 transition-colors min-w-[40px] min-h-[40px]
                           flex items-center justify-center rounded-full ${iconColor}`}
-              aria-label="Cart"
+              aria-label="Open Cart"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor"
                 strokeWidth={1.8} viewBox="0 0 24 24">
@@ -116,6 +123,9 @@ export default function Navbar({
                 <div className="relative">
                   <button
                     onClick={() => setMenuOpen?.((p) => !p)}
+                    aria-expanded={menuOpen}
+                    aria-controls="user-menu"
+                    aria-label="User menu"
                     className={`flex items-center gap-1.5 sm:gap-2 border rounded-full
                                 px-2 sm:px-2.5 py-1.5 hover:bg-stone-50 transition-colors ml-0.5
                                 min-h-[36px]
@@ -160,7 +170,7 @@ export default function Navbar({
                         className="fixed inset-0 z-40"
                         onClick={() => setMenuOpen?.(false)}
                       />
-                      <div className="absolute right-0 top-full mt-2 w-44 sm:w-48 bg-white
+                      <div id="user-menu" className="absolute right-0 top-full mt-2 w-44 sm:w-48 bg-white
                                       border border-stone-200 rounded-xl shadow-lg py-1 z-50">
                         <div className="px-4 py-2.5 border-b border-stone-100">
                           <p className="text-xs font-medium text-stone-900 truncate">
