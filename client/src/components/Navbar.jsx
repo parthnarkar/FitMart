@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../auth/firebase";
 import { useAuth } from "../auth/useAuth";
+import PropTypes from 'prop-types'; // ✅ PropTypes import added
 
 export default function Navbar({
   variant = "landing",
@@ -32,6 +33,11 @@ export default function Navbar({
 
   const isLanding = variant === "landing";
 
+  const handleNav = () => {
+    if (isLanding) window.scrollTo({ top: 0, behavior: "smooth" });
+    else navigate("/home");
+  };
+
   const positionClass = isLanding
     ? "fixed top-0 left-0 right-0 z-50"
     : "sticky top-0 z-40";
@@ -57,10 +63,10 @@ export default function Navbar({
         <span
           className={`font-['DM_Serif_Display'] text-lg sm:text-xl tracking-tight
                        cursor-pointer transition-colors ${logoColor}`}
-          onClick={() => {
-            if (isLanding) window.scrollTo({ top: 0, behavior: "smooth" });
-            else navigate("/home");
-          }}
+          role="button"
+          tabIndex="0"
+          onClick={handleNav}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleNav()}
         >
           FitMart
         </span>
@@ -90,7 +96,7 @@ export default function Navbar({
               onClick={onCartOpen}
               className={`relative p-2 transition-colors min-w-[40px] min-h-[40px]
                           flex items-center justify-center rounded-full ${iconColor}`}
-              aria-label="Cart"
+              aria-label="Open cart"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor"
                 strokeWidth={1.8} viewBox="0 0 24 24">
@@ -112,10 +118,12 @@ export default function Navbar({
           {!authLoading && (
             <>
               {user ? (
-                /* ── Logged IN: avatar + dropdown ── */
                 <div className="relative">
                   <button
                     onClick={() => setMenuOpen?.((p) => !p)}
+                    aria-expanded={menuOpen}
+                    aria-controls="mobile-menu"
+                    aria-label="Toggle user menu"
                     className={`flex items-center gap-1.5 sm:gap-2 border rounded-full
                                 px-2 sm:px-2.5 py-1.5 hover:bg-stone-50 transition-colors ml-0.5
                                 min-h-[36px]
@@ -124,13 +132,12 @@ export default function Navbar({
                         : "border-stone-200"
                       }`}
                   >
-                    {/* Avatar */}
                     <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0
                                     bg-stone-200 flex items-center justify-center">
                       {user.photoURL ? (
                         <img
                           src={user.photoURL}
-                          alt={user.displayName || "avatar"}
+                          alt={user.displayName || "User avatar"}
                           className="w-full h-full object-cover"
                           referrerPolicy="no-referrer"
                         />
@@ -144,7 +151,6 @@ export default function Navbar({
                         </span>
                       )}
                     </div>
-                    {/* Name — hidden on mobile */}
                     {!isLanding && (
                       <span className="hidden sm:block text-xs text-stone-700
                                        max-w-[80px] sm:max-w-[96px] truncate">
@@ -153,14 +159,15 @@ export default function Navbar({
                     )}
                   </button>
 
-                  {/* Dropdown */}
                   {menuOpen && (
                     <>
                       <div
                         className="fixed inset-0 z-40"
                         onClick={() => setMenuOpen?.(false)}
                       />
-                      <div className="absolute right-0 top-full mt-2 w-44 sm:w-48 bg-white
+                      <div
+                        id="mobile-menu"
+                        className="absolute right-0 top-full mt-2 w-44 sm:w-48 bg-white
                                       border border-stone-200 rounded-xl shadow-lg py-1 z-50">
                         <div className="px-4 py-2.5 border-b border-stone-100">
                           <p className="text-xs font-medium text-stone-900 truncate">
@@ -250,9 +257,7 @@ export default function Navbar({
                 </div>
 
               ) : (
-                /* ── Logged OUT ── */
                 <div className="flex items-center gap-1.5 sm:gap-2 ml-0.5 sm:ml-1">
-                  {/* "Sign In" text link — hidden on mobile */}
                   <button
                     onClick={() => navigate(user ? "/home" : "/auth")}
                     className={`hidden sm:block text-sm px-3 sm:px-4 py-2 transition-colors
@@ -263,7 +268,6 @@ export default function Navbar({
                   >
                     Sign In
                   </button>
-                  {/* Primary CTA */}
                   <button
                     onClick={() => navigate(user ? "/home" : "/auth")}
                     className={`text-xs sm:text-sm px-4 sm:px-5 py-2 rounded-full
@@ -284,3 +288,15 @@ export default function Navbar({
     </nav>
   );
 }
+
+// ✅ PropTypes added
+Navbar.propTypes = {
+  variant: PropTypes.string,
+  navOpaque: PropTypes.bool,
+  onSearchToggle: PropTypes.func,
+  cartCount: PropTypes.number,
+  onCartOpen: PropTypes.func,
+  menuOpen: PropTypes.bool,
+  setMenuOpen: PropTypes.func,
+  onSignOut: PropTypes.func,
+};
