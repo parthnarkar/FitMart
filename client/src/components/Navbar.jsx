@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { auth } from "../auth/firebase";
 import { useAuth } from "../auth/useAuth";
-
+import PropTypes from "prop-types";
 export default function Navbar({
   variant = "landing",
   navOpaque = true,
@@ -284,3 +284,14 @@ export default function Navbar({
     </nav>
   );
 }
+
+Navbar.propTypes = {
+  variant: PropTypes.string,               // "landing" or other variants
+  navOpaque: PropTypes.bool,
+  onSearchToggle: PropTypes.func,
+  cartCount: PropTypes.number,
+  onCartOpen: PropTypes.func,
+  menuOpen: PropTypes.bool,
+  setMenuOpen: PropTypes.func,
+  onSignOut: PropTypes.func,
+};
