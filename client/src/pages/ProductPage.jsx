@@ -5,6 +5,7 @@ import { auth } from "../auth/firebase";
 import { getAuthHeaders } from "../utils/getAuthHeaders";
 import { fmt } from "../utils/formatters";
 import CartDrawer from "../components/CartDrawer";
+import { normalizeProduct } from "../utils/normalizeProduct"; 
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -136,16 +137,17 @@ export default function ProductPage() {
         const res = await fetch(`${API}/api/products`);
         if (!res.ok) throw new Error("Failed to load products");
         const all = res.ok ? await res.json() : [];
-        const normalised = all.map(p => ({ ...p, id: p.productId }));
+        const normalised = all.map(p => normalizeProduct(p));
         setProducts(normalised);
         const found = normalised.find(p => String(p.productId) === String(productId));
         if (!found) throw new Error("Product not found");
-        setProduct(found);
+        setProduct(normalizeProduct(found));
         setRelated(
-          normalised
-            .filter(p => p.category === found.category && String(p.productId) !== String(productId))
-            .slice(0, 4)
-        );
+  normalised
+    .filter(p => p.category === found.category && String(p.productId) !== String(productId))
+    .slice(0, 4)
+    .map(p => normalizeProduct(p))
+);
         const user = auth.currentUser;
         if (user) {
           const cartDoc = await apiGetCart(user.uid);
@@ -255,7 +257,7 @@ export default function ProductPage() {
         <p className="text-stone-500 text-sm mb-6">{error}</p>
         <button onClick={() => navigate("/home")}
           className="bg-stone-900 text-white text-sm px-8 py-3 rounded-full
-                     hover:bg-stone-700 transition-colors min-h-[44px]">
+                     hover:bg-stone-700 transition-colors min-h-11">
           Back to Store
         </button>
       </div>
@@ -295,16 +297,16 @@ export default function ProductPage() {
                           flex items-center gap-1.5 sm:gap-2 text-xs text-stone-400 overflow-x-auto
                           whitespace-nowrap scrollbar-none">
             <button onClick={() => navigate("/")}
-              className="hover:text-stone-700 transition-colors flex-shrink-0">Home</button>
-            <span className="flex-shrink-0">→</span>
+              className="hover:text-stone-700 transition-colors shrink-0">Home</button>
+            <span className="shrink-0">→</span>
             <button onClick={() => navigate("/home")}
-              className="hover:text-stone-700 transition-colors flex-shrink-0">Shop</button>
-            <span className="flex-shrink-0">→</span>
+              className="hover:text-stone-700 transition-colors shrink-0">Shop</button>
+            <span className="shrink-0">→</span>
             <button onClick={() => navigate("/home")}
-              className="hover:text-stone-700 transition-colors flex-shrink-0">
+              className="hover:text-stone-700 transition-colors shrink-0">
               {product.category}
             </button>
-            <span className="flex-shrink-0">→</span>
+            <span className="shrink-0">→</span>
             <span className="text-stone-600 truncate">{product.name}</span>
           </div>
         </div>
@@ -352,7 +354,7 @@ export default function ProductPage() {
                 {features.map((f, i) => (
                   <div key={i} className="flex items-center gap-2 sm:gap-2.5 bg-stone-50
                                           border border-stone-200 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3">
-                    <span className="text-stone-400 text-sm flex-shrink-0">✓</span>
+                    <span className="text-stone-400 text-sm shrink-0">✓</span>
                     <span className="text-xs text-stone-600 leading-snug">{f}</span>
                   </div>
                 ))}
@@ -466,7 +468,7 @@ export default function ProductPage() {
                   disabled={busy}
                   className={`flex-1 text-sm py-4 rounded-full font-medium transition-all
                               flex items-center justify-center gap-2 disabled:cursor-not-allowed
-                              min-h-[52px] active:scale-[0.98]
+                              min-h-13 active:scale-[0.98]
                               ${added
                       ? "bg-stone-700 text-white"
                       : adding
