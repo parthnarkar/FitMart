@@ -44,11 +44,37 @@ const logger = (req, res, next) => {
             '\x1b[0m'; // Default
 
     // Format the log message without timestamp
-    console.log(
-      `${methodColor}${req.method.padEnd(6)}\x1b[0m ` +
-      `${statusColor}${status}\x1b[0m ` +
-      `${simplifiedUrl}`
-    );
+   const timestamp = new Date().toISOString();
+
+// Safely stringify body
+let bodyStr = "";
+try {
+  bodyStr = JSON.stringify(req.body);
+} catch {
+  bodyStr = "[unserializable body]";
+}
+
+// Redact sensitive fields
+const redactFields = ["password", "token"];
+let safeBody = { ...req.body };
+
+redactFields.forEach((field) => {
+  if (safeBody && safeBody[field]) {
+    safeBody[field] = "[REDACTED]";
+  }
+});
+
+// Logging logic
+if (bodyStr.length < 1000) {
+  console.log(
+    `[${timestamp}] ${req.method} ${req.url}`,
+    safeBody
+  );
+} else {
+  console.log(
+    `[${timestamp}] ${req.method} ${req.url} [body too large to log]`
+  );
+}
 
     // Log request body for non-GET requests (optional)
     if (req.method !== 'GET' && Object.keys(req.body || {}).length > 0) {

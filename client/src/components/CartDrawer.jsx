@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { fmt } from "../utils/formatters";
 import { Link } from "react-router-dom";
-
+import PropTypes from "prop-types";
 function CartDrawer({
   isOpen,
   onClose,
@@ -228,3 +228,8 @@ function CartDrawer({
 }
 
 export default CartDrawer;
+CartDrawer.propTypes = {
+  isOpen: PropTypes.bool,
+  onClose: PropTypes.func,
+  items: PropTypes.array,
+};
