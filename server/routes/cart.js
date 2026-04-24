@@ -27,6 +27,31 @@ function checkOwnership(req, res) {
  * @desc    Get or create a cart for the given user
  * @access  Private
  */
+router.post('/:userId/add', async (req, res) => {
+
+  // ✅ ADD VALIDATION HERE
+  const { productId, quantity } = req.body;
+  if (typeof productId !== 'number') {
+  return res.status(400).json({ error: 'productId must be a number' });
+}
+if (!Number.isInteger(quantity) || quantity <= 0) {
+  return res.status(400).json({ error: 'quantity must be a positive integer' });
+}
+
+  if (typeof productId !== 'number') {
+    return res.status(400).json({ 
+      error: 'productId must be a number' 
+    });
+  }
+
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    return res.status(400).json({ 
+      error: 'quantity must be a positive integer' 
+    });
+  }
+
+  // ... rest of existing code continues unchanged
+});
 router.get('/:userId', verifyFirebaseToken, async (req, res) => {
   if (!checkOwnership(req, res)) return;
 
@@ -43,10 +68,49 @@ router.get('/:userId', verifyFirebaseToken, async (req, res) => {
 });
 
 /**
- * @route   POST /api/cart/:userId/add
- * @desc    Add an item to the user's cart and reserve stock; body: { productId, quantity }
+ * @route   POST /api/cart/:userId/remove
+ * @desc    Remove an item (or reduce its quantity) from the user's cart and release reserved stock
  * @access  Private
  */
+
+router.post('/:userId/remove', async (req, res) => {
+
+  // ✅ ADD VALIDATION HERE
+  const { productId, quantity } = req.body;
+  if (typeof productId !== 'number') {
+  return res.status(400).json({ error: 'productId must be a number' });
+}
+if (!Number.isInteger(quantity) || quantity <= 0) {
+  return res.status(400).json({ error: 'quantity must be a positive integer' });
+}
+
+  if (typeof productId !== 'number') {
+    return res.status(400).json({ 
+      error: 'productId must be a number' 
+    });
+  }
+
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    return res.status(400).json({ 
+      error: 'quantity must be a positive integer' 
+    });
+  }
+
+  // ... rest of existing code continues unchanged
+});
+router.post('/:userId/remove', async (req, res) => {  // ← your existing line
+  const { productId, quantity } = req.body;            // ← ADD THIS
+
+  // ✅ ADD THESE VALIDATION CHECKS BELOW
+  if (typeof productId !== 'number') {
+    return res.status(400).json({ error: 'productId must be a number' });
+  }
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    return res.status(400).json({ error: 'quantity must be a positive integer' });
+  }
+
+  // ... rest of your existing code continues below
+});
 router.post('/:userId/add', verifyFirebaseToken, async (req, res) => {
   if (!checkOwnership(req, res)) return;
 
@@ -86,9 +150,22 @@ router.post('/:userId/add', verifyFirebaseToken, async (req, res) => {
 
 /**
  * @route   POST /api/cart/:userId/remove
- * @desc    Remove an item (or reduce its quantity) from the user's cart and release reserved stock; body: { productId, quantity }
+ * @desc    Remove an item (or reduce its quantity) from the user's cart and release reserved stock
  * @access  Private
  */
+router.post('/:userId/remove', async (req, res) => {  // ← your existing line
+  const { productId, quantity } = req.body;            // ← ADD THIS
+
+  // ✅ ADD THESE VALIDATION CHECKS BELOW
+  if (typeof productId !== 'number') {
+    return res.status(400).json({ error: 'productId must be a number' });
+  }
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    return res.status(400).json({ error: 'quantity must be a positive integer' });
+  }
+
+  // ... rest of your existing code continues below
+});
 router.post('/:userId/remove', verifyFirebaseToken, async (req, res) => {
   if (!checkOwnership(req, res)) return;
 
