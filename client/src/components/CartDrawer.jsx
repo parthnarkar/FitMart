@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { fmt } from "../utils/formatters";
 import { Link } from "react-router-dom";
+import { normalizeProduct } from "../utils/normalizeProduct"; 
 
 function CartDrawer({
   isOpen,
@@ -108,84 +109,87 @@ function CartDrawer({
 
             /* ── Cart Items ── */
             <div className="flex flex-col">
-              {cart.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex gap-3 sm:gap-4 items-start py-4 sm:py-5
-                             border-b border-stone-200 last:border-0"
-                >
-                  {/* Product image */}
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 bg-stone-100 rounded-2xl
-                                  flex items-center justify-center shrink-0 overflow-hidden
-                                  border border-stone-200">
-                    {item.image ? (
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.style.display = "none";
-                        }}
-                      />
-                    ) : (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-                        stroke="#d6d3d1" strokeWidth="1.5">
-                        <circle cx="12" cy="12" r="9" />
-                        <line x1="5" y1="5" x2="19" y2="19" />
-                      </svg>
-                    )}
-                  </div>
+              {cart.map((item) => {
+  const normalizedItem = normalizeProduct(item);
 
-                  {/* Product info */}
-                  <div className="flex-1 min-w-0">
-                    {item.brand && (
-                      <p className="text-[10px] tracking-[0.15em] uppercase text-stone-400 mb-0.5">
-                        {item.brand}
-                      </p>
-                    )}
-                    <p className="font-['DM_Serif_Display'] text-sm sm:text-base text-stone-900
-                                  leading-snug truncate">
-                      {item.name}
-                    </p>
-                    <p className="text-sm text-stone-700 mt-1">{fmt(item.price)}</p>
-                  </div>
+  return (
+    <div
+      key={normalizedItem.id}
+      className="flex gap-3 sm:gap-4 items-start py-4 sm:py-5
+                 border-b border-stone-200 last:border-0"
+    >
+      {/* Product image */}
+      <div className="w-14 h-14 sm:w-16 sm:h-16 bg-stone-100 rounded-2xl
+                      flex items-center justify-center shrink-0 overflow-hidden
+                      border border-stone-200">
+        {normalizedItem.image ? (
+          <img
+            src={normalizedItem.image}
+            alt={normalizedItem.name}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.style.display = "none";
+            }}
+          />
+        ) : (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="#d6d3d1" strokeWidth="1.5">
+            <circle cx="12" cy="12" r="9" />
+            <line x1="5" y1="5" x2="19" y2="19" />
+          </svg>
+        )}
+      </div>
 
-                  {/* Qty + Remove */}
-                  <div className="flex flex-col items-end gap-2 shrink-0">
-                    <button
-                      onClick={() => removeFromCart(item.id)}
-                      className="text-xs text-stone-300 hover:text-stone-900 transition-colors
-                                 min-h-[28px] flex items-center"
-                    >
-                      Remove
-                    </button>
-                    <div className="flex items-center gap-1.5 sm:gap-2 border border-stone-200
-                                    rounded-full px-2.5 sm:px-3 py-1">
-                      <button
-                        onClick={() => updateQty(item.id, -1)}
-                        className="text-stone-500 hover:text-stone-900 transition-colors
-                                   text-sm w-5 h-5 flex items-center justify-center"
-                        aria-label="Decrease quantity"
-                      >
-                        −
-                      </button>
-                      <span className="text-xs text-stone-900 min-w-[1rem] text-center
-                                       select-none">
-                        {item.qty}
-                      </span>
-                      <button
-                        onClick={() => updateQty(item.id, 1)}
-                        className="text-stone-500 hover:text-stone-900 transition-colors
-                                   text-sm w-5 h-5 flex items-center justify-center"
-                        aria-label="Increase quantity"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
+      {/* Product info */}
+      <div className="flex-1 min-w-0">
+        {normalizedItem.brand && (
+          <p className="text-[10px] tracking-[0.15em] uppercase text-stone-400 mb-0.5">
+            {normalizedItem.brand}
+          </p>
+        )}
+        <p className="font-['DM_Serif_Display'] text-sm sm:text-base text-stone-900
+                      leading-snug truncate">
+          {normalizedItem.name}
+        </p>
+        <p className="text-sm text-stone-700 mt-1">
+          {fmt(normalizedItem.price)}
+        </p>
+      </div>
+
+      {/* Qty + Remove */}
+      <div className="flex flex-col items-end gap-2 shrink-0">
+        <button
+          onClick={() => removeFromCart(normalizedItem.id)}
+          className="text-xs text-stone-300 hover:text-stone-900 transition-colors
+                     min-h-[28px] flex items-center"
+        >
+          Remove
+        </button>
+        <div className="flex items-center gap-1.5 sm:gap-2 border border-stone-200
+                        rounded-full px-2.5 sm:px-3 py-1">
+          <button
+            onClick={() => updateQty(normalizedItem.id, -1)}
+            className="text-stone-500 hover:text-stone-900 transition-colors
+                       text-sm w-5 h-5 flex items-center justify-center"
+          >
+            −
+          </button>
+          <span className="text-xs text-stone-900 min-w-[1rem] text-center">
+            {normalizedItem.qty}
+          </span>
+          <button
+            onClick={() => updateQty(normalizedItem.id, 1)}
+            className="text-stone-500 hover:text-stone-900 transition-colors
+                       text-sm w-5 h-5 flex items-center justify-center"
+          >
+            +
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+})}
             </div>
           )}
         </div>
