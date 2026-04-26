@@ -32,6 +32,11 @@ export default function Navbar({
 
   const isLanding = variant === "landing";
 
+  const handleNav = () => {
+    if (isLanding) window.scrollTo({ top: 0, behavior: "smooth" });
+    else navigate("/home");
+  };
+
   const positionClass = isLanding
     ? "fixed top-0 left-0 right-0 z-50"
     : "sticky top-0 z-40";
@@ -54,12 +59,16 @@ export default function Navbar({
                       flex items-center justify-between">
 
         {/* ── Brand ── */}
+        {/* FIX: Added role, tabIndex, aria-label, onKeyDown for keyboard accessibility */}
         <span
           className={`font-['DM_Serif_Display'] text-lg sm:text-xl tracking-tight
                        cursor-pointer transition-colors ${logoColor}`}
-          onClick={() => {
-            if (isLanding) window.scrollTo({ top: 0, behavior: "smooth" });
-            else navigate("/home");
+          onClick={handleNav}
+          role="button"
+          tabIndex="0"
+          aria-label="FitMart – go to home"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") handleNav();
           }}
         >
           FitMart
@@ -74,10 +83,10 @@ export default function Navbar({
               onClick={onSearchToggle}
               className={`p-2 transition-colors min-w-[40px] min-h-[40px] flex items-center
                           justify-center rounded-full ${iconColor}`}
-              aria-label="Search"
+              aria-label="Toggle search"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor"
-                strokeWidth={1.8} viewBox="0 0 24 24">
+                strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="11" cy="11" r="7" />
                 <path d="m16.5 16.5 4 4" />
               </svg>
@@ -90,18 +99,21 @@ export default function Navbar({
               onClick={onCartOpen}
               className={`relative p-2 transition-colors min-w-[40px] min-h-[40px]
                           flex items-center justify-center rounded-full ${iconColor}`}
-              aria-label="Cart"
+              aria-label={`Cart, ${cartCount} item${cartCount !== 1 ? "s" : ""}`}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor"
-                strokeWidth={1.8} viewBox="0 0 24 24">
+                strokeWidth={1.8} viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <path d="M16 10a4 4 0 0 1-8 0" />
               </svg>
               {cartCount > 0 && (
-                <span className="absolute top-0.5 right-0.5 bg-stone-900 text-white
-                                 text-[9px] w-4 h-4 rounded-full flex items-center
-                                 justify-center font-semibold">
+                <span
+                  className="absolute top-0.5 right-0.5 bg-stone-900 text-white
+                               text-[9px] w-4 h-4 rounded-full flex items-center
+                               justify-center font-semibold"
+                  aria-hidden="true"
+                >
                   {cartCount}
                 </span>
               )}
@@ -114,8 +126,12 @@ export default function Navbar({
               {user ? (
                 /* ── Logged IN: avatar + dropdown ── */
                 <div className="relative">
+                  {/* FIX: Added aria-expanded, aria-controls, aria-label for screen readers */}
                   <button
                     onClick={() => setMenuOpen?.((p) => !p)}
+                    aria-expanded={menuOpen}
+                    aria-controls="user-dropdown-menu"
+                    aria-label="User menu"
                     className={`flex items-center gap-1.5 sm:gap-2 border rounded-full
                                 px-2 sm:px-2.5 py-1.5 hover:bg-stone-50 transition-colors ml-0.5
                                 min-h-[36px]
@@ -130,16 +146,19 @@ export default function Navbar({
                       {user.photoURL ? (
                         <img
                           src={user.photoURL}
-                          alt={user.displayName || "avatar"}
+                          alt={user.displayName ? `${user.displayName}'s avatar` : "User avatar"}
                           className="w-full h-full object-cover"
                           referrerPolicy="no-referrer"
                         />
                       ) : (
-                        <span className={`text-[11px] font-medium
-                                          ${isLanding && !navOpaque
-                            ? "text-stone-700"
-                            : "text-stone-600"
-                          }`}>
+                        <span
+                          className={`text-[11px] font-medium
+                                      ${isLanding && !navOpaque
+                              ? "text-stone-700"
+                              : "text-stone-600"
+                            }`}
+                          aria-hidden="true"
+                        >
                           {(user.displayName?.[0] || user.email?.[0] || "U").toUpperCase()}
                         </span>
                       )}
@@ -159,9 +178,15 @@ export default function Navbar({
                       <div
                         className="fixed inset-0 z-40"
                         onClick={() => setMenuOpen?.(false)}
+                        aria-hidden="true"
                       />
-                      <div className="absolute right-0 top-full mt-2 w-44 sm:w-48 bg-white
-                                      border border-stone-200 rounded-xl shadow-lg py-1 z-50">
+                      {/* FIX: Added id matching aria-controls on the toggle button */}
+                      <div
+                        id="user-dropdown-menu"
+                        role="menu"
+                        className="absolute right-0 top-full mt-2 w-44 sm:w-48 bg-white
+                                    border border-stone-200 rounded-xl shadow-lg py-1 z-50"
+                      >
                         <div className="px-4 py-2.5 border-b border-stone-100">
                           <p className="text-xs font-medium text-stone-900 truncate">
                             {user.displayName || "Account"}
@@ -175,6 +200,7 @@ export default function Navbar({
                         {isProfileRoute ? (
                           <div className="border-t border-stone-100 mt-1">
                             <button
+                              role="menuitem"
                               onClick={() => {
                                 navigate("/home");
                                 setMenuOpen?.(false);
@@ -186,6 +212,7 @@ export default function Navbar({
                             </button>
 
                             <button
+                              role="menuitem"
                               onClick={handleSignOut}
                               className="w-full text-left text-xs text-stone-500 hover:bg-stone-50
                                          px-4 py-2.5 transition-colors min-h-[36px]"
@@ -197,6 +224,7 @@ export default function Navbar({
                           <>
                             {isLanding && (
                               <button
+                                role="menuitem"
                                 onClick={() => {
                                   navigate("/home");
                                   setMenuOpen?.(false);
@@ -211,6 +239,7 @@ export default function Navbar({
 
                             {/* Fitness tracker link - from daily-workout-tracker branch */}
                             <button
+                              role="menuitem"
                               onClick={() => {
                                 navigate("/tracker");
                                 setMenuOpen?.(false);
@@ -224,6 +253,7 @@ export default function Navbar({
 
                             <div className="border-t border-stone-100 mt-1">
                               <button
+                                role="menuitem"
                                 onClick={() => {
                                   navigate('/profile');
                                   setMenuOpen?.(false);
@@ -235,6 +265,7 @@ export default function Navbar({
                               </button>
 
                               <button
+                                role="menuitem"
                                 onClick={handleSignOut}
                                 className="w-full text-left text-xs text-stone-500 hover:bg-stone-50
                                            px-4 py-2.5 transition-colors min-h-[36px]"
