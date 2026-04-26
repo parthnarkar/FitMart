@@ -1,5 +1,6 @@
 // src/components/WelcomeBanner.jsx
 import { useEffect, useState } from "react";
+import PropTypes from "prop-types";
 
 export default function WelcomeBanner({ onDismiss }) {
   const [visible, setVisible] = useState(false);
@@ -63,4 +64,14 @@ export default function WelcomeBanner({ onDismiss }) {
       </button>
     </div>
   );
+
+
+WelcomeBanner.propTypes = {
+  onDismiss: PropTypes.func,
+};
+
+
+WelcomeBanner.propTypes = {
+  onDismiss: PropTypes.func,
+};
 }
