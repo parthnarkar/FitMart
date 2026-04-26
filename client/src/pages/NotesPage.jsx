@@ -55,7 +55,7 @@ export default function NotesPage() {
     // Save functionality
     saveWorkout(entry);
     setSaved(true);
-    
+
     // Redirect to "/tracker" after a brief confirmation
     setTimeout(() => {
       navigate("/tracker");
@@ -147,7 +147,7 @@ export default function NotesPage() {
                 rows={12}
                 className="w-full border border-stone-200 bg-white rounded-xl sm:rounded-2xl px-4 sm:px-6 py-4 sm:py-6 text-sm sm:text-base text-stone-700 
                            placeholder-stone-300 focus:outline-none focus:border-stone-900 transition-colors resize-none
-                           min-h-[300px] sm:min-h-[450px] leading-relaxed"
+                           min-h-75 sm:min-h-112.5 leading-relaxed"
               />
             </div>
 
@@ -185,12 +185,12 @@ export default function NotesPage() {
                       </div>
 
                       {/* Exercise Details */}
-                      <div className="p-4 flex flex-col flex-grow">
+                      <div className="p-4 flex flex-col grow">
                         <h4 className="font-['DM_Serif_Display'] text-base md:text-lg text-stone-900 mb-2 capitalize">
                           {exercise.name}
                         </h4>
 
-                        <div className="space-y-1 text-xs text-stone-500 mb-4 flex-grow">
+                        <div className="space-y-1 text-xs text-stone-500 mb-4 grow">
                           {exercise.target && (
                             <p>
                               <span className="uppercase tracking-wide">Target:</span>{" "}
