@@ -157,71 +157,121 @@ Whether you're a beginner learning full-stack development or an experienced deve
 
 ```
 FitMart/
+├── .github/
+│   └── pull_request_template.md   # Template used to standardize pull request descriptions
 ├── client/                        # React + Vite Frontend
 │   ├── public/                    # Static assets (logo, icons)
 │   ├── src/
 │   │   ├── auth/
-│   │   │   ├── firebase.js        # Firebase app initialization
-│   │   │   ├── useAuth.js         # Auth state hook
+│   │   │   ├── firebase.js            # Firebase app initialization
+│   │   │   ├── useAuth.js             # Auth state hook
 │   │   │   └── useWelcomeDiscount.js  # First-order discount hook
 │   │   ├── components/
-│   │   │   ├── AdminNavbar.jsx    # Admin panel navigation bar
-│   │   │   ├── AdminRoute.jsx     # Admin-only route guard
-│   │   │   ├── BMICalculator.jsx  # BMI/TDEE calculator widget
-│   │   │   ├── CartDrawer.jsx     # Slide-in cart panel
-│   │   │   ├── FitnessChatBot.jsx # Floating AI chatbot
-│   │   │   ├── Navbar.jsx         # Main navigation bar
-│   │   │   ├── NonAdminRoute.jsx  # Redirects admin away from customer pages
-│   │   │   └── WelcomeBanner.jsx  # First-visit discount banner
+│   │   │   ├── AdminNavbar.jsx          # Admin panel navigation bar
+│   │   │   ├── AdminRoute.jsx           # Admin-only route guard
+│   │   │   ├── BMICalculator.jsx        # BMI/TDEE calculator widget
+│   │   │   ├── CalorieCalculator.jsx    # Estimates daily calorie intake based on user input
+│   │   │   ├── CartDrawer.jsx           # Slide-in cart panel
+│   │   │   ├── FitnessCenterDetail.jsx  # Displays detailed info about a selected fitness center
+│   │   │   ├── FitnessChatBot.jsx       # Floating AI chatbot
+│   │   │   ├── Navbar.jsx               # Main navigation bar
+│   │   │   ├── NearbyFitnessCenters.jsx # Lists nearby gyms/fitness centers based on location
+│   │   │   ├── NonAdminRoute.jsx        # Redirects admin away from customer pages
+│   │   │   ├── ReportBugButton.jsx      # Button to report bugs/issues
+│   │   │   ├── WelcomeBanner.jsx        # First-visit discount banner
+│   │   │   └── WorkoutCalendar.jsx      # Tracks and displays workout schedules
 │   │   ├── pages/
-│   │   │   ├── AdminCustomerDetail.jsx
-│   │   │   ├── AdminCustomers.jsx
-│   │   │   ├── AdminDashboard.jsx
-│   │   │   ├── AdminInventory.jsx
-│   │   │   ├── AdminReports.jsx
-│   │   │   ├── Authentication.jsx
-│   │   │   ├── Checkout.jsx
-│   │   │   ├── HomePage.jsx
-│   │   │   ├── LandingPage.jsx
-│   │   │   ├── MobilityRecoveryPlans.jsx
-│   │   │   ├── MuscleBuildingPlans.jsx
-│   │   │   ├── NotFound.jsx
-│   │   │   ├── PaymentPage.jsx
-│   │   │   ├── ProductConfirmation.jsx
-│   │   │   ├── ProductPage.jsx
-│   │   │   └── WeightLossPlans.jsx
+│   │   │   ├── AdminBugs.jsx             # Displays and manages reported bugs/issues (admin access)
+│   │   │   ├── AdminCustomerDetail.jsx   # Displays detailed information for a specific customer (admin access)
+│   │   │   ├── AdminCustomers.jsx        # Lists and manages all registered customers (admin access)
+│   │   │   ├── AdminDashboard.jsx        # Dashboard with key metrics and analytics (admin access)
+│   │   │   ├── AdminInventory.jsx        # Manages product inventory (admin access)
+│   │   │   ├── AdminMarketing.jsx        # Handles marketing tools like promotions, emails, or campaigns (admin access)
+│   │   │   ├── AdminReports.jsx          # Displays sales reports and analytics (admin access)
+│   │   │   ├── Authentication.jsx        # Handles user login and signup using Firebase Auth
+│   │   │   ├── Checkout.jsx              # Checkout process including order summary and user details
+│   │   │   ├── ExercisePage.jsx          # Displays exercise routines or workout guides
+│   │   │   ├── HomePage.jsx              # Main homepage displaying products and features
+│   │   │   ├── LandingPage.jsx           # Intro/landing screen with platform overview
+│   │   │   ├── MobilityRecoveryPlans.jsx # Fitness plans focused on mobility and recovery
+│   │   │   ├── MuscleBuildingPlans.jsx   # Workout plans for muscle gain
+│   │   │   ├── NotesPage.jsx             # Allows users to create and manage personal fitness notes
+│   │   │   ├── NotFound.jsx              # 404 page for undefined routes
+│   │   │   ├── PaymentPage.jsx           # Handles payment processing
+│   │   │   ├── PrivacyPolicy.jsx         # Displays the platform's privacy policy
+│   │   │   ├── ProductConfirmation.jsx   # Order confirmation after successful purchase
+│   │   │   ├── ProductPage.jsx           # Detailed view of a selected product
+│   │   │   ├── Profile.jsx               # User profile page with personal and account details
+│   │   │   ├── TermsAndConditions.jsx    # Displays terms and conditions of the platform
+│   │   │   ├── TrackerPage.jsx           # Tracks user fitness progress and activities
+│   │   │   ├── WeightLossPlans.jsx       # Workout and diet plans for weight loss
+│   │   │   ├── WorkoutNotes.jsx          # Stores and displays user workout-related notes
+│   │   │   └── WorkoutTracker.jsx        # Tracks workouts, sets, and progress over time
 │   │   ├── utils/
-│   │   │   ├── formatters.js      # Currency formatter (INR)
-│   │   │   ├── getAuthHeaders.js  # Firebase token → Authorization header
-│   │   │   └── healthUtils.js     # BMI, BMR, TDEE calculations
-│   │   ├── App.jsx                # Root router
-│   │   ├── index.css              # Tailwind import
+│   │   │   ├── formatters.js             # Utility functions for formatting values (e.g., currency in INR)
+│   │   │   ├── getAuthHeaders.js         # Attaches Firebase auth token to API request headers
+│   │   │   ├── healthUtils.js            # Functions for BMI, BMR, and TDEE calculations
+│   │   │   ├── normalizeProduct.js       # Normalizes product data from API into consistent frontend format
+│   │   │   └── workoutStorage.js         # Handles storing and retrieving workout data (local storage or state)
+│   │   ├── App.jsx                # Main application component with routing setup
+│   │   ├── index.css              # Global styles and CSS imports
 │   │   └── main.jsx               # React entry point
-│   ├── .env.example
-│   ├── index.html
-│   ├── package.json
-│   └── vite.config.js
+│   ├── .env.example       # Example environment variables required for local setup
+│   ├── .gitignore         # Specifies files and folders ignored by Git
+│   ├── DesignSystem.md    # Documentation for UI design guidelines and components
+│   ├── eslint.config.js   # ESLint configuration for code linting and formatting rules
+│   ├── index.html         # Main HTML template used by Vite
+│   ├── package-lock.json  # Locks exact dependency versions for consistent installs
+│   ├── package.json       # Project metadata, scripts, and dependencies
+│   ├── README.md          # Project documentation and setup guide
+│   ├── vercel.json        # Deployment configuration for Vercel
+│   └── vite.config.js     # Vite configuration for build and development setup
 │
-├── server/                        # Node.js + Express Backend
+├── docs/
+│   ├── CONTRIBUTING.md               # Guidelines for contributing (setup, coding standards, PR process)
+│   ├── FIRST_PURCHASE_EMAIL_SETUP.md # Setup guide for email notifications after a user's first purchase
+│   └── SECURITY.md                  # Security policies, best practices, and vulnerability reporting
+│
+├── server/                        # Node.js + Express backend
+│   ├── middleware/
+│   │   ├── logger.js              # Logs API requests and server activity
+│   │   └── verifyFirebaseToken.js # Verifies Firebase auth token for protected routes
 │   ├── models/
-│   │   ├── Product.js             # Product schema
-│   │   ├── Cart.js                # Cart schema
-│   │   └── Order.js               # Order schema
+│   │   ├── Bug.js                 # Schema for storing user-reported bugs/issues
+│   │   ├── Cart.js                # Schema for user shopping cart data
+│   │   ├── FitnessCenter.js       # Schema for fitness center details (location, services, etc.)
+│   │   ├── Order.js               # Schema for order data and transaction details
+│   │   ├── Product.js             # Schema for product information and inventory
+│   │   └── UserProfile.js         # Schema for user profile and additional user data
 │   ├── routes/
-│   │   ├── products.js            # CRUD for products
-│   │   ├── cart.js                # Cart management + stock reservation
-│   │   ├── orders.js              # Order creation and retrieval
-│   │   ├── payment.js             # Razorpay integration
-│   │   ├── chat.js                # AI chatbot endpoint
-│   │   ├── dashboard.js           # Admin dashboard data
-│   │   ├── reports.js             # Sales reports
-│   │   ├── customers.js           # Customer management
-│   │   └── user.js                # Welcome discount & user management
-│   ├── db.js                      # MongoDB connection
-│   ├── index.js                   # Server entry point
-│   └── seed.js                    # DB seed script
+│   │   ├── bugs.js                # Handles bug reporting and retrieval (admin + user reports)
+│   │   ├── cart.js                # Cart management and stock reservation
+│   │   ├── chat.js                # AI chatbot API endpoint for user queries
+│   │   ├── customers.js           # Customer data management (admin access)
+│   │   ├── products.js            # CRUD operations for products
+│   │   ├── dashboard.js           # Provides data for admin dashboard analytics
+│   │   ├── exercises.js           # Manages exercise/workout-related data
+│   │   ├── fitnessCenters.js      # Fetches and manages nearby fitness centers
+│   │   ├── orders.js              # Handles order creation, history, and tracking
+│   │   ├── payment.js             # Handles payment processing (Razorpay integration)
+│   │   ├── reports.js             # Generates sales and performance reports (admin access)
+│   │   └── user.js                # User management and welcome discount handling
+│   ├── services/
+│   │   ├── emailService.js                 # Core email sending logic and configuration
+│   │   ├── emailTemplates.js               # Defines reusable email templates and content
+│   │   ├── firstPurchaseEmailService.js    # Sends email notifications after a user's first purchase
+│   │   └── inactiveCustomerEmailService.js # Sends re-engagement emails to inactive customers
+│   ├── .env.example            # Example environment variables for backend configuration
+│   ├── .gitignore              # Specifies files and folders ignored by Git
+│   ├── db.js                   # MongoDB connection setup
+│   ├── firebaseAdmin.js        # Firebase Admin SDK configuration for authentication and token verification
+│   ├── index.js                # Main server entry point (Express app initialization)
+│   ├── package-lock.json       # Locks exact dependency versions for consistent installs
+│   ├── package.json            # Backend dependencies, scripts, and metadata
+│   ├── seed.js                 # Script to seed initial data into the database
+│   ├── seedFitnessCenters.js   # Seeds fitness center data into the database
+│   └── test-gemini.js          # Script to test Gemini AI integration
 │
-├── CONTRIBUTING.md
 └── README.md
 ```
 
