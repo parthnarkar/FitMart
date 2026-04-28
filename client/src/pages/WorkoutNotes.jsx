@@ -102,7 +102,7 @@ export default function WorkoutNotes() {
               <button
                 onClick={handleSave}
                 className="bg-stone-900 text-white text-sm px-8 py-3 rounded-full hover:bg-stone-700 
-                           transition-colors font-medium min-w-[160px]"
+                           transition-colors font-medium min-w-40"
               >
                 {saved ? "Saved ✓" : "Save Workout"}
               </button>
