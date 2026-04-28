@@ -133,6 +133,7 @@ Whether you're a beginner learning full-stack development or an experienced deve
 | **React Router v7** | Client-side routing |
 | **Firebase (client)** | Authentication |
 | **Recharts** | Admin dashboard charts (AreaChart, BarChart) |
+| **Framer Motion** | Smooth animations & transitions |
 
 ### Backend
 
@@ -578,6 +579,11 @@ FitMart uses a **luxury refined minimalism** design language — clean, editoria
 
 - **Headings:** `DM Serif Display`
 - **Body / UI:** `DM Sans`
+
+### Animations
+- Page transitions powered by **Framer Motion**
+- Micro-interactions for buttons, modals, and cart drawer
+- Entrance animations for product cards and sections
 
 ### Key Component Patterns
 

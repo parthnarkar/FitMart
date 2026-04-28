@@ -306,7 +306,7 @@ After you open a PR:
 FitMart/
 ├── client/                   # React + Vite Frontend
 │   ├── src/
-│   │   ├── components/       # Reusable UI components
+│   │   ├── components/       # Reusable UI components (uses Framer Motion for animations)
 │   │   ├── pages/            # Route-level page components
 │   │   ├── auth/             # Firebase auth setup & helpers
 │   │   └── utilities/        # Helper/utility functions
@@ -347,12 +347,31 @@ FitMart/
 - Always validate input and handle errors properly
 - Never log or expose sensitive values (API keys, passwords)
 
+### Animations (Framer Motion)
+
+- Use **Framer Motion** for all UI animations — page transitions, modal entrances, hover effects
+- Keep animations quick (150-300ms) and subtle — no distracting or overly complex movements
+- Prefer `motion` components over CSS transitions for interactive elements
+- Use `AnimatePresence` for exit animations on unmounting components
+- Example pattern:
+  ```jsx
+  import { motion, AnimatePresence } from 'framer-motion';
+  
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ duration: 0.2 }}
+  >
+  ```
+
 ### General
 
 - **No hardcoded URLs** — use `VITE_API_URL` or env variables
 - **No committed secrets** — `.env` files are gitignored for a reason
 - Delete commented-out code before submitting a PR
 - Write clear variable and function names — code should read like English
+- **Animations** — Use **[Framer Motion](https://www.framer.com/motion/)** for all animations and transitions (page entrances, modals, hover effects, etc.). Keep animations subtle and performant — avoid over-animating.
 
 ---
 
