@@ -1,5 +1,6 @@
 // src/components/Navbar.jsx
 import { useNavigate, useLocation } from "react-router-dom";
+import { useState } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "../auth/firebase";
 import { useAuth } from "../auth/useAuth";
@@ -10,15 +11,20 @@ export default function Navbar({
   onSearchToggle,
   cartCount = 0,
   onCartOpen,
-  menuOpen = false,
+  menuOpen,
   setMenuOpen,
   onSignOut,
 }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, loading: authLoading } = useAuth();
+  const [localMenuOpen, setLocalMenuOpen] = useState(false);
 
-  const isLimitedNavRoute = location?.pathname === "/profile" || location?.pathname === "/tracker";
+  // Treat tracker and notes as limited nav routes (no "Track Fitness" option)
+  const isLimitedNavRoute =
+    location?.pathname === "/profile" ||
+    location?.pathname === "/tracker" ||
+    location?.pathname === "/notes";
 
   const handleSignOut = async () => {
     if (onSignOut) {
@@ -27,7 +33,9 @@ export default function Navbar({
       await signOut(auth);
       navigate("/");
     }
-    setMenuOpen?.(false);
+    // Close whichever menu state is in use
+    if (typeof setMenuOpen === "function") setMenuOpen(false);
+    else setLocalMenuOpen(false);
   };
 
   const isLanding = variant === "landing";
@@ -128,8 +136,11 @@ export default function Navbar({
                 <div className="relative">
                   {/* FIX: Added aria-expanded, aria-controls, aria-label for screen readers */}
                   <button
-                    onClick={() => setMenuOpen?.((p) => !p)}
-                    aria-expanded={menuOpen}
+                    onClick={() => {
+                      if (typeof setMenuOpen === "function") setMenuOpen(!menuOpen);
+                      else setLocalMenuOpen((p) => !p);
+                    }}
+                    aria-expanded={typeof setMenuOpen === "function" ? !!menuOpen : localMenuOpen}
                     aria-controls="user-dropdown-menu"
                     aria-label="User menu"
                     className={`flex items-center gap-1.5 sm:gap-2 border rounded-full
@@ -173,11 +184,14 @@ export default function Navbar({
                   </button>
 
                   {/* Dropdown */}
-                  {menuOpen && (
+                  {(typeof setMenuOpen === "function" ? menuOpen : localMenuOpen) && (
                     <>
                       <div
                         className="fixed inset-0 z-40"
-                        onClick={() => setMenuOpen?.(false)}
+                        onClick={() => {
+                          if (typeof setMenuOpen === "function") setMenuOpen(false);
+                          else setLocalMenuOpen(false);
+                        }}
                         aria-hidden="true"
                       />
                       {/* FIX: Added id matching aria-controls on the toggle button */}
@@ -196,19 +210,20 @@ export default function Navbar({
                           </p>
                         </div>
 
-                        {/* If user is currently on the profile page or tracker page, show limited options */}
+                        {/* Limited routes (tracker, notes, profile) show only View Profile + Sign Out */}
                         {isLimitedNavRoute ? (
                           <div className="border-t border-stone-100 mt-1">
                             <button
                               role="menuitem"
                               onClick={() => {
-                                navigate("/home");
-                                setMenuOpen?.(false);
+                                navigate('/profile');
+                                if (typeof setMenuOpen === "function") setMenuOpen(false);
+                                else setLocalMenuOpen(false);
                               }}
-                              className="w-full text-left text-xs text-stone-700 font-medium
-                                         hover:bg-stone-50 px-4 py-2.5 transition-colors min-h-[36px]"
+                              className="w-full text-left text-xs text-stone-700 hover:bg-stone-50
+                                         px-4 py-2.5 transition-colors min-h-[36px]"
                             >
-                              Go to Shop →
+                              View Profile
                             </button>
 
                             <button
@@ -227,7 +242,8 @@ export default function Navbar({
                                 role="menuitem"
                                 onClick={() => {
                                   navigate("/home");
-                                  setMenuOpen?.(false);
+                                  if (typeof setMenuOpen === "function") setMenuOpen(false);
+                                  else setLocalMenuOpen(false);
                                 }}
                                 className="w-full text-left text-xs text-stone-700 font-medium
                                            hover:bg-stone-50 px-4 py-2.5 transition-colors
@@ -237,12 +253,13 @@ export default function Navbar({
                               </button>
                             )}
 
-                            {/* Fitness tracker link - from daily-workout-tracker branch */}
+                            {/* Fitness tracker link - shown on non-limited routes */}
                             <button
                               role="menuitem"
                               onClick={() => {
                                 navigate("/tracker");
-                                setMenuOpen?.(false);
+                                if (typeof setMenuOpen === "function") setMenuOpen(false);
+                                else setLocalMenuOpen(false);
                               }}
                               className="w-full text-left text-xs text-stone-700 font-medium
                                          hover:bg-stone-50 px-4 py-2.5 transition-colors
@@ -256,7 +273,8 @@ export default function Navbar({
                                 role="menuitem"
                                 onClick={() => {
                                   navigate('/profile');
-                                  setMenuOpen?.(false);
+                                  if (typeof setMenuOpen === "function") setMenuOpen(false);
+                                  else setLocalMenuOpen(false);
                                 }}
                                 className="w-full text-left text-xs text-stone-700 hover:bg-stone-50
                                            px-4 py-2.5 transition-colors min-h-[36px]"
