@@ -18,6 +18,10 @@ export default function WorkoutCalendar() {
     setEvents(getAllWorkoutEvents());
   }, []);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, []);
+
   const handleDateClick = (arg) => {
     localStorage.setItem("selectedDate", arg.dateStr);
     navigate("/notes");
@@ -170,7 +174,7 @@ export default function WorkoutCalendar() {
         aspectRatio={1.4}
         selectable={true}
       />
-      
+
       <div className="mt-8 pt-6 border-t border-stone-100 flex items-center justify-between">
         <div className="flex items-center gap-3 text-[10px] text-stone-400 uppercase tracking-widest">
           <span className="w-2.5 h-2.5 rounded-full bg-stone-900 shadow-sm animate-pulse"></span>
