@@ -52,6 +52,7 @@
 - [Data Models](#-data-models)
 - [Design System](#-design-system)
 - [Admin Panel](#-admin-panel)
+- [Security](#-security)
 - [Notes & Recommendations](#-notes--recommendations)
 - [Contributing](#-contributing)
 - [Contributors](#-contributors)
@@ -71,7 +72,13 @@ The project covers end-to-end functionality including:
 - 📦 Order management with price snapshotting at purchase time
 - 🤖 AI-powered Fitness Chatbot assistant
 - 🧮 BMI & TDEE Calculator with personalized product recommendations
-- 👑 Full Admin Panel with dashboard, inventory, reports, and customer management
+- 🏋️ Daily Workout Tracker with exercise logging and progress tracking
+- 🗺️ Nearby Fitness Centers with location-based sorting
+- 👤 User Profile with address management and checkout integration
+- 🐛 Bug Reporting system for users and admin management
+- 🧾 Downloadable Invoice on order confirmation
+- 🔒 Security hardening with Helmet, rate limiting, and request size limits
+- 👑 Full Admin Panel with dashboard, inventory, reports, marketing, and customer management
 - 🎯 Welcome discount system for first-time buyers
 
 Whether you're a beginner learning full-stack development or an experienced developer looking to contribute — **FitMart is built for you.**
@@ -88,7 +95,7 @@ Whether you're a beginner learning full-stack development or an experienced deve
 
 🔗 https://fitmart-omega.vercel.app/
 
-> 💡 Try exploring products, cart, and the admin panel for full experience.
+> 💡 Try exploring products, cart, workout tracker, and the admin panel for the full experience.
 
 ---
 
@@ -102,12 +109,22 @@ Whether you're a beginner learning full-stack development or an experienced deve
 | 🔍 Search | Real-time product search by name and brand |
 | 🛒 Smart Cart | Cart with quantity controls and real-time stock reservation |
 | 📦 Order Management | Orders with price snapshotting at time of purchase |
+| 🧾 Invoice Download | Download PDF invoice from the order confirmation page |
 | 💳 Razorpay Payments | Secure order creation & HMAC payment verification |
 | 🔐 Firebase Auth | Email/password and Google Sign-In |
 | 🎁 Welcome Discount | 10% off automatically applied for first-time buyers |
 | 🤖 Fitness Chatbot | AI-powered assistant for workout and nutrition queries |
 | 🧮 BMI Calculator | Body metrics tool with TDEE calculation and product recommendations |
+| 🧮 Calorie Calculator | Estimates daily calorie needs based on user inputs |
+| 🏋️ Workout Tracker | Log daily workouts, exercises, sets, and track progress over time |
+| 📅 Workout Calendar | Visual calendar to track and plan workout schedules |
+| 📝 Workout Notes | Create and manage personal fitness notes |
+| 💪 Exercise Library | Browse exercises by body part via RapidAPI ExerciseDB |
+| 🗺️ Nearby Fitness Centers | Location-based gym finder with distance sorting |
 | 🏋️ Fitness Plans | Weight Loss, Muscle Building, and Mobility & Recovery plans |
+| 👤 User Profile | Manage personal info, address, and account settings |
+| 🐛 Bug Reporting | Report bugs or issues directly from within the app |
+| ♿ Accessibility | Keyboard navigation and ARIA improvements across all interactive elements |
 | 📱 PWA Ready | Progressive Web App support for mobile installation |
 
 ### Admin-Facing
@@ -115,10 +132,12 @@ Whether you're a beginner learning full-stack development or an experienced deve
 | Feature | Description |
 |---|---|
 | 📊 Dashboard | Revenue KPIs, charts, top products, and recent orders |
-| 📦 Inventory | Real-time stock levels, low-stock alerts, and product filtering |
+| 📦 Inventory | Real-time stock levels, low-stock alerts, product editing and status updates |
 | 👥 Customers | Customer directory with segments (new / returning / high-value) |
 | 🔍 Customer Detail | Full order history and spend analytics per customer |
 | 📈 Reports | Sales reports with daily, weekly, and monthly breakdowns |
+| 📣 Marketing | Campaign management, promotions, and customer email tools |
+| 🐛 Bug Management | View and manage all user-reported bugs and issues |
 
 ---
 
@@ -142,6 +161,9 @@ Whether you're a beginner learning full-stack development or an experienced deve
 | **Mongoose** | MongoDB ODM |
 | **Firebase Admin SDK** | Server-side auth token verification |
 | **Razorpay SDK** | Payment order creation and HMAC verification |
+| **Helmet** | HTTP security headers |
+| **express-rate-limit** | API rate limiting to prevent abuse |
+| **RapidAPI ExerciseDB** | Exercise data by body part |
 
 ### Database & Services
 
@@ -150,6 +172,7 @@ Whether you're a beginner learning full-stack development or an experienced deve
 | **MongoDB** (Atlas or local) | Primary database |
 | **Firebase** | Authentication provider |
 | **Razorpay** | Payment processing |
+| **RapidAPI** | Exercise library data |
 
 ---
 
@@ -158,121 +181,118 @@ Whether you're a beginner learning full-stack development or an experienced deve
 ```
 FitMart/
 ├── .github/
-│   └── pull_request_template.md   # Template used to standardize pull request descriptions
-├── client/                        # React + Vite Frontend
-│   ├── public/                    # Static assets (logo, icons)
+│   └── pull_request_template.md        # Standardizes pull request descriptions
+├── client/                             # React + Vite Frontend
+│   ├── public/                         # Static assets (logo, icons)
 │   ├── src/
 │   │   ├── auth/
-│   │   │   ├── firebase.js            # Firebase app initialization
-│   │   │   ├── useAuth.js             # Auth state hook
-│   │   │   └── useWelcomeDiscount.js  # First-order discount hook
+│   │   │   ├── firebase.js             # Firebase app initialization
+│   │   │   ├── useAuth.js              # Auth state hook
+│   │   │   └── useWelcomeDiscount.js   # First-order discount hook
 │   │   ├── components/
-│   │   │   ├── AdminNavbar.jsx          # Admin panel navigation bar
-│   │   │   ├── AdminRoute.jsx           # Admin-only route guard
-│   │   │   ├── BMICalculator.jsx        # BMI/TDEE calculator widget
-│   │   │   ├── CalorieCalculator.jsx    # Estimates daily calorie intake based on user input
-│   │   │   ├── CartDrawer.jsx           # Slide-in cart panel
-│   │   │   ├── FitnessCenterDetail.jsx  # Displays detailed info about a selected fitness center
-│   │   │   ├── FitnessChatBot.jsx       # Floating AI chatbot
-│   │   │   ├── Navbar.jsx               # Main navigation bar
-│   │   │   ├── NearbyFitnessCenters.jsx # Lists nearby gyms/fitness centers based on location
-│   │   │   ├── NonAdminRoute.jsx        # Redirects admin away from customer pages
-│   │   │   ├── ReportBugButton.jsx      # Button to report bugs/issues
-│   │   │   ├── WelcomeBanner.jsx        # First-visit discount banner
-│   │   │   └── WorkoutCalendar.jsx      # Tracks and displays workout schedules
+│   │   │   ├── AdminNavbar.jsx         # Admin panel navigation bar
+│   │   │   ├── AdminRoute.jsx          # Admin-only route guard
+│   │   │   ├── BMICalculator.jsx       # BMI/TDEE calculator widget
+│   │   │   ├── CalorieCalculator.jsx   # Daily calorie estimator based on user input
+│   │   │   ├── CartDrawer.jsx          # Slide-in cart panel
+│   │   │   ├── FitnessCenterDetail.jsx # Detailed info about a selected fitness center
+│   │   │   ├── FitnessChatBot.jsx      # Floating AI chatbot
+│   │   │   ├── Navbar.jsx              # Main navigation bar (keyboard & ARIA accessible)
+│   │   │   ├── NearbyFitnessCenters.jsx# Lists nearby gyms based on user location
+│   │   │   ├── NonAdminRoute.jsx       # Redirects admin away from customer pages
+│   │   │   ├── ReportBugButton.jsx     # Floating button to report bugs/issues
+│   │   │   ├── WelcomeBanner.jsx       # First-visit discount banner
+│   │   │   └── WorkoutCalendar.jsx     # Visual calendar for workout scheduling
 │   │   ├── pages/
-│   │   │   ├── AdminBugs.jsx             # Displays and manages reported bugs/issues (admin access)
-│   │   │   ├── AdminCustomerDetail.jsx   # Displays detailed information for a specific customer (admin access)
-│   │   │   ├── AdminCustomers.jsx        # Lists and manages all registered customers (admin access)
-│   │   │   ├── AdminDashboard.jsx        # Dashboard with key metrics and analytics (admin access)
-│   │   │   ├── AdminInventory.jsx        # Manages product inventory (admin access)
-│   │   │   ├── AdminMarketing.jsx        # Handles marketing tools like promotions, emails, or campaigns (admin access)
-│   │   │   ├── AdminReports.jsx          # Displays sales reports and analytics (admin access)
-│   │   │   ├── Authentication.jsx        # Handles user login and signup using Firebase Auth
-│   │   │   ├── Checkout.jsx              # Checkout process including order summary and user details
-│   │   │   ├── ExercisePage.jsx          # Displays exercise routines or workout guides
-│   │   │   ├── HomePage.jsx              # Main homepage displaying products and features
-│   │   │   ├── LandingPage.jsx           # Intro/landing screen with platform overview
-│   │   │   ├── MobilityRecoveryPlans.jsx # Fitness plans focused on mobility and recovery
-│   │   │   ├── MuscleBuildingPlans.jsx   # Workout plans for muscle gain
-│   │   │   ├── NotesPage.jsx             # Allows users to create and manage personal fitness notes
-│   │   │   ├── NotFound.jsx              # 404 page for undefined routes
-│   │   │   ├── PaymentPage.jsx           # Handles payment processing
-│   │   │   ├── PrivacyPolicy.jsx         # Displays the platform's privacy policy
-│   │   │   ├── ProductConfirmation.jsx   # Order confirmation after successful purchase
-│   │   │   ├── ProductPage.jsx           # Detailed view of a selected product
-│   │   │   ├── Profile.jsx               # User profile page with personal and account details
-│   │   │   ├── TermsAndConditions.jsx    # Displays terms and conditions of the platform
-│   │   │   ├── TrackerPage.jsx           # Tracks user fitness progress and activities
-│   │   │   ├── WeightLossPlans.jsx       # Workout and diet plans for weight loss
-│   │   │   ├── WorkoutNotes.jsx          # Stores and displays user workout-related notes
-│   │   │   └── WorkoutTracker.jsx        # Tracks workouts, sets, and progress over time
+│   │   │   ├── AdminBugs.jsx           # View and manage reported bugs (admin only)
+│   │   │   ├── AdminCustomerDetail.jsx # Detailed customer info and order history (admin only)
+│   │   │   ├── AdminCustomers.jsx      # All registered customers with segments (admin only)
+│   │   │   ├── AdminDashboard.jsx      # KPIs, charts, and recent orders (admin only)
+│   │   │   ├── AdminInventory.jsx      # Product stock management with editing (admin only)
+│   │   │   ├── AdminMarketing.jsx      # Campaign and promotion management (admin only)
+│   │   │   ├── AdminReports.jsx        # Sales reports and analytics (admin only)
+│   │   │   ├── Authentication.jsx      # Login and signup via Firebase Auth
+│   │   │   ├── Checkout.jsx            # Order summary and user details before payment
+│   │   │   ├── ExercisePage.jsx        # Browse exercises by body part via ExerciseDB API
+│   │   │   ├── HomePage.jsx            # Main product catalog with search and filters
+│   │   │   ├── LandingPage.jsx         # Marketing homepage with hero and feature sections
+│   │   │   ├── MobilityRecoveryPlans.jsx # Fitness plans for mobility and recovery
+│   │   │   ├── MuscleBuildingPlans.jsx # Workout plans for muscle gain
+│   │   │   ├── NotesPage.jsx           # Create and manage personal fitness notes
+│   │   │   ├── NotFound.jsx            # 404 page for undefined routes
+│   │   │   ├── PaymentPage.jsx         # Razorpay payment flow and demo bypass
+│   │   │   ├── PrivacyPolicy.jsx       # Platform privacy policy
+│   │   │   ├── ProductConfirmation.jsx # Order confirmation with invoice download
+│   │   │   ├── ProductPage.jsx         # Individual product detail view
+│   │   │   ├── Profile.jsx             # User profile with address management
+│   │   │   ├── TermsAndConditions.jsx  # Platform terms and conditions
+│   │   │   ├── TrackerPage.jsx         # Fitness progress tracking hub
+│   │   │   ├── WeightLossPlans.jsx     # Workout and diet plans for weight loss
+│   │   │   ├── WorkoutNotes.jsx        # Workout-specific notes and logs
+│   │   │   └── WorkoutTracker.jsx      # Daily workout logger with sets and exercises
 │   │   ├── utils/
-│   │   │   ├── formatters.js             # Utility functions for formatting values (e.g., currency in INR)
-│   │   │   ├── getAuthHeaders.js         # Attaches Firebase auth token to API request headers
-│   │   │   ├── healthUtils.js            # Functions for BMI, BMR, and TDEE calculations
-│   │   │   ├── normalizeProduct.js       # Normalizes product data from API into consistent frontend format
-│   │   │   └── workoutStorage.js         # Handles storing and retrieving workout data (local storage or state)
-│   │   ├── App.jsx                # Main application component with routing setup
-│   │   ├── index.css              # Global styles and CSS imports
-│   │   └── main.jsx               # React entry point
-│   ├── .env.example       # Example environment variables required for local setup
-│   ├── .gitignore         # Specifies files and folders ignored by Git
-│   ├── DesignSystem.md    # Documentation for UI design guidelines and components
-│   ├── eslint.config.js   # ESLint configuration for code linting and formatting rules
-│   ├── index.html         # Main HTML template used by Vite
-│   ├── package-lock.json  # Locks exact dependency versions for consistent installs
-│   ├── package.json       # Project metadata, scripts, and dependencies
-│   ├── README.md          # Project documentation and setup guide
-│   ├── vercel.json        # Deployment configuration for Vercel
-│   └── vite.config.js     # Vite configuration for build and development setup
+│   │   │   ├── formatters.js           # Utility functions (e.g. currency formatting in INR)
+│   │   │   ├── getAuthHeaders.js       # Attaches Firebase auth token to API request headers
+│   │   │   ├── healthUtils.js          # BMI, BMR, and TDEE calculation functions
+│   │   │   ├── normalizeProduct.js     # Normalizes product data into consistent frontend format
+│   │   │   └── workoutStorage.js       # Handles storing and retrieving workout data
+│   │   ├── App.jsx                     # Main app component with all route definitions
+│   │   ├── index.css                   # Global styles and Tailwind imports
+│   │   └── main.jsx                    # React entry point
+│   ├── .env.example                    # Example environment variables for local setup
+│   ├── .gitignore                      # Files and folders ignored by Git
+│   ├── DesignSystem.md                 # UI design guidelines and component patterns
+│   ├── eslint.config.js                # ESLint configuration for code quality
+│   ├── index.html                      # Main HTML template used by Vite
+│   ├── package.json                    # Project metadata, scripts, and dependencies
+│   ├── vercel.json                     # Deployment configuration for Vercel
+│   └── vite.config.js                  # Vite build and dev configuration
 │
 ├── docs/
-│   ├── CONTRIBUTING.md               # Guidelines for contributing (setup, coding standards, PR process)
-│   ├── FIRST_PURCHASE_EMAIL_SETUP.md # Setup guide for email notifications after a user's first purchase
-│   └── SECURITY.md                  # Security policies, best practices, and vulnerability reporting
+│   ├── CONTRIBUTING.md                 # Guidelines for contributing to FitMart
+│   ├── FIRST_PURCHASE_EMAIL_SETUP.md   # Setup guide for first-purchase email notifications
+│   └── SECURITY.md                     # Security policies and vulnerability reporting
 │
-├── server/                        # Node.js + Express backend
+├── server/                             # Node.js + Express Backend
 │   ├── middleware/
-│   │   ├── logger.js              # Logs API requests and server activity
-│   │   └── verifyFirebaseToken.js # Verifies Firebase auth token for protected routes
+│   │   ├── logger.js                   # Logs API requests with timestamps, redacts sensitive data
+│   │   └── verifyFirebaseToken.js      # Verifies Firebase auth token for protected routes
 │   ├── models/
-│   │   ├── Bug.js                 # Schema for storing user-reported bugs/issues
-│   │   ├── Cart.js                # Schema for user shopping cart data
-│   │   ├── FitnessCenter.js       # Schema for fitness center details (location, services, etc.)
-│   │   ├── Order.js               # Schema for order data and transaction details
-│   │   ├── Product.js             # Schema for product information and inventory
-│   │   └── UserProfile.js         # Schema for user profile and additional user data
+│   │   ├── Bug.js                      # Schema for user-reported bugs
+│   │   ├── Cart.js                     # Schema for user shopping cart
+│   │   ├── FitnessCenter.js            # Schema for fitness center details
+│   │   ├── Order.js                    # Schema for orders and transactions
+│   │   ├── Product.js                  # Schema for product info and inventory
+│   │   └── UserProfile.js              # Schema for user profile and address data
 │   ├── routes/
-│   │   ├── bugs.js                # Handles bug reporting and retrieval (admin + user reports)
-│   │   ├── cart.js                # Cart management and stock reservation
-│   │   ├── chat.js                # AI chatbot API endpoint for user queries
-│   │   ├── customers.js           # Customer data management (admin access)
-│   │   ├── products.js            # CRUD operations for products
-│   │   ├── dashboard.js           # Provides data for admin dashboard analytics
-│   │   ├── exercises.js           # Manages exercise/workout-related data
-│   │   ├── fitnessCenters.js      # Fetches and manages nearby fitness centers
-│   │   ├── orders.js              # Handles order creation, history, and tracking
-│   │   ├── payment.js             # Handles payment processing (Razorpay integration)
-│   │   ├── reports.js             # Generates sales and performance reports (admin access)
-│   │   └── user.js                # User management and welcome discount handling
+│   │   ├── bugs.js                     # Bug reporting and admin management endpoints
+│   │   ├── cart.js                     # Cart management and stock reservation
+│   │   ├── chat.js                     # AI chatbot endpoint
+│   │   ├── customers.js                # Customer data management (admin only)
+│   │   ├── dashboard.js                # Admin dashboard analytics data
+│   │   ├── exercises.js                # Exercise data via RapidAPI ExerciseDB
+│   │   ├── fitnessCenters.js           # Nearby fitness centers with location sorting
+│   │   ├── orders.js                   # Order creation, history, and tracking
+│   │   ├── payment.js                  # Razorpay payment processing
+│   │   ├── products.js                 # CRUD operations for products
+│   │   ├── reports.js                  # Sales and performance reports (admin only)
+│   │   └── user.js                     # User management and welcome discount handling
 │   ├── services/
-│   │   ├── emailService.js                 # Core email sending logic and configuration
-│   │   ├── emailTemplates.js               # Defines reusable email templates and content
-│   │   ├── firstPurchaseEmailService.js    # Sends email notifications after a user's first purchase
-│   │   └── inactiveCustomerEmailService.js # Sends re-engagement emails to inactive customers
-│   ├── .env.example            # Example environment variables for backend configuration
-│   ├── .gitignore              # Specifies files and folders ignored by Git
-│   ├── db.js                   # MongoDB connection setup
-│   ├── firebaseAdmin.js        # Firebase Admin SDK configuration for authentication and token verification
-│   ├── index.js                # Main server entry point (Express app initialization)
-│   ├── package-lock.json       # Locks exact dependency versions for consistent installs
-│   ├── package.json            # Backend dependencies, scripts, and metadata
-│   ├── seed.js                 # Script to seed initial data into the database
-│   ├── seedFitnessCenters.js   # Seeds fitness center data into the database
-│   └── test-gemini.js          # Script to test Gemini AI integration
+│   │   ├── emailService.js             # Core email sending logic and configuration
+│   │   ├── emailTemplates.js           # Reusable email templates
+│   │   ├── firstPurchaseEmailService.js     # Email after a user's first purchase
+│   │   └── inactiveCustomerEmailService.js  # Re-engagement emails for inactive customers
+│   ├── .env.example                    # Example environment variables for backend
+│   ├── .gitignore                      # Files and folders ignored by Git
+│   ├── db.js                           # MongoDB connection setup
+│   ├── firebaseAdmin.js                # Firebase Admin SDK configuration
+│   ├── index.js                        # Express app entry point with middleware setup
+│   ├── package.json                    # Backend dependencies and scripts
+│   ├── seed.js                         # Seeds sample products into the database
+│   ├── seedFitnessCenters.js           # Seeds fitness center data into the database
+│   └── test-gemini.js                  # Script to test Gemini AI integration
 │
-└── README.md
+└── README.md                           # You are here
 ```
 
 ---
@@ -289,10 +309,17 @@ FitMart/
 | `/product/:productId` | `ProductPage` | Individual product detail page |
 | `/checkout` | `Checkout` | Order review with discount summary |
 | `/payment` | `PaymentPage` | Razorpay payment flow + demo bypass |
-| `/payment-confirmation` | `ProductConfirmation` | Post-payment success screen |
+| `/payment-confirmation` | `ProductConfirmation` | Post-payment success screen with invoice download |
+| `/profile` | `Profile` | User profile with address management and account settings |
+| `/tracker` | `TrackerPage` | Fitness progress tracking hub |
+| `/tracker/workout` | `WorkoutTracker` | Daily workout logger with sets and exercises |
+| `/tracker/notes` | `WorkoutNotes` | Workout-specific notes and logs |
+| `/exercises` | `ExercisePage` | Browse exercises by body part via ExerciseDB |
 | `/plans/weight-loss` | `WeightLossPlans` | Weight loss program listing |
 | `/plans/muscle-building` | `MuscleBuildingPlans` | Muscle building program listing |
 | `/plans/mobility-recovery` | `MobilityRecoveryPlans` | Mobility & recovery program listing |
+| `/privacy-policy` | `PrivacyPolicy` | Platform privacy policy |
+| `/terms` | `TermsAndConditions` | Platform terms and conditions |
 | `*` | `NotFound` | 404 fallback |
 
 ### Admin Routes (guarded — admin UID only)
@@ -300,10 +327,12 @@ FitMart/
 | Route | Page | Description |
 |---|---|---|
 | `/admin/dashboard` | `AdminDashboard` | KPIs, revenue chart, top products, recent orders |
-| `/admin/inventory` | `AdminInventory` | Stock levels with low-stock alerts |
+| `/admin/inventory` | `AdminInventory` | Stock levels, product editing, and status updates |
 | `/admin/customers` | `AdminCustomers` | All customers with segment tagging |
 | `/admin/customers/:userId` | `AdminCustomerDetail` | Customer profile + full order history |
 | `/admin/reports` | `AdminReports` | Sales reports (daily / weekly / monthly) |
+| `/admin/marketing` | `AdminMarketing` | Campaign management and customer email tools |
+| `/admin/bugs` | `AdminBugs` | View and manage user-reported bugs |
 
 > **Route Guards:** `AdminRoute` redirects non-admins to `/home`. `NonAdminRoute` redirects the admin account to `/admin/dashboard`.
 
@@ -312,7 +341,7 @@ FitMart/
 ## 🧩 Components
 
 ### `Navbar`
-Dual-variant navigation bar (`landing` / `home`). Landing variant is transparent and becomes opaque on scroll. Home variant is sticky with search, cart icon (with badge), and user avatar dropdown.
+Dual-variant navigation bar (`landing` / `home`). Landing variant is transparent and becomes opaque on scroll. Home variant is sticky with search, cart icon (with badge), and user avatar dropdown. Fully keyboard accessible with ARIA attributes.
 
 ### `CartDrawer`
 Slide-in panel from the right showing cart items with quantity controls, remove buttons, subtotal, and a checkout CTA. Closes on `Escape` key or overlay click. Locks body scroll when open.
@@ -322,6 +351,21 @@ Floating chat widget (FAB in bottom-right corner) backed by the `/api/chat` endp
 
 ### `BMICalculator`
 Form-based calculator that computes BMI and TDEE from user inputs (weight, height, age, gender, activity level). Displays results with a product category recommendation that links to the store.
+
+### `CalorieCalculator`
+Estimates daily calorie intake based on user's physical stats and activity level. Helps users plan nutrition alongside their fitness goals.
+
+### `WorkoutCalendar`
+Visual calendar component that allows users to view and plan their workout schedule. Integrates with the workout tracker for a complete fitness management experience.
+
+### `NearbyFitnessCenters`
+Location-aware component that lists nearby gyms and fitness centers sorted by distance. Uses the user's saved address from their profile to calculate proximity.
+
+### `FitnessCenterDetail`
+Displays detailed information about a selected fitness center including address, services, and contact details.
+
+### `ReportBugButton`
+Floating button available across the app that lets users submit bug reports with title, description, steps to reproduce, page URL, and browser info.
 
 ### `WelcomeBanner`
 Top-of-page animated banner shown to first-time users. Displays the 10% welcome discount and dismisses via a POST to `/api/user/dismiss-banner`.
@@ -374,6 +418,12 @@ Seed the database with sample products:
 npm run seed
 ```
 
+Optionally seed fitness center data:
+
+```bash
+node seedFitnessCenters.js
+```
+
 Start the backend dev server:
 
 ```bash
@@ -406,16 +456,21 @@ npm run dev
 
 ```env
 MONGO_URI=<your_mongodb_connection_string>
-MONGO_DB=<your_database_name>           # optional
+MONGO_DB=<your_database_name>             # optional
 PORT=5000
-ALLOWED_ORIGIN=http://localhost:5173    # allowed frontend origin for CORS
+ALLOWED_ORIGIN=http://localhost:5173      # allowed frontend origin for CORS
 RAZORPAY_KEY_ID=<your_razorpay_key_id>
 RAZORPAY_KEY_SECRET=<your_razorpay_key_secret>
+ADMIN_UID=<firebase_uid_of_admin_account>
 
 # Firebase Admin SDK (required for auth middleware)
 FIREBASE_PROJECT_ID=<your_firebase_project_id>
 FIREBASE_CLIENT_EMAIL=<your_firebase_client_email>
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+
+# RapidAPI — ExerciseDB (required for Exercise Library feature)
+RAPIDAPI_KEY=<your_rapidapi_key>
+RAPIDAPI_HOST=exercisedb.p.rapidapi.com
 ```
 
 #### Getting Firebase Admin Credentials
@@ -445,7 +500,7 @@ VITE_FIREBASE_APP_ID=
 VITE_FIREBASE_MEASUREMENT_ID=
 ```
 
-> **Setting the Admin UID:** Sign in to Firebase, find your user's UID in the Firebase Console under **Authentication → Users**, and paste it into `VITE_ADMIN_UID`. That account will be redirected to `/admin/dashboard` on login.
+> **Setting the Admin UID:** Sign in to Firebase, find your user's UID in the Firebase Console under **Authentication → Users**, and paste it into both `VITE_ADMIN_UID` (client) and `ADMIN_UID` (server). That account will be redirected to `/admin/dashboard` on login.
 
 ---
 
@@ -456,6 +511,12 @@ The seed script populates your MongoDB with sample fitness products across all c
 ```bash
 cd server
 npm run seed
+```
+
+To seed fitness center data for the Nearby Fitness Centers feature:
+
+```bash
+node seedFitnessCenters.js
 ```
 
 Each seeded product includes: `productId`, `name`, `brand`, `category`, `price`, `originalPrice`, `rating`, `reviews`, `badge`, `image`, `stock`, and `reserved`.
@@ -542,6 +603,26 @@ cd server && npm start
 | `POST` | `/api/user/use-discount` | Mark welcome discount as used |
 | `POST` | `/api/user/dismiss-banner` | Dismiss the welcome banner |
 
+### 💪 Exercises
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/exercises?category=chest` | Fetch exercises by body part via RapidAPI ExerciseDB |
+
+### 🗺️ Fitness Centers
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/fitness-centers` | List all fitness centers sorted by proximity to user address |
+
+### 🐛 Bugs
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/bugs` | Submit a bug report (public, auth optional) |
+| `GET` | `/api/bugs` | List all bug reports (admin only) |
+| `PATCH` | `/api/bugs/:id` | Update bug status (admin only) |
+
 ### 📊 Admin
 
 | Method | Endpoint | Description |
@@ -606,6 +687,55 @@ cd server && npm start
 }
 ```
 
+### UserProfile
+
+```js
+{
+  userId:    String  (unique),
+  name:      String,
+  email:     String,
+  address: {
+    line1: String,
+    line2: String,
+    city:  String,
+    state: String,
+    zip:   String
+  },
+  createdAt: Date
+}
+```
+
+### Bug
+
+```js
+{
+  title:         String (required),
+  description:   String (required),
+  steps:         String,
+  pageUrl:       String,
+  browser:       String,
+  reporterName:  String,
+  reporterEmail: String,
+  status:        String,  // "open" | "in-progress" | "resolved"
+  createdAt:     Date
+}
+```
+
+### FitnessCenter
+
+```js
+{
+  name:     String,
+  address:  String,
+  city:     String,
+  state:    String,
+  zip:      String,
+  phone:    String,
+  website:  String,
+  services: [String]
+}
+```
+
 ---
 
 ## 🎨 Design System
@@ -645,7 +775,8 @@ The admin panel is accessible only to the account whose Firebase UID matches `VI
 ### Accessing Admin
 
 1. Set `VITE_ADMIN_UID` in `client/.env` to your Firebase user UID
-2. Sign in with that account — you'll be automatically redirected to `/admin/dashboard`
+2. Set `ADMIN_UID` in `server/.env` to the same UID
+3. Sign in with that account — you'll be automatically redirected to `/admin/dashboard`
 
 ### Admin Features
 
@@ -655,36 +786,37 @@ The admin panel is accessible only to the account whose Firebase UID matches `VI
 - Top 5 selling products (horizontal Bar chart)
 - Recent orders table with customer info and status badges
 - Time range filter: Today / Week / Month
-- Quick navigation cards to Inventory, Customers, Reports
 
 **Inventory (`/admin/inventory`)**
 - Real-time stock levels for all products
+- Product editing and status updates
 - Status badges: In Stock / Low Stock / Unlimited
-- Filter pills by stock status
-- Stock, Reserved, and Available columns
+- Filter by stock status
 
 **Customers (`/admin/customers`)**
 - All customers sorted by spend
 - Segment badges: `new` / `returning` / `high-value`
-- Click through to individual customer profiles
-
-**Customer Detail (`/admin/customers/:userId`)**
-- Customer avatar, name, email, Firebase UID
-- KPI cards: Order Count, Total Spend, First Order, Last Order
-- Expandable order history with line-item breakdown
+- Click through to individual customer profiles with full order history
 
 **Reports (`/admin/reports`)**
 - Summary KPIs: Total Revenue, Total Orders, Avg Order Value
-- Revenue by date table
-- Product performance ranking
+- Revenue by date table and product performance ranking
 - Time range: Daily / Weekly / Monthly
 
+**Marketing (`/admin/marketing`)**
+- Campaign management tools
+- Customer email promotions and outreach
+
+**Bug Management (`/admin/bugs`)**
+- View all user-reported bugs
+- Update bug status (open / in-progress / resolved)
+
 ---
- 
+
 ## 🔒 Security
- 
+
 FitMart includes several security hardening measures added recently:
- 
+
 | Measure | Details |
 |---|---|
 | **Helmet** | Sets secure HTTP headers on all responses |
@@ -694,19 +826,20 @@ FitMart includes several security hardening measures added recently:
 | **Enhanced Logger** | Timestamps on all requests, large payloads truncated, sensitive fields redacted |
 | **HMAC Payment Verification** | All Razorpay payments verified server-side before fulfillment |
 | **Firebase Token Verification** | Protected routes verify Firebase ID tokens via Admin SDK |
- 
+
 For reporting vulnerabilities, see [`docs/SECURITY.md`](docs/SECURITY.md).
- 
+
 ---
 
 ## 📝 Notes & Recommendations
 
-- **API URL consistency** — Some client files still use the hardcoded `http://localhost:5000`. Standardize everything on `VITE_API_URL`. This is a great first contribution!
+- **API URL consistency** — Some client files may still use hardcoded `http://localhost:5000`. Standardize everything on `VITE_API_URL`. Great first contribution!
 - **Cart reservation** — `Product.reserved` increments on cart add and decrements on cart remove/clear. Orders finalize the reservation but don't re-release it — this is intentional.
 - **Razorpay** — Always verify payments server-side with HMAC. Never expose `RAZORPAY_KEY_SECRET` to the client.
-- **Firebase** — Only client-facing Firebase config keys go in the Vite `.env`. Never put service account credentials in the client `.env`.
+- **Firebase** — Only client-facing Firebase config keys go in `client/.env`. Never put service account credentials in the client `.env`.
 - **Demo payment** — A "Simulate Success" bypass button is available on the payment page for testing without a real Razorpay transaction. Remove or guard this in production.
-- **Admin UID** — The admin guard is purely UID-based. For production, consider role-based access control stored in your database.
+- **Admin UID** — The admin guard is UID-based on both client and server. Ensure both `VITE_ADMIN_UID` and `ADMIN_UID` are set to the same value.
+- **RapidAPI** — The Exercise Library requires a valid `RAPIDAPI_KEY`. Without it, the `/exercises` route will not return data.
 
 ---
 
@@ -714,7 +847,7 @@ For reporting vulnerabilities, see [`docs/SECURITY.md`](docs/SECURITY.md).
 
 We love contributions! FitMart is an open-source, community-driven project and contributions of all kinds are welcome — from fixing typos to building new features.
 
-Please read **[CONTRIBUTING.md](CONTRIBUTING.md)** for a full guide on:
+Please read **[CONTRIBUTING.md](docs/CONTRIBUTING.md)** for a full guide on:
 - Setting up your development environment
 - Picking and working on issues
 - Submitting a Pull Request
