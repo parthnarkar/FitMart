@@ -337,8 +337,8 @@ After you open a PR:
 FitMart/
 ├── client/                   # React + Vite Frontend
 │   ├── src/
+│   │   ├── components/       # Reusable UI components (uses Framer Motion for animations)
 │   │   ├── auth/             # Firebase auth setup & hooks
-│   │   ├── components/       # Reusable UI components
 │   │   ├── pages/            # Route-level page components
 │   │   └── utils/            # Helper/utility functions
 │   └── .env.local            # ⚠️ Not committed — create manually
@@ -418,6 +418,24 @@ FitMart/
 - Never log or expose sensitive values (API keys, passwords) — the request logger already redacts `password`, `token`, `secret`, and `apiKey` keys
 - New services that depend on env variables must fail gracefully (log a warning, return null, and allow the rest of the app to function) — do not call `process.exit()`
 
+### Animations (Framer Motion)
+
+- Use **Framer Motion** for all UI animations — page transitions, modal entrances, hover effects
+- Keep animations quick (150-300ms) and subtle — no distracting or overly complex movements
+- Prefer `motion` components over CSS transitions for interactive elements
+- Use `AnimatePresence` for exit animations on unmounting components
+- Example pattern:
+  ```jsx
+  import { motion, AnimatePresence } from 'framer-motion';
+  
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ duration: 0.2 }}
+  >
+  ```
+
 ### General
 
 - **No hardcoded URLs** — use `import.meta.env.VITE_API_URL` on the client and environment variables on the server
@@ -425,6 +443,7 @@ FitMart/
 - Delete commented-out code before submitting a PR
 - Write clear variable and function names — code should read like English
 - When touching `UserProfile`, remember it tracks `email`, `firstPurchaseEmailSentAt`, and `lastReminderEmailSentAt` for the email services — don't overwrite these fields unintentionally
+- **Animations** — Use **[Framer Motion](https://www.framer.com/motion/)** for all animations and transitions (page entrances, modals, hover effects, etc.). Keep animations subtle and performant — avoid over-animating.
 
 ---
 
