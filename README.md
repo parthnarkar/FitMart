@@ -680,6 +680,24 @@ The admin panel is accessible only to the account whose Firebase UID matches `VI
 - Time range: Daily / Weekly / Monthly
 
 ---
+ 
+## 🔒 Security
+ 
+FitMart includes several security hardening measures added recently:
+ 
+| Measure | Details |
+|---|---|
+| **Helmet** | Sets secure HTTP headers on all responses |
+| **Rate Limiting** | General API limiter + stricter limiter on payment routes |
+| **Request Size Limit** | JSON body capped at `10kb` to prevent payload attacks |
+| **Sanitized Error Responses** | Server errors never leak stack traces or internals to the client |
+| **Enhanced Logger** | Timestamps on all requests, large payloads truncated, sensitive fields redacted |
+| **HMAC Payment Verification** | All Razorpay payments verified server-side before fulfillment |
+| **Firebase Token Verification** | Protected routes verify Firebase ID tokens via Admin SDK |
+ 
+For reporting vulnerabilities, see [`docs/SECURITY.md`](docs/SECURITY.md).
+ 
+---
 
 ## 📝 Notes & Recommendations
 
