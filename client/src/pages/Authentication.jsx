@@ -208,7 +208,7 @@ export default function Authentication() {
                   key={m}
                   onClick={() => switchMode(m)}
                   className={`mode-tab flex-1 py-3 text-sm font-medium border-b-2 -mb-px
-                              transition-all min-h-[44px]
+                              transition-all min-h-11
                               ${mode === m
                       ? "border-stone-900 text-stone-900"
                       : "border-transparent text-stone-400 hover:text-stone-600"
@@ -240,7 +240,7 @@ export default function Authentication() {
                   <label className="text-xs text-stone-500 tracking-wide uppercase">Password</label>
                   <button
                     type="button" onClick={() => switchMode("reset")}
-                    className="text-xs text-stone-400 hover:text-stone-600 transition-colors min-h-[32px] px-1"
+                    className="text-xs text-stone-400 hover:text-stone-600 transition-colors min-h-8 px-1"
                   >
                     Forgot password?
                   </button>
@@ -261,7 +261,7 @@ export default function Authentication() {
 
               <button type="submit" disabled={loading}
                 className="w-full bg-stone-900 text-white text-sm py-3 rounded-lg
-                           hover:bg-stone-700 transition-colors disabled:opacity-50 mt-1 min-h-[48px]">
+                           hover:bg-stone-700 transition-colors disabled:opacity-50 mt-1 min-h-12">
                 {loading ? "Signing in…" : "Sign In"}
               </button>
 
@@ -274,7 +274,7 @@ export default function Authentication() {
               <button type="button" onClick={handleGoogle} disabled={loading}
                 className="w-full flex items-center justify-center gap-2.5 border border-stone-200
                            bg-white text-stone-700 text-sm py-3 rounded-lg hover:bg-stone-50
-                           transition-colors disabled:opacity-50 min-h-[48px]">
+                           transition-colors disabled:opacity-50 min-h-12">
                 <GoogleIcon />
                 Continue with Google
               </button>
@@ -336,7 +336,7 @@ export default function Authentication() {
 
               <button type="submit" disabled={loading}
                 className="w-full bg-stone-900 text-white text-sm py-3 rounded-lg
-                           hover:bg-stone-700 transition-colors disabled:opacity-50 mt-1 min-h-[48px]">
+                           hover:bg-stone-700 transition-colors disabled:opacity-50 mt-1 min-h-12">
                 {loading ? "Creating account…" : "Create Account"}
               </button>
 
@@ -349,7 +349,7 @@ export default function Authentication() {
               <button type="button" onClick={handleGoogle} disabled={loading}
                 className="w-full flex items-center justify-center gap-2.5 border border-stone-200
                            bg-white text-stone-700 text-sm py-3 rounded-lg hover:bg-stone-50
-                           transition-colors disabled:opacity-50 min-h-[48px]">
+                           transition-colors disabled:opacity-50 min-h-12">
                 <GoogleIcon />
                 Continue with Google
               </button>
@@ -368,7 +368,7 @@ export default function Authentication() {
               <button
                 onClick={() => switchMode("signin")}
                 className="flex items-center gap-1.5 text-xs text-stone-400 hover:text-stone-600
-                           transition-colors mb-6 min-h-[36px]"
+                           transition-colors mb-6 min-h-9"
               >
                 ← Back to Sign In
               </button>
@@ -388,7 +388,7 @@ export default function Authentication() {
                   </p>
                   <button
                     onClick={() => switchMode("signin")}
-                    className="mt-4 text-xs text-stone-500 underline min-h-[36px]"
+                    className="mt-4 text-xs text-stone-500 underline min-h-9"
                   >
                     Back to Sign In
                   </button>
@@ -415,7 +415,7 @@ export default function Authentication() {
 
                   <button type="submit" disabled={loading}
                     className="w-full bg-stone-900 text-white text-sm py-3 rounded-lg
-                               hover:bg-stone-700 transition-colors disabled:opacity-50 min-h-[48px]">
+                               hover:bg-stone-700 transition-colors disabled:opacity-50 min-h-12">
                     {loading ? "Sending…" : "Send Reset Link"}
                   </button>
                 </form>

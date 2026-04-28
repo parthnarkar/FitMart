@@ -1,5 +1,3 @@
-// client\src\pages\NotesPage.jsx
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,6 +19,29 @@ export default function NotesPage() {
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
   const [imageErrors, setImageErrors] = useState(new Set());
+
+  // Animation variants
+  const fadeUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  };
+
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+    exit: { opacity: 0, x: -20, transition: { duration: 0.2 } },
+    hover: { scale: 1.02, transition: { duration: 0.2 } }
+  };
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
@@ -44,165 +65,65 @@ export default function NotesPage() {
     }
   }, []);
 
-  const handleSave = () => {
-    // Prevent saving empty title
-    if (!title.trim()) {
-      alert("Please enter a workout title.");
-      return;
-    }
-
-    // Create entry object
-    const entry = {
-      date,
-      title,
-      notes,
-      exercises,
-    };
-
-    // Save functionality
-    saveWorkout(entry);
-    setSaved(true);
-
-    // Redirect to "/tracker" after a brief confirmation
-    setTimeout(() => {
-      navigate("/tracker");
-    }, 1000);
-  };
-
-  const handleAddExercise = () => {
-    // Note: We don't save here — user can add exercises and navigation back will reload from storage
-    localStorage.setItem("selectedDate", date);
-    navigate("/exercises");
+  const handleImageError = (exerciseId) => {
+    setImageErrors(prev => new Set(prev).add(exerciseId));
   };
 
   const handleRemoveExercise = (exerciseId) => {
-    removeExerciseFromWorkout(date, exerciseId);
-    setExercises(exercises.filter(e => e.id !== exerciseId));
+    const updatedExercises = removeExerciseFromWorkout(date, exerciseId);
+    setExercises(updatedExercises);
   };
 
-  const handleImageError = (exerciseId) => {
-    setImageErrors((prev) => new Set([...prev, exerciseId]));
+  const handleSave = () => {
+    const workoutData = {
+      date,
+      title,
+      notes,
+      exercises
+    };
+    saveWorkout(workoutData);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   };
 
-  const formattedDate = date ? new Date(date).toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }) : "";
-
-  // Animation variants
-  const fadeUp = {
-    hidden: { opacity: 0, y: 28 },
-    visible: { opacity: 1, y: 0 }
-  };
-
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.12
-      }
-    }
-  };
-
-  const slideUp = {
-    hidden: { y: "100%" },
-    visible: {
-      y: 0,
-      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] }
-    }
-  };
-
-  const cardVariants = {
-    hidden: { opacity: 0, scale: 0.95 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: { duration: 0.4, ease: "easeOut" }
-    },
-    exit: {
-      opacity: 0,
-      scale: 0.9,
-      transition: { duration: 0.2 }
-    },
-    hover: {
-      y: -4,
-      boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
-      transition: { duration: 0.2 }
-    }
+  const handleAddExercise = () => {
+    localStorage.setItem("returnToNotes", "true");
+    navigate("/exercises");
   };
 
   if (error) {
     return (
-      <div className="min-h-screen bg-stone-50 flex items-center justify-center p-6">
-        <motion.div
-          className="max-w-md w-full bg-white border border-stone-200 rounded-2xl p-10 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <motion.p
-            className="text-3xl mb-4"
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 0.5 }}
-          >
-            ∅
-          </motion.p>
-          <p className="text-stone-700 font-medium mb-6">{error}</p>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => navigate("/tracker")}
-            className="w-full bg-stone-900 text-white py-3 rounded-full hover:bg-stone-700 transition-all font-medium"
-          >
-            ← Back to Tracker
-          </motion.button>
-        </motion.div>
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        <div className="pt-32 px-4 max-w-2xl mx-auto">
+          <div className="text-red-600">{error}</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 font-['DM_Sans',sans-serif] overflow-x-hidden">
-      <Navbar variant="product" />
-
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-10 py-10 sm:py-16">
-        <motion.button
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.4 }}
-          whileHover={{ x: -4 }}
-          onClick={() => navigate("/tracker")}
-          className="text-xs tracking-[0.2em] uppercase text-stone-400 hover:text-stone-900 transition-colors mb-12 flex items-center gap-2 group"
-        >
-          <span>←</span> Back to Calendar
-        </motion.button>
-
-        <motion.div
-          className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 md:p-10 shadow-sm"
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-        >
-          <motion.header
-            className="mb-8 sm:mb-10 text-center md:text-left"
-            variants={fadeUp}
+    <div className="min-h-screen bg-white">
+      <Navbar />
+      <main className="pt-24 pb-16 px-4">
+        <div className="max-w-4xl mx-auto">
+          <motion.div
+            className="space-y-8 md:space-y-12"
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
           >
-            <p className="text-[10px] sm:text-xs tracking-[0.2em] uppercase text-stone-400 mb-2 font-medium">Training Session For</p>
-            <div className="hero-line overflow-hidden">
-              <motion.h1
-                className="font-['DM_Serif_Display'] text-2xl sm:text-3xl md:text-4xl text-stone-900"
-                variants={slideUp}
-              >
-                {formattedDate}
-              </motion.h1>
-            </div>
-          </motion.header>
+            {/* Date Display */}
+            <motion.div variants={fadeUp} className="text-center">
+              <p className="text-xs text-stone-500 tracking-wide uppercase mb-2">
+                Workout for
+              </p>
+              <p className="text-2xl md:text-3xl font-['DM_Serif_Display'] text-stone-900">
+                {date}
+              </p>
+            </motion.div>
 
-          <div className="space-y-8">
-            {/* Input field for "Workout Title" */}
+            {/* Workout Title */}
             <motion.div variants={fadeUp}>
               <label className="block text-xs text-stone-500 mb-2 tracking-wide uppercase">
                 Workout Title
@@ -231,7 +152,7 @@ export default function NotesPage() {
                 whileFocus={{ borderColor: "#1c1917" }}
                 className="w-full border border-stone-200 bg-white rounded-xl sm:rounded-2xl px-4 sm:px-6 py-4 sm:py-6 text-sm sm:text-base text-stone-700 
                            placeholder-stone-300 focus:outline-none focus:border-stone-900 transition-colors resize-none
-                           min-h-[300px] sm:min-h-[450px] leading-relaxed"
+                           min-h-75 sm:min-h-112.5 leading-relaxed"
               />
             </motion.div>
 
@@ -241,6 +162,7 @@ export default function NotesPage() {
                 <label className="block text-xs text-stone-500 mb-4 tracking-wide uppercase">
                   Selected Exercises ({exercises.length})
                 </label>
+
                 <motion.div
                   className="grid grid-cols-1 md:grid-cols-2 gap-4"
                   variants={staggerContainer}
@@ -292,12 +214,12 @@ export default function NotesPage() {
                         </motion.div>
 
                         {/* Exercise Details */}
-                        <div className="p-4 flex flex-col flex-grow">
+                        <div className="p-4 flex flex-col grow">
                           <h4 className="font-['DM_Serif_Display'] text-base md:text-lg text-stone-900 mb-2 capitalize">
                             {exercise.name}
                           </h4>
 
-                          <div className="space-y-1 text-xs text-stone-500 mb-4 flex-grow">
+                          <div className="space-y-1 text-xs text-stone-500 mb-4 grow">
                             {exercise.target && (
                               <p>
                                 <span className="uppercase tracking-wide">Target:</span>{" "}
@@ -367,8 +289,8 @@ export default function NotesPage() {
                 "Save Workout"
               )}
             </motion.button>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </main>
     </div>
   );

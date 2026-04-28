@@ -89,7 +89,7 @@ export default function Navbar({
           {onSearchToggle && (
             <button
               onClick={onSearchToggle}
-              className={`p-2 transition-colors min-w-[40px] min-h-[40px] flex items-center
+              className={`p-2 transition-colors min-w-10 min-h-10 flex items-center
                           justify-center rounded-full ${iconColor}`}
               aria-label="Toggle search"
             >
@@ -105,7 +105,7 @@ export default function Navbar({
           {onCartOpen && (
             <button
               onClick={onCartOpen}
-              className={`relative p-2 transition-colors min-w-[40px] min-h-[40px]
+              className={`relative p-2 transition-colors min-w-10 min-h-10
                           flex items-center justify-center rounded-full ${iconColor}`}
               aria-label={`Cart, ${cartCount} item${cartCount !== 1 ? "s" : ""}`}
             >
@@ -145,14 +145,14 @@ export default function Navbar({
                     aria-label="User menu"
                     className={`flex items-center gap-1.5 sm:gap-2 border rounded-full
                                 px-2 sm:px-2.5 py-1.5 hover:bg-stone-50 transition-colors ml-0.5
-                                min-h-[36px]
+                                min-h-9
                                 ${isLanding && !navOpaque
                         ? "border-white/30 hover:bg-white/10"
                         : "border-stone-200"
                       }`}
                   >
                     {/* Avatar */}
-                    <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0
+                    <div className="w-6 h-6 rounded-full overflow-hidden shrink-0
                                     bg-stone-200 flex items-center justify-center">
                       {user.photoURL ? (
                         <img
@@ -177,7 +177,7 @@ export default function Navbar({
                     {/* Name — hidden on mobile */}
                     {!isLanding && (
                       <span className="hidden sm:block text-xs text-stone-700
-                                       max-w-[80px] sm:max-w-[96px] truncate">
+                                       max-w-20 sm:max-w-24 truncate">
                         {user.displayName || user.email?.split("@")[0]}
                       </span>
                     )}
@@ -220,8 +220,8 @@ export default function Navbar({
                                 if (typeof setMenuOpen === "function") setMenuOpen(false);
                                 else setLocalMenuOpen(false);
                               }}
-                              className="w-full text-left text-xs text-stone-700 hover:bg-stone-50
-                                         px-4 py-2.5 transition-colors min-h-[36px]"
+                              className="w-full text-left text-xs text-stone-700 font-medium
+                                         hover:bg-stone-50 px-4 py-2.5 transition-colors min-h-9"
                             >
                               View Profile
                             </button>
@@ -230,7 +230,7 @@ export default function Navbar({
                               role="menuitem"
                               onClick={handleSignOut}
                               className="w-full text-left text-xs text-stone-500 hover:bg-stone-50
-                                         px-4 py-2.5 transition-colors min-h-[36px]"
+                                         px-4 py-2.5 transition-colors min-h-9"
                             >
                               Sign Out
                             </button>
@@ -247,7 +247,7 @@ export default function Navbar({
                                 }}
                                 className="w-full text-left text-xs text-stone-700 font-medium
                                            hover:bg-stone-50 px-4 py-2.5 transition-colors
-                                           min-h-[36px]"
+                                           min-h-9"
                               >
                                 Go to Shop →
                               </button>
@@ -263,7 +263,7 @@ export default function Navbar({
                               }}
                               className="w-full text-left text-xs text-stone-700 font-medium
                                          hover:bg-stone-50 px-4 py-2.5 transition-colors
-                                         min-h-[36px]"
+                                         min-h-9"
                             >
                               Track Fitness →
                             </button>
@@ -277,7 +277,7 @@ export default function Navbar({
                                   else setLocalMenuOpen(false);
                                 }}
                                 className="w-full text-left text-xs text-stone-700 hover:bg-stone-50
-                                           px-4 py-2.5 transition-colors min-h-[36px]"
+                                           px-4 py-2.5 transition-colors min-h-9"
                               >
                                 View Profile
                               </button>
@@ -286,7 +286,7 @@ export default function Navbar({
                                 role="menuitem"
                                 onClick={handleSignOut}
                                 className="w-full text-left text-xs text-stone-500 hover:bg-stone-50
-                                           px-4 py-2.5 transition-colors min-h-[36px]"
+                                           px-4 py-2.5 transition-colors min-h-9"
                               >
                                 Sign Out
                               </button>
@@ -316,7 +316,7 @@ export default function Navbar({
                   <button
                     onClick={() => navigate(user ? "/home" : "/auth")}
                     className={`text-xs sm:text-sm px-4 sm:px-5 py-2 rounded-full
-                                 transition-colors min-h-[36px]
+                                 transition-colors min-h-9
                                  ${isLanding && !navOpaque
                         ? "bg-white text-stone-900 hover:bg-stone-100"
                         : "bg-stone-900 text-white hover:bg-stone-700"
