@@ -21,6 +21,7 @@ This guide will walk you through **everything** you need to know to contribute t
 - [PR Review Process](#-pr-review-process)
 - [Project Structure Reference](#-project-structure-reference)
 - [Style Guide](#-style-guide)
+- [Security Guidelines](#-security-guidelines)
 - [Need Help?](#-need-help)
 
 ---
@@ -50,6 +51,7 @@ You don't need to write code to contribute! Here are all the ways you can help:
 | 🎨 **UI/UX** | Improve design, responsiveness, accessibility |
 | 🧪 **Tests** | Add unit or integration tests |
 | 🔧 **Refactor** | Clean up code without changing behavior |
+| 🔒 **Security** | Identify vulnerabilities, improve input validation |
 | 💬 **Discussion** | Comment on issues, review PRs, share ideas |
 
 ---
@@ -100,7 +102,7 @@ git remote -v
 
 ### Step 4: Set Up the Project Locally
 
-Follow the [Quick Start guide in README.md](README.md#-quick-start) to get both the client and server running locally.
+Follow the [Quick Start guide in README.md](../README.md#-quick-start) to get both the client and server running locally.
 
 > ✅ Make sure the app runs on your machine **before** making any changes.
 
@@ -132,6 +134,8 @@ Browse the [Issues tab](https://github.com/parthnarkar/FitMart/issues) and look 
 | `bug` | Something is broken |
 | `enhancement` | New feature or improvement |
 | `documentation` | Docs-related work |
+| `security` | Security-related improvements |
+| `refactor` | Code cleanup or restructuring |
 
 ### Before You Start
 
@@ -161,6 +165,7 @@ git checkout -b fix/cart-reservation-bug
 git checkout -b feat/product-search
 git checkout -b docs/improve-contributing-guide
 git checkout -b refactor/api-url-standardize
+git checkout -b fix/navbar-accessibility
 ```
 
 | Prefix | Use For |
@@ -171,6 +176,7 @@ git checkout -b refactor/api-url-standardize
 | `refactor/` | Code cleanup |
 | `test/` | Adding/updating tests |
 | `chore/` | Build scripts, config, etc. |
+| `security/` | Security improvements |
 
 ---
 
@@ -219,6 +225,8 @@ feat(cart): add quantity update button on cart page
 fix(auth): resolve Google sign-in redirect loop
 docs(readme): add environment variable instructions
 refactor(client): replace hardcoded API URLs with VITE_API_URL
+fix(navbar): improve accessibility with keyboard support and ARIA attributes
+feat(tracker): add daily workout logging with sets and exercises
 chore: update dependencies
 ```
 
@@ -233,6 +241,7 @@ chore: update dependencies
 | `refactor` | Code restructure (no feature/fix) |
 | `test` | Adding or updating tests |
 | `chore` | Build, config, tooling changes |
+| `security` | Security improvements or patches |
 
 > 💡 Keep the subject line under **72 characters** and in **lowercase**.
 
@@ -255,6 +264,7 @@ Use the same convention as commits:
 ```
 feat(product): add product filter by category
 fix(payment): handle failed payment edge case
+fix(navbar): improve accessibility with keyboard and ARIA support
 ```
 
 ### PR Description Template
@@ -288,7 +298,7 @@ Before / After screenshots if you changed any UI.
 
 After you open a PR:
 
-1. **Automated checks** may run (linting, etc.) — make sure they pass.
+1. **Automated checks** may run (linting, Vercel deployment previews, etc.) — make sure they pass.
 2. The **maintainer (Parth)** will review your PR and may leave comments.
 3. If changes are requested:
    - Make the changes on the **same branch**
@@ -298,28 +308,44 @@ After you open a PR:
 
 > ⏱️ Be patient — reviews can take a few days. Feel free to ping if there's no response after a week.
 
+> ⚠️ **Note on Vercel checks:** PRs from forked repositories may show Vercel deployment checks as failing due to authorization restrictions. This is a repo-level configuration and does not affect your code quality or merge eligibility.
+
 ---
 
 ## 📁 Project Structure Reference
 
 ```
 FitMart/
-├── client/                   # React + Vite Frontend
+├── .github/
+│   └── pull_request_template.md        # PR description template
+├── client/                             # React + Vite Frontend
 │   ├── src/
-│   │   ├── components/       # Reusable UI components
-│   │   ├── pages/            # Route-level page components
-│   │   ├── auth/             # Firebase auth setup & helpers
-│   │   └── utilities/        # Helper/utility functions
-│   └── .env.local            # ⚠️ Not committed — create manually
+│   │   ├── auth/                       # Firebase auth setup & hooks
+│   │   ├── components/                 # Reusable UI components
+│   │   ├── pages/                      # Route-level page components
+│   │   └── utils/                      # Helper/utility functions
+│   ├── .env.example                    # ⚠️ Not committed — create manually
+│   └── DesignSystem.md                 # UI design guidelines
 │
-├── server/                   # Node.js + Express Backend
-│   ├── models/               # Mongoose schemas (Product, Cart, Order)
-│   ├── routes/               # Route handlers (products, cart, orders, payment)
-│   ├── seed.js               # DB seeding script
-│   ├── db.js                 # MongoDB connection
-│   ├── index.js              # Server entry point
-│   └── .env                  # ⚠️ Not committed — create manually
+├── docs/
+│   ├── CONTRIBUTING.md                 # This file
+│   ├── FIRST_PURCHASE_EMAIL_SETUP.md   # Email setup guide
+│   └── SECURITY.md                     # Security policy
+│
+├── server/                             # Node.js + Express Backend
+│   ├── middleware/                     # Logger, Firebase token verifier
+│   ├── models/                         # Mongoose schemas
+│   ├── routes/                         # API route handlers
+│   ├── services/                       # Email services and templates
+│   ├── db.js                           # MongoDB connection
+│   ├── index.js                        # Server entry point
+│   ├── seed.js                         # Product seeding script
+│   └── .env.example                    # ⚠️ Not committed — create manually
+│
+└── README.md                           # Full project documentation
 ```
+
+> 📖 For a complete and detailed project structure, refer to the [README.md](../README.md#-project-structure).
 
 ---
 
@@ -333,19 +359,32 @@ FitMart/
 - Keep components small and single-purpose
 - Name component files with **PascalCase** (e.g., `ProductCard.jsx`)
 - Name utility files with **camelCase** (e.g., `formatPrice.js`)
+- Use `normalizeProduct.js` when handling product data from the API to ensure consistent formatting
 
 ### CSS / Tailwind
 
 - Use **Tailwind utility classes** wherever possible
 - Keep custom CSS to a minimum
 - Ensure UI is responsive and works on mobile
+- Follow the **stone-\* only** color palette — no blues, greens, or purples
+- Refer to [`client/DesignSystem.md`](../client/DesignSystem.md) for full design guidelines
+
+### Accessibility
+
+- All interactive elements must be reachable via **keyboard** (Tab + Enter/Space)
+- Icon-only buttons must have a descriptive **`aria-label`**
+- Use `aria-expanded` and `aria-controls` on toggleable elements (dropdowns, menus)
+- Add `aria-hidden="true"` to decorative SVGs and icons
+- Use semantic HTML wherever possible — prefer `<button>` over `<div onClick>`
 
 ### Backend (Node/Express)
 
 - Keep route files focused on a single resource
-- Put business logic in separate helper functions, not directly in routes
+- Put business logic in separate helper/service functions, not directly in routes
 - Always validate input and handle errors properly
-- Never log or expose sensitive values (API keys, passwords)
+- Never log or expose sensitive values (API keys, passwords, tokens)
+- Respect the existing middleware setup — logger, rate limiter, and Helmet are already configured in `index.js`
+- Keep JSON request bodies under `10kb` — the server enforces this limit
 
 ### General
 
@@ -353,6 +392,21 @@ FitMart/
 - **No committed secrets** — `.env` files are gitignored for a reason
 - Delete commented-out code before submitting a PR
 - Write clear variable and function names — code should read like English
+- Use `normalizeProduct()` from `client/src/utils/normalizeProduct.js` when accessing product data on the frontend
+
+---
+
+## 🔒 Security Guidelines
+
+Security is taken seriously in FitMart. Please follow these rules when contributing:
+
+- **Never commit secrets** — API keys, Firebase credentials, Razorpay keys, and database URIs must never appear in code or git history
+- **Never expose `RAZORPAY_KEY_SECRET`** to the client — payment verification must always happen server-side
+- **Never put Firebase Admin credentials** in the client `.env` — only client-safe Firebase config keys belong there
+- **Validate all inputs** on both client and server — never trust user-provided data
+- **Use environment variables** for all sensitive configuration — refer to `.env.example` files in both `client/` and `server/`
+- **Do not remove or bypass** existing security middleware (Helmet, rate limiter, request size limit, Firebase token verifier)
+- **Report vulnerabilities privately** — do not open a public issue for security bugs. See [`docs/SECURITY.md`](SECURITY.md) for the responsible disclosure process
 
 ---
 
