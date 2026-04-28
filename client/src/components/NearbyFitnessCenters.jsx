@@ -90,7 +90,7 @@ export default function NearbyFitnessCenters({ visible = true }) {
               )}
 
               <div className="flex gap-3">
-                <div className="w-20 h-20 bg-stone-100 rounded-xl overflow-hidden flex-shrink-0">
+                <div className="w-20 h-20 bg-stone-100 rounded-xl overflow-hidden shrink-0">
                   <img src={c.imageUrl} alt={c.name} className="w-full h-full object-cover" onError={e => e.currentTarget.style.display = 'none'} />
                 </div>
                 <div className="flex-1">
