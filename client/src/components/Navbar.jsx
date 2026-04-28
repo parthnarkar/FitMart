@@ -18,7 +18,7 @@ export default function Navbar({
   const location = useLocation();
   const { user, loading: authLoading } = useAuth();
 
-  const isProfileRoute = location?.pathname === "/profile";
+  const isLimitedNavRoute = location?.pathname === "/profile" || location?.pathname === "/tracker";
 
   const handleSignOut = async () => {
     if (onSignOut) {
@@ -196,8 +196,8 @@ export default function Navbar({
                           </p>
                         </div>
 
-                        {/* If user is currently on the profile page, show limited options */}
-                        {isProfileRoute ? (
+                        {/* If user is currently on the profile page or tracker page, show limited options */}
+                        {isLimitedNavRoute ? (
                           <div className="border-t border-stone-100 mt-1">
                             <button
                               role="menuitem"
