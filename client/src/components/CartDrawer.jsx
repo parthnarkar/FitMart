@@ -2,6 +2,35 @@
 import { useEffect } from "react";
 import { fmt } from "../utils/formatters";
 import { Link } from "react-router-dom";
+import PropTypes from "prop-types";
+const CartDrawer = ({ isOpen, cartItems, onClose }) => {
+  return (
+    <div>
+      <h2>Cart Drawer</h2>
+      <button onClick={onClose}>Close</button>
+      <ul>
+        {cartItems.map((item) => (
+          <li key={item.id}>{item.name}</li>
+        ))}
+      </ul>
+    </div>
+  )
+};
+ CartDrawer.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  cartItems: PropTypes.array.isRequired,
+  onClose: PropTypes.func.isRequired,
+};
+PropTypes.string
+PropTypes.number
+PropTypes.bool
+PropTypes.func
+PropTypes.array
+PropTypes.object
+PropTypes.shape({
+  id: PropTypes.number,
+  name: PropTypes.string,
+})
 
 function CartDrawer({
   isOpen,
