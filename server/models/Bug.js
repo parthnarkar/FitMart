@@ -10,6 +10,7 @@ const BugSchema = new mongoose.Schema(
     reporterName: { type: String, default: '' },
     reporterEmail: { type: String, default: '' },
     // allowed statuses: open, in-progress, resolved
+    screenshot: { type: String, default: '' }, // relative path under /uploads/bugs/
     status: { type: String, enum: ['open', 'in-progress', 'resolved'], default: 'open' },
   },
   { timestamps: true }
