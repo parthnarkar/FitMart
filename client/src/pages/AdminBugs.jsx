@@ -327,7 +327,7 @@ export default function AdminBugs() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-stone-100">
-                  {["#", "Title", "Description", "Status", "Reported", "Reporter", "Page"].map((h, i) => (
+                  {["#", "Title", "Description", "Status", "Reported", "Reporter", "Page", "Screenshot"].map((h, i) => (
                     <th key={h}
                       className={`px-6 py-4 text-xs tracking-[0.15em] uppercase text-stone-400
                                   font-normal whitespace-nowrap
@@ -424,6 +424,25 @@ export default function AdminBugs() {
                         <span className="text-xs text-stone-400 truncate max-w-37.5 block">
                           {bug.pageUrl.split('/').pop() || 'page'}
                         </span>
+                      ) : (
+                        <span className="text-xs text-stone-300">—</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-5 text-center">
+                      {bug.screenshot ? (
+                        <a
+                          href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${bug.screenshot}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={e => e.stopPropagation()}
+                          className="inline-block"
+                        >
+                          <img
+                            src={`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${bug.screenshot}`}
+                            alt="Screenshot"
+                            className="w-12 h-8 object-cover rounded border border-stone-200 hover:opacity-80 transition-opacity"
+                          />
+                        </a>
                       ) : (
                         <span className="text-xs text-stone-300">—</span>
                       )}
