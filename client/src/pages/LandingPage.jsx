@@ -201,7 +201,7 @@ export default function LandingPage() {
                            text-stone-900 leading-[1.05] mb-5 sm:mb-6 tracking-tight">
               <div className="hero-line">
                 <span className={`slide-up ${visible ? "visible" : ""} delay-1`}>
-                  Everything fitness.
+                  Everything fitness for You.
                 </span>
               </div>
               <div className="hero-line">

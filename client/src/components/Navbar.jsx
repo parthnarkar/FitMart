@@ -26,12 +26,12 @@ export default function Navbar({
     location?.pathname === "/notes";
 
   const handleSignOut = async () => {
-    if (onSignOut) {
-      onSignOut();
-    } else {
-      await signOut(auth);
-      navigate("/");
-    }
+  if (onSignOut) {
+    onSignOut();
+  } else {
+    // Firebase disabled
+    navigate("/");
+  }
     if (typeof setMenuOpen === "function") setMenuOpen(false);
     else setLocalMenuOpen(false);
   };
